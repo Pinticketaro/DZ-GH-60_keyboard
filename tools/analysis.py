@@ -52,7 +52,7 @@ def main():
     # 重さ（ケース部品）
     outer = Polygon(g.outer_pts())
     inner = Polygon(g.frame_inner_pts())
-    holes = unary_union([Point(c).buffer(g.HOLE_D / 2) for c in g.holes()])
+    holes = unary_union([Point(c).buffer(g.hole_d(c) / 2) for c in g.holes()])
     sw = unary_union([Polygon(p) for p in g.switch_cutouts()])
     st = unary_union([Polygon(p) for p in g.stiffener_openings()])
     cm2 = lambda p: p.area / 100

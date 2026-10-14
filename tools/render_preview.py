@@ -74,6 +74,8 @@ def build_scene(frame_hex, top_style):
         meshes.append(mesh_of(sw, hex2rgba("#3a3d42"), 0.6))
     if parts.get("rod") is not None:
         meshes.append(mesh_of(parts["rod"], [0.83, 0.66, 0.36, 1.0], 0.32, 0.0))
+    for sd in parts.get("saddle") or []:
+        meshes.append(mesh_of(sd, hex2rgba(frame_hex), 0.85))
     # ボルトの頭（ボタンヘッド φ5.7×1.65）
     for (x, y) in g.holes():
         head = m3.Manifold.cylinder(1.65, 2.85, 2.6, 32).translate([x, -y, z["top1"]])

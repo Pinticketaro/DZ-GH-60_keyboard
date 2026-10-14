@@ -64,7 +64,7 @@ def z_levels():
 
 def build_parts():
     z = z_levels()
-    hole_polys = [circle(c, g.HOLE_D) for c in g.holes()]
+    hole_polys = [circle(c, g.hole_d(c)) for c in g.holes()]
     parts = {}
     parts["top"] = slab(g.outer_pts(), g.switch_cutouts() + hole_polys, z["st1"], g.TOP_T)
     parts["stiffener"] = slab(g.outer_pts(), g.stiffener_openings() + hole_polys, z["fr1"], g.STIFF_T)
@@ -108,12 +108,26 @@ def build_parts():
     if g.REAR_FOOT == "brass_rod":
         r = g.rod()
         L = r["x1"] - r["x0"]
-        rodm = m3.Manifold.cylinder(L, g.ROD_D / 2, g.ROD_D / 2, 64).rotate([0, 90, 0]).translate([r["x0"], -r["y"], -g.ROD_D / 2])
+        gap = g.rod_top_gap()
+        rodm = m3.Manifold.cylinder(L, g.ROD_D / 2, g.ROD_D / 2, 64).rotate([0, 90, 0]).translate([r["x0"], -r["y"], -gap - g.ROD_D / 2])
         for x in r["holes_x"]:
             hole = m3.Manifold.cylinder(g.ROD_HOLE_DEPTH, g.ROD_TAP_DRILL / 2, g.ROD_TAP_DRILL / 2, 24).translate(
-                [x, -r["y"], -g.ROD_HOLE_DEPTH])
+                [x, -r["y"], -gap - g.ROD_HOLE_DEPTH])
             rodm = rodm - hole
         parts["rod"] = rodm
+        # 受け台：上は平ら（ボトムプレートの下面に接する）、下は丸棒に沿う凹面。左右2分割
+        parts["saddle"] = []
+        if g.SADDLE:
+            s = g.saddle()
+            body = m3.Manifold.cube([s["x1"] - s["x0"], s["w"], s["height"]]).translate([s["x0"], -s["y"] - s["w"] / 2, -s["height"]])
+            groove = m3.Manifold.cylinder(L + 40, s["R"], s["R"], 96).rotate([0, 90, 0]).translate([r["x0"] - 20, -r["y"], -gap - g.ROD_D / 2])
+            body = body - groove
+            for x in r["holes_x"]:
+                body = body - m3.Manifold.cylinder(20, g.REAR_HOLE_D / 2, g.REAR_HOLE_D / 2, 24).translate([x, -r["y"], -10])
+            big = 1000
+            left = body ^ m3.Manifold.cube([big, big, big]).translate([g.SPLIT_X - big, -big / 2, -big / 2])
+            right = body ^ m3.Manifold.cube([big, big, big]).translate([g.SPLIT_X, -big / 2, -big / 2])
+            parts["saddle"] = [left, right]
 
     # 参考：PCB・スイッチ・キーキャップ（簡略形状）
     parts["pcb"] = m3.Manifold.cube([g.PCB_W, g.PCB_H, g.PCB_T]).translate([0, -g.PCB_H, z["pcb0"]])
@@ -167,6 +181,10 @@ def export(parts, z):
         allfeet = allfeet + f
     to_trimesh(allfeet).export(os.path.join(OUT, f"feet_{g.VER}.stl"))
     asm = parts["top"] + parts["stiffener"] + parts["frame_left"] + parts["frame_right"] + parts["bottom"] + parts["pcb"]
+    for k, sd in enumerate(parts.get("saddle") or []):
+        asm = asm + sd
+        # 印刷向き：平らな面（ボトムプレート側）を下に
+        to_trimesh(sd.rotate([180, 0, 0])).export(os.path.join(OUT, f"rod_saddle_{'left' if k == 0 else 'right'}_{g.VER}.stl"))
     if parts.get("rod") is not None:
         asm = asm + parts["rod"]
         to_trimesh(parts["rod"]).export(os.path.join(OUT, f"brass_rod_reference_{g.VER}.stl"))

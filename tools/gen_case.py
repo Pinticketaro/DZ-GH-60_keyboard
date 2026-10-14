@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v06"
+VER = "v07"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -74,11 +74,17 @@ REAR_FOOT = "brass_rod"             # "brass_rod" または "pucks"（丸台8個
 ROD_D = 12.0                        # 丸棒の直径。傾きはこれで決まる（φ10≈3°、φ12≈4°、φ14≈5°）
 ROD_BOLT_L = 20.0                   # 後ろ4本のボルト長さ（丸棒のめねじにねじ込む）
 ROD_TAP_DRILL = 2.5                 # M3めねじの下穴
-ROD_HOLE_DEPTH = 7.0                # 下穴の深さ（ねじ込み量＋0.5mm以上）
+ROD_HOLE_DEPTH = 7.0                # 下穴の深さ（ねじ込み量＋1.5mm以上。φ12なら下に5mm残る）
 ROD_END_MODE = "side"               # "side"＝端を側面にそろえる（横から丸がよく見える）／"inside"＝上から見て角丸の内側に収める
 ROD_END_INSET = 0.5                 # 端を側面より内側に下げる量
 ROD_HOLE_FROM_END_MIN = 6.0         # めねじの中心から丸棒の端までの最小距離（割れ防止）
 HOLE_EDGE_MIN = 4.5                 # 後ろの角の穴を一直線に並べるときの、穴の縁から外周・枠の内側までの最小距離
+REAR_HOLE_D = 4.0                   # 後ろの4穴（全層）。丸棒の穴位置が±0.3mmずれても組めるよう大きめ。ボタンヘッドφ5.7で隠れる
+# ---- 丸棒の受け台（3Dプリント）：ボトムプレートと丸棒の間に挟み、丸棒が線で当たってアクリルが割れるのを防ぐ
+SADDLE = True
+SADDLE_T_MIN = 1.0                  # 受け台のいちばん薄い所（丸棒の真上）。ボルトのねじ込み量に直結
+SADDLE_W = 9.0                      # 受け台の幅（前後方向）
+SADDLE_CLEAR = 0.1                  # 受け台の凹面と丸棒のすき間（半径方向）
 SWILLKB = os.path.join(ROOT, "tools/data/swillkb_switch_layer_2025.svg")
 # -----------------------------------------------------------------------------
 
@@ -132,7 +138,7 @@ def feet():
     y_front = max(y for _, y in hs)
     if REAR_FOOT == "brass_rod":
         r = rod()
-        yc, zc, rr = r["y"], -ROD_D / 2, ROD_D / 2
+        yc, zc, rr = r["y"], -(rod_top_gap() + ROD_D / 2), ROD_D / 2
         tan = 0.05
         for _ in range(60):          # 机の面が丸棒に接する傾きを求める（反復）
             hf = _h_front(tan)
@@ -157,6 +163,37 @@ def feet():
         h = h_front + (y_front - y) * tan
         out.append(dict(x=x, y=y, h=round(h, 2), pocket_top=FOOT_SKIN))
     return out, h_front, tan, y_front
+
+
+def rod_top_gap():
+    """ボトムプレートの下面から丸棒の上端までの距離（受け台の最も薄い所）。"""
+    return SADDLE_T_MIN if (REAR_FOOT == "brass_rod" and SADDLE) else 0.0
+
+
+def saddle():
+    """受け台：左右2分割（枠と同じ位置で分ける）。上は平ら、下は丸棒に沿う凹面。"""
+    import math
+    r = rod()
+    R = ROD_D / 2 + SADDLE_CLEAR
+    sag = R - math.sqrt(R * R - (SADDLE_W / 2) ** 2)
+    # 端：上から見て外形の内側（受け台の奥側の縁で判定）。ただし端の穴より4mm以上外まで
+    from shapely.geometry import LineString
+    o = Polygon(outer_pts())
+    ye = r["y"] - SADDLE_W / 2
+    xo = LineString([(OX - 5, ye), (OX + OUTER_W + 5, ye)]).intersection(o).bounds[0] + 0.5
+    x0 = min(xo, r["holes_x"][0] - (REAR_HOLE_D / 2 + 3.0))
+    x1 = OX + OUTER_W - (x0 - OX)
+    return dict(y=r["y"], w=SADDLE_W, t_min=SADDLE_T_MIN, height=round(SADDLE_T_MIN + sag, 2), x0=round(x0, 2), x1=round(x1, 2),
+                split_x=SPLIT_X, R=R)
+
+
+def hole_d(c):
+    """穴の直径：後ろの列（丸棒）はREAR_HOLE_D、ほかはHOLE_D。"""
+    if REAR_FOOT == "brass_rod":
+        y_rear = min(y for _, y in holes())
+        if abs(c[1] - y_rear) < 1e-6:
+            return REAR_HOLE_D
+    return HOLE_D
 
 
 def tilt_deg():
@@ -286,7 +323,7 @@ def svg(path, layers, title, extra_note=""):
 def main():
     pcb_clear = check_pcb_clearance()
     outer_d = sq.to_svg_path(kerf_out(outer_pts()))
-    hole_ds = [circle_path(c, HOLE_D) for c in holes()]
+    hole_ds = [circle_path(c, hole_d(c)) for c in holes()]
     sw_ds = [sq.to_svg_path(kerf_in(p)) for p in switch_cutouts()]
     inner = frame_inner_pts()
     note = f"R{CORNER_R} smoothing{CORNER_SMOOTH} kerf{KERF}"
@@ -319,7 +356,7 @@ def main():
              f"L {USB_X + USB_W / 2:.4f},{OY + WALL:.4f} L {USB_X + USB_W / 2:.4f},{OY:.4f}")
     svg(os.path.join(ROOT, f"case/frame_{VER}.svg"),
         [("outline", "#000000", [sq.to_svg_path(frame_outer_pts()), sq.to_svg_path(inner)], f"枠の外形（アクリルより{FRAME_INSET}mm内側）と内側"),
-         ("holes", "#000000", [circle_path(c, HOLE_D, False) for c in holes()], "M3穴"),
+         ("holes", "#000000", [circle_path(c, hole_d(c), False) for c in holes()], "M3穴（後ろはφ4.0）"),
          ("split", "#0000ff", [split_d], f"分割線 X={SPLIT_X}"),
          ("usb", "#0000ff", [usb_d], f"USB切り欠き 幅{USB_W}（位置は要実測）")],
         f"枠（厚さ{FRAME_H}mm・PLA・左右2分割）", note)
@@ -400,7 +437,8 @@ def main():
                   bolt=f"M3x{BOLT_L:g}", foot_skin=FOOT_SKIN, tilt_deg=tilt_deg(), foot_d=FOOT_D,
                   rear_foot=REAR_FOOT, rod=rod_info,
                   rod_bolt=(f"M3x{ROD_BOLT_L:g}" if rod_info else None),
-                  rod_thread_engagement=(round(ROD_BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T), 2) if rod_info else None),
+                  rod_thread_engagement=(round(ROD_BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) - rod_top_gap(), 2) if rod_info else None),
+                  saddle=(saddle() if (rod_info and SADDLE) else None), rear_hole_d=REAR_HOLE_D,
                   feet=[{k: (round(v, 2) if isinstance(v, float) else v) for k, v in f.items()} for f in fl],
                   front_height_no_keycap=round(h_front + TOP_T + STIFF_T + FRAME_H + BOTTOM_T, 2))
     open(os.path.join(ROOT, f"case/params_{VER}.json"), "w", encoding="utf-8").write(

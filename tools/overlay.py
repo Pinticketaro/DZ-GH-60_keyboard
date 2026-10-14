@@ -33,7 +33,7 @@ def main():
     for p in g.switch_cutouts():
         ax.add_patch(MPoly(p, closed=True, fc="none", ec="#c33", lw=0.6))
     for c in g.holes():
-        ax.add_patch(Circle(c, g.HOLE_D / 2, fc="#333", ec="none"))
+        ax.add_patch(Circle(c, g.hole_d(c) / 2, fc="#333", ec="none"))
     for c in PCB_HOLES:
         ax.add_patch(Circle(c, 1.25, fc="none", ec="#2f6d4f", lw=0.8))
     ax.plot([g.SPLIT_X] * 2, [g.OY - 4, g.OY + g.OUTER_H + 4], color="#36c", lw=1.2, ls="-.", label="枠の分割線")
