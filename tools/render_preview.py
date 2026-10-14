@@ -72,6 +72,8 @@ def build_scene(frame_hex, top_style):
         sw = m3.Manifold.extrude(m3.CrossSection([[(-7.8, -7.8), (7.8, -7.8), (7.8, 7.8), (-7.8, 7.8)]]), 6.0, 0, 0,
                                  [0.75, 0.75]).translate([cx, -cy, z["top1"]])
         meshes.append(mesh_of(sw, hex2rgba("#3a3d42"), 0.6))
+    if parts.get("rod") is not None:
+        meshes.append(mesh_of(parts["rod"], [0.83, 0.66, 0.36, 1.0], 0.32, 0.0))
     # ボルトの頭（ボタンヘッド φ5.7×1.65）
     for (x, y) in g.holes():
         head = m3.Manifold.cylinder(1.65, 2.85, 2.6, 32).translate([x, -y, z["top1"]])
@@ -88,7 +90,7 @@ HTML = r"""<!doctype html><html><head><meta charset="utf-8">
 #c{display:block}.lab{position:absolute;font-size:15px;color:#333}</style></head><body>
 <canvas id="c" width="1800" height="1150"></canvas>
 <div class="lab" style="left:24px;top:14px;font-size:20px">__TITLE__</div>
-<div class="lab" style="left:24px;top:760px">正面（手前）から</div>
+<div class="lab" style="left:24px;top:760px">斜め後ろから</div>
 <div class="lab" style="left:924px;top:760px">右横から</div>
 <script type="importmap">{"imports":{"three":"./three/build/three.module.js","three/addons/":"./three/examples/jsm/"}}</script>
 <script type="module">
@@ -115,12 +117,10 @@ new GLTFLoader().load('./model.glb',(gl)=>{
   const p=new THREE.PerspectiveCamera(24,W/700,1,5000);
   p.position.set(c.x-210,c.y+250,c.z+430); p.lookAt(c.x+8,c.y-18,c.z);
   r.setViewport(0,H-740,W,700); r.setScissor(0,H-740,W,700); r.setScissorTest(true); r.clear(); r.render(s,p);
-  // 2) 正面（平行投影）
-  const half=sz.x*0.55, hh=half*(380/880);
-  const o1=new THREE.OrthographicCamera(-half,half,hh,-hh,1,5000);
-  const yb1=box.min.y+hh*0.85;
-  o1.position.set(c.x,yb1,c.z+800); o1.lookAt(c.x,yb1,c.z);
-  r.setViewport(10,10,880,380); r.setScissor(10,10,880,380); r.clear(); r.render(s,o1);
+  // 2) 斜め後ろ（透視・低め）
+  const p2=new THREE.PerspectiveCamera(24,880/380,1,5000);
+  p2.position.set(c.x+235,c.y+62,c.z-330); p2.lookAt(c.x+5,c.y-10,c.z);
+  r.setViewport(10,10,880,380); r.setScissor(10,10,880,380); r.clear(); r.render(s,p2);
   // 3) 右横（平行投影）
   const half2=sz.z*0.62, hh2=half2*(380/880);
   const o2=new THREE.OrthographicCamera(-half2,half2,hh2,-hh2,1,5000);
@@ -144,7 +144,7 @@ def main():
     scene, fh = build_scene(a.frame, a.top)
     scene.export(os.path.join(work, "model.glb"))
     top_name = {"frosted": "すりガラス", "clear": "透明", "smoke": "スモーク"}[a.top]
-    title = (f"外観プレビュー {g.VER}：トッププレート{top_name}・枠{a.frame}、傾き{g.TILT_DEG:g}°、"
+    title = (f"外観プレビュー {g.VER}：トッププレート{top_name}・枠{a.frame}、傾き{g.tilt_deg():g}°{"（真鍮丸棒φ%g）" % g.ROD_D if g.REAR_FOOT == "brass_rod" else ""}、"
              f"手前の高さ{fh:.1f}mm（キーキャップ別）、角R{g.CORNER_R:g}・スムージング{g.CORNER_SMOOTH}")
     open(os.path.join(work, "index.html"), "w", encoding="utf-8").write(HTML.replace("__TITLE__", title))
 

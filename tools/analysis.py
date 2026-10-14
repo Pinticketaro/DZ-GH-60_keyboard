@@ -76,7 +76,20 @@ def main():
         rear = front + span * tan
         rows.append({"deg": deg, "front_foot": round(front, 1), "rear_foot": round(rear, 1),
                      "front_height_no_keycap": round(front + stack, 1)})
-    res["tilt"] = rows
+    res["tilt_pucks"] = rows
+    # 真鍮丸棒の太さと傾き・重さ
+    if g.REAR_FOOT == "brass_rod":
+        keep = g.ROD_D
+        rod_rows = []
+        for rd in (10.0, 12.0, 13.0, 14.0, 16.0):
+            g.ROD_D = rd
+            _, hf, tn, _ = g.feet()
+            L = g.rod()["length"]
+            rod_rows.append({"rod_d": rd, "tilt_deg": round(math.degrees(math.atan(tn)), 1), "front_foot": hf,
+                             "front_height_no_keycap": round(hf + stack, 1),
+                             "rod_mass_g": round(math.pi * (rd / 20) ** 2 * L / 10 * 8.5)})
+        g.ROD_D = keep
+        res["tilt_brass_rod"] = rod_rows
     res["plate_open_ratio"] = round(sw.area / box(-0.375, -0.325, 285.375, 94.925).area, 2)
     path = os.path.join(g.ROOT, f"case/analysis_{g.VER}.json")
     open(path, "w", encoding="utf-8").write(json.dumps(res, ensure_ascii=False, indent=2) + "\n")

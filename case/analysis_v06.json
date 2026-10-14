@@ -1,0 +1,85 @@
+{
+  "bending_stiffness_Nm": {
+    "top_plate": 0.272,
+    "stiffener": 0.44,
+    "pcb": 6.29,
+    "plate+switch+pcb_upper_bound": 37.6
+  },
+  "center_deflection_mm_per_1N": {
+    "top_plate_only": 0.599,
+    "top+stiffener(not bonded)": 0.229,
+    "pcb_only": 0.0259,
+    "plate+switch+pcb": 0.0043
+  },
+  "mass_g": {
+    "top_plate": 46,
+    "stiffener": 53,
+    "bottom_plate": 141,
+    "frame_100pct": 114,
+    "case_total_100pct": 354
+  },
+  "tilt_pucks": [
+    {
+      "deg": 0,
+      "front_foot": 3.7,
+      "rear_foot": 3.7,
+      "front_height_no_keycap": 18.3
+    },
+    {
+      "deg": 3,
+      "front_foot": 3.9,
+      "rear_foot": 9.8,
+      "front_height_no_keycap": 18.5
+    },
+    {
+      "deg": 5,
+      "front_foot": 4.1,
+      "rear_foot": 13.9,
+      "front_height_no_keycap": 18.7
+    },
+    {
+      "deg": 7,
+      "front_foot": 4.2,
+      "rear_foot": 18.0,
+      "front_height_no_keycap": 18.8
+    }
+  ],
+  "tilt_brass_rod": [
+    {
+      "rod_d": 10.0,
+      "tilt_deg": 3.1,
+      "front_foot": 3.9,
+      "front_height_no_keycap": 18.5,
+      "rod_mass_g": 207
+    },
+    {
+      "rod_d": 12.0,
+      "tilt_deg": 4.1,
+      "front_foot": 4.0,
+      "front_height_no_keycap": 18.6,
+      "rod_mass_g": 298
+    },
+    {
+      "rod_d": 13.0,
+      "tilt_deg": 4.6,
+      "front_foot": 4.0,
+      "front_height_no_keycap": 18.6,
+      "rod_mass_g": 350
+    },
+    {
+      "rod_d": 14.0,
+      "tilt_deg": 5.1,
+      "front_foot": 4.1,
+      "front_height_no_keycap": 18.7,
+      "rod_mass_g": 406
+    },
+    {
+      "rod_d": 16.0,
+      "tilt_deg": 6.1,
+      "front_foot": 4.1,
+      "front_height_no_keycap": 18.7,
+      "rod_mass_g": 531
+    }
+  ],
+  "plate_open_ratio": 0.5
+}

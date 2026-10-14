@@ -103,6 +103,18 @@ def build_parts():
         feet.append(foot - pocket - bolt)
     parts["feet"] = feet
 
+    # 真鍮丸棒（奥側の足）：X方向の円柱、上面がボトムプレートの下面に接する。M3めねじの下穴つき
+    parts["rod"] = None
+    if g.REAR_FOOT == "brass_rod":
+        r = g.rod()
+        L = r["x1"] - r["x0"]
+        rodm = m3.Manifold.cylinder(L, g.ROD_D / 2, g.ROD_D / 2, 64).rotate([0, 90, 0]).translate([r["x0"], -r["y"], -g.ROD_D / 2])
+        for x in r["holes_x"]:
+            hole = m3.Manifold.cylinder(g.ROD_HOLE_DEPTH, g.ROD_TAP_DRILL / 2, g.ROD_TAP_DRILL / 2, 24).translate(
+                [x, -r["y"], -g.ROD_HOLE_DEPTH])
+            rodm = rodm - hole
+        parts["rod"] = rodm
+
     # 参考：PCB・スイッチ・キーキャップ（簡略形状）
     parts["pcb"] = m3.Manifold.cube([g.PCB_W, g.PCB_H, g.PCB_T]).translate([0, -g.PCB_H, z["pcb0"]])
     return parts, z
@@ -149,11 +161,15 @@ def export(parts, z):
         c = ((bb[0] + bb[3]) / 2, (bb[1] + bb[4]) / 2)
         f2 = f.translate([-c[0], -c[1], 0]).rotate([180, 0, 0]).translate([(i % 4) * 20, (i // 4) * 20, 0])
         feet.append(f2)
+    # 足は印刷向きに：前の足だけ（丸棒のとき）
     allfeet = feet[0]
     for f in feet[1:]:
         allfeet = allfeet + f
     to_trimesh(allfeet).export(os.path.join(OUT, f"feet_{g.VER}.stl"))
     asm = parts["top"] + parts["stiffener"] + parts["frame_left"] + parts["frame_right"] + parts["bottom"] + parts["pcb"]
+    if parts.get("rod") is not None:
+        asm = asm + parts["rod"]
+        to_trimesh(parts["rod"]).export(os.path.join(OUT, f"brass_rod_reference_{g.VER}.stl"))
     for f in parts["feet"]:
         asm = asm + f
     to_trimesh(asm).export(os.path.join(OUT, f"assembly_{g.VER}.stl"))
@@ -171,7 +187,7 @@ def render(parts, z, path, frame_color="#e9e4da", acrylic="#bcd6e4"):
             font_manager.fontManager.addfont(fpath)
     plt.rcParams["font.family"] = "Noto Sans CJK JP"
 
-    tilt = math.radians(g.TILT_DEG)
+    tilt = math.radians(g.tilt_deg())
     fl, h_front, tan, y_front = g.feet()
     light = np.array([-0.35, -0.55, 0.76]); light /= np.linalg.norm(light)
 
@@ -222,7 +238,7 @@ def render(parts, z, path, frame_color="#e9e4da", acrylic="#bcd6e4"):
             ax.set_zlim(ctr[2] - r * 0.18, ctr[2] + r * 0.18)
             ax.set_box_aspect((1, 1, 0.18))
         ax.set_title(title, fontsize=11)
-    fig.suptitle(f"外観プレビュー {g.VER}：傾き{g.TILT_DEG:g}°、手前の高さ{h_front + z['top1']:.1f}mm（キーキャップ別）、"
+    fig.suptitle(f"外観プレビュー {g.VER}：傾き{g.tilt_deg():g}°、手前の高さ{h_front + z['top1']:.1f}mm（キーキャップ別）、"
                  f"角R{g.CORNER_R:g}・スムージング{g.CORNER_SMOOTH}", fontsize=13)
     fig.savefig(path, dpi=100, bbox_inches="tight", facecolor="white")
     print(path)

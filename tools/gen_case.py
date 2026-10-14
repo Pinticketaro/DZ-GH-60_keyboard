@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v05"
+VER = "v06"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -69,6 +69,16 @@ NUT_POCKET_AF = 6.1                 # 足のナット溝の二面幅（少しき
 FOOT_D = 12.0                       # 足（丸い台）の直径。外形より1mm以上内側に収まり、浮いて見える
 TILT_DEG = 5.0                      # キーボードの傾き（仮）。0〜7°程度
 FOOT_SKIN = round(BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) - NUT_T, 2)  # ナットの上に残るPLAの厚さ
+# ---- 奥側の足：真鍮の丸棒（ボトムプレートの奥側の下面に沿わせて左右方向に置く。横から見ると端の丸が見える）
+REAR_FOOT = "brass_rod"             # "brass_rod" または "pucks"（丸台8個）
+ROD_D = 12.0                        # 丸棒の直径。傾きはこれで決まる（φ10≈3°、φ12≈4°、φ14≈5°）
+ROD_BOLT_L = 20.0                   # 後ろ4本のボルト長さ（丸棒のめねじにねじ込む）
+ROD_TAP_DRILL = 2.5                 # M3めねじの下穴
+ROD_HOLE_DEPTH = 7.0                # 下穴の深さ（ねじ込み量＋0.5mm以上）
+ROD_END_MODE = "side"               # "side"＝端を側面にそろえる（横から丸がよく見える）／"inside"＝上から見て角丸の内側に収める
+ROD_END_INSET = 0.5                 # 端を側面より内側に下げる量
+ROD_HOLE_FROM_END_MIN = 6.0         # めねじの中心から丸棒の端までの最小距離（割れ防止）
+HOLE_EDGE_MIN = 4.5                 # 後ろの角の穴を一直線に並べるときの、穴の縁から外周・枠の内側までの最小距離
 SWILLKB = os.path.join(ROOT, "tools/data/swillkb_switch_layer_2025.svg")
 # -----------------------------------------------------------------------------
 
@@ -86,20 +96,72 @@ def frame_outer_pts():
     return list(Polygon(outer_pts()).buffer(-FRAME_INSET, join_style=1).exterior.coords)[:-1]
 
 
+def _h_front(tan):
+    import math
+    nut_r = NUT_POCKET_AF / math.sqrt(3)              # 六角の外接円の半径
+    # 前の足：ナット（＋0.3mm）が傾いた底面から出ない最小の高さ
+    return math.ceil((FOOT_SKIN + NUT_T + 0.3 + nut_r * tan) * 10) / 10
+
+
+def rod():
+    """真鍮丸棒：中心線のY、直径、両端のX、めねじの位置（丸棒の左端からの距離も）。"""
+    hs = holes()
+    y_rear = min(y for _, y in hs)
+    rear = sorted(x for x, y in hs if abs(y - y_rear) < 1e-6)
+    # 端：丸棒が上から見て外形の内側に収まる範囲（丸棒の奥側の縁＝いちばん角丸に近い所で判定）
+    from shapely.geometry import LineString
+    o = Polygon(outer_pts())
+    y_check = y_rear if ROD_END_MODE == "side" else y_rear - ROD_D / 2
+    x0 = max(LineString([(OX - 5, y_check), (OX + OUTER_W + 5, y_check)]).intersection(o).bounds[0], OX)
+    x1 = OX + OUTER_W - (x0 - OX)
+    x0, x1 = x0 + ROD_END_INSET, x1 - ROD_END_INSET
+    # 上から見て外形からはみ出す量（丸棒の奥側の縁の高さで）
+    xr = LineString([(OX - 5, y_rear - ROD_D / 2), (OX + OUTER_W + 5, y_rear - ROD_D / 2)]).intersection(o).bounds[0]
+    info = dict(y=y_rear, d=ROD_D, x0=round(x0, 2), x1=round(x1, 2), length=round(x1 - x0, 1), end_mode=ROD_END_MODE,
+                holes_x=rear, holes_from_left_end=[round(x - x0, 2) for x in rear],
+                plan_overhang_at_rear_corner=round(max(0.0, xr - x0), 1))
+    if min(info["holes_from_left_end"][0], x1 - rear[-1]) < ROD_HOLE_FROM_END_MIN:
+        raise SystemExit(f"丸棒の端のめねじが端に近すぎる（{info['holes_from_left_end'][0]}mm）。ROD_END_MODEか穴位置を見直す")
+    return info
+
+
 def feet():
-    """足（ナット受け）の一覧：中心(x,y)、中心での高さ、ナット溝の深さ。傾きは前のネジ列を基準に後ろを高くする。"""
+    """足の一覧と傾き。丸棒のときは前の4個だけを返し、傾きは「前の足の底」と「丸棒の下側」が同じ机の面に乗る角度で決める。"""
     import math
     hs = holes()
     y_front = max(y for _, y in hs)
-    tan = math.tan(math.radians(TILT_DEG))
-    nut_r = NUT_POCKET_AF / math.sqrt(3)              # 六角の外接円の半径
-    # 前の足：ナット（＋0.3mm）が傾いた底面から出ない最小の高さ
-    h_front = math.ceil((FOOT_SKIN + NUT_T + 0.3 + nut_r * tan) * 10) / 10
+    if REAR_FOOT == "brass_rod":
+        r = rod()
+        yc, zc, rr = r["y"], -ROD_D / 2, ROD_D / 2
+        tan = 0.05
+        for _ in range(60):          # 机の面が丸棒に接する傾きを求める（反復）
+            hf = _h_front(tan)
+            # 机の面：z = -(hf + (y_front - y)·tan)。丸棒の中心からの距離 = 半径
+            f = lambda tt: (zc + _h_front(tt) + (y_front - yc) * tt) / math.sqrt(1 + tt * tt) - rr
+            lo, hi = 0.0, 0.3
+            for _ in range(60):
+                mid = (lo + hi) / 2
+                if f(mid) > 0:
+                    hi = mid
+                else:
+                    lo = mid
+            tan = (lo + hi) / 2
+        h_front = _h_front(tan)
+        front = [(x, y) for x, y in hs if abs(y - y_front) < 8]
+    else:
+        tan = math.tan(math.radians(TILT_DEG))
+        h_front = _h_front(tan)
+        front = hs
     out = []
-    for x, y in hs:
+    for x, y in front:
         h = h_front + (y_front - y) * tan
         out.append(dict(x=x, y=y, h=round(h, 2), pocket_top=FOOT_SKIN))
     return out, h_front, tan, y_front
+
+
+def tilt_deg():
+    import math
+    return round(math.degrees(math.atan(feet()[2])), 2)
 
 
 def holes():
@@ -112,6 +174,17 @@ def holes():
     for x, y in HOLES_FROM_OUTER:
         c = (OX + x, OY + y)
         is_corner = x in (7, 308) and y in (7, 119)
+        if is_corner and REAR_FOOT == "brass_rod" and y == 7:
+            # 後ろの角の穴は中央の穴と同じ列に並べる（丸棒にまっすぐ穴を開けるため）
+            sx = 1 if x < OUTER_W / 2 else -1
+            x_edge = OX if sx == 1 else OX + OUTER_W
+            for i in range(0, 600):
+                q = Point(x_edge + sx * i * 0.05, OY + y)
+                if ring.contains(q) and min(outer.exterior.distance(q), inner.exterior.distance(q)) - HOLE_D / 2 >= HOLE_EDGE_MIN:
+                    c = (round(q.x, 2), round(q.y, 2))
+                    break
+            out.append(c)
+            continue
         if is_corner and CORNER_R > 0:
             vx = OX if x < OUTER_W / 2 else OX + OUTER_W
             vy = OY if y < OUTER_H / 2 else OY + OUTER_H
@@ -282,11 +355,33 @@ def main():
         r = NUT_POCKET_AF / _m.sqrt(3)
         pts = [(f["x"] + r * _m.cos(_m.radians(60 * k)), f["y"] + r * _m.sin(_m.radians(60 * k))) for k in range(6)]
         hex_ds.append(sq.to_svg_path(pts))
-    svg(os.path.join(ROOT, f"case/feet_{VER}.svg"),
-        [("outline", "#000000", [sq.to_svg_path(outer_pts())], "参考：ケース外形"),
-         ("feet", "#0000ff", foot_ds, f"足 φ{FOOT_D}×8（前{h_front}mm〜後{max(f['h'] for f in fl)}mm、傾き{TILT_DEG}°）"),
-         ("nut", "#ff0000", hex_ds, f"ナット溝（二面幅{NUT_POCKET_AF}、下から）")],
-        "足（ナット受け）平面図", note)
+    feet_layers = [("outline", "#000000", [sq.to_svg_path(outer_pts())], "参考：ケース外形"),
+                   ("feet", "#0000ff", foot_ds, f"足 φ{FOOT_D}×{len(fl)}（前{h_front}mm、傾き{tilt_deg()}°）"),
+                   ("nut", "#ff0000", hex_ds, f"ナット溝（二面幅{NUT_POCKET_AF}、下から）")]
+    rod_info = None
+    if REAR_FOOT == "brass_rod":
+        rod_info = rod()
+        ry, rd = rod_info["y"], ROD_D
+        rect = [(rod_info["x0"], ry - rd / 2), (rod_info["x1"], ry - rd / 2), (rod_info["x1"], ry + rd / 2), (rod_info["x0"], ry + rd / 2)]
+        feet_layers.append(("rod", "#b8860b", [sq.to_svg_path(rect)] + [circle_path((x, ry), ROD_TAP_DRILL, False) for x in rod_info["holes_x"]],
+                            f"真鍮丸棒 φ{ROD_D}×{rod_info['length']}（M3めねじ×{len(rod_info['holes_x'])}）"))
+        # 丸棒の穴あけ型紙（100%で印刷し、丸棒に巻いて/当ててポンチを打つ）
+        L = rod_info["length"]
+        marks = []
+        for k, xh in enumerate(rod_info["holes_from_left_end"]):
+            marks.append(f'<line x1="{xh + 5:.2f}" y1="8" x2="{xh + 5:.2f}" y2="{8 + rd * 3.1416 / 2:.2f}" stroke="#ff0000" stroke-width="0.2"/>'
+                         f'<circle cx="{xh + 5:.2f}" cy="{8 + rd * 3.1416 / 4:.2f}" r="1.25" fill="none" stroke="#ff0000" stroke-width="0.2"/>'
+                         f'<text x="{xh + 5:.2f}" y="6" font-size="3" text-anchor="middle" font-family="Hiragino Sans, Noto Sans CJK JP, sans-serif">{xh:.2f}</text>')
+        tw = L + 10
+        th = 8 + rd * 3.1416 / 2 + 22
+        tpl = (f'<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="{tw:.1f}mm" height="{th:.1f}mm" viewBox="0 0 {tw:.1f} {th:.1f}">'
+               f'<rect x="5" y="8" width="{L:.2f}" height="{rd * 3.1416 / 2:.2f}" fill="none" stroke="#000" stroke-width="0.2"/>'
+               + "".join(marks) +
+               f'<text x="5" y="{th - 10:.1f}" font-size="3.2" font-family="Hiragino Sans, Noto Sans CJK JP, sans-serif">真鍮丸棒 φ{rd:g}×{L:g}mm の穴あけ型紙（100%で印刷）。左端をそろえ、赤丸の中心にポンチ。'
+               f'下穴φ{ROD_TAP_DRILL}・深さ{ROD_HOLE_DEPTH}→M3タップ。数字は左端からの距離(mm)</text>'
+               f'<text x="5" y="{th - 5:.1f}" font-size="3.2" font-family="Hiragino Sans, Noto Sans CJK JP, sans-serif">丸棒の上側（ボトムプレートに当たる線）に4穴を一直線に。V字の台に載せ、ボール盤で垂直に開ける</text></svg>\n')
+        open(os.path.join(ROOT, f"case/rod_drill_template_{VER}.svg"), "w", encoding="utf-8").write(tpl)
+    svg(os.path.join(ROOT, f"case/feet_{VER}.svg"), feet_layers, "足（ナット受け）と真鍮丸棒 平面図", note)
 
     params = dict(version=VER, pcb=[PCB_W, PCB_H], outer=[OUTER_W, OUTER_H], outer_origin=[OX, OY],
                   wall=WALL, frame_inner=[OUTER_W - 2 * WALL, OUTER_H - 2 * WALL],
@@ -302,7 +397,10 @@ def main():
                   pcb_t=PCB_T, under_pcb=UNDER_PCB, bottom_t=BOTTOM_T,
                   total_height=round(TOP_T + STIFF_T + FRAME_H + BOTTOM_T, 2),
                   switch_cutouts=len(sw_ds), frame_inset=FRAME_INSET,
-                  bolt=f"M3x{BOLT_L:g}", foot_skin=FOOT_SKIN, tilt_deg=TILT_DEG, foot_d=FOOT_D,
+                  bolt=f"M3x{BOLT_L:g}", foot_skin=FOOT_SKIN, tilt_deg=tilt_deg(), foot_d=FOOT_D,
+                  rear_foot=REAR_FOOT, rod=rod_info,
+                  rod_bolt=(f"M3x{ROD_BOLT_L:g}" if rod_info else None),
+                  rod_thread_engagement=(round(ROD_BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T), 2) if rod_info else None),
                   feet=[{k: (round(v, 2) if isinstance(v, float) else v) for k, v in f.items()} for f in fl],
                   front_height_no_keycap=round(h_front + TOP_T + STIFF_T + FRAME_H + BOTTOM_T, 2))
     open(os.path.join(ROOT, f"case/params_{VER}.json"), "w", encoding="utf-8").write(
