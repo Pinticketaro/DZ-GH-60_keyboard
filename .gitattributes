@@ -1,0 +1,16 @@
+# テキストとして差分を見るもの
+*.svg  text
+*.dxf  text
+*.json text
+*.py   text
+*.md   text
+# バイナリ（差分は取らない）
+*.stl   binary
+*.step  binary
+*.stp   binary
+*.f3d   binary
+*.blend binary
+*.3mf   binary
+*.gcode binary
+*.jpg   binary
+*.png   binary

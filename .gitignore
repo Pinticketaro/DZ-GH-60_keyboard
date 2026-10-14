@@ -1,0 +1,9 @@
+# スライサーの出力（STLから毎回作り直せる）
+*.gcode
+# 各ソフトの一時・バックアップファイル
+*.blend1
+*.blend2
+*~
+.DS_Store
+Thumbs.db
+__pycache__/
