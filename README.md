@@ -1,17 +1,18 @@
 # DZ-GH-60_keyboard
 
-DZ60 V2（はんだ付け版）PCBを使った60%キーボード。プレートはCO2レーザーで、ケースはPLAの3Dプリント（Ender-3、2分割）で自作する。
+DZ60 V2（はんだ付け版）PCBを使った60%キーボード。旧デザイン（2025年の積層ケース案）を踏襲し、トッププレート（アクリル・CO2レーザー）／枠（PLA・3Dプリント、Ender-3 Proで2分割）／ボトムプレート（アクリル・CO2レーザー）の3層をM3ネジで留める。外形315×126mm、角はApple風の角丸。
 
 ## フォルダ構成
 
 | フォルダ | 中身 |
 |---|---|
 | `layout/` | 配列データ（KLE JSON） |
-| `plate/` | プレートの生成スクリプトと図面（SVG / DXF） |
-| `case/` | ケースの土台モデル（CadQuery）、Fusion 360から書き出したSTEP、印刷用STL |
+| `tools/` | 図面生成スクリプト（`gen_case.py`：プレート・枠・底板、`corner_compare.py`：角丸の比較、`overlay.py`：重ね合わせ確認）。`pip install -r tools/requirements.txt` |
+| `plate/` | トッププレートの図面（SVG / DXF） |
+| `case/` | 枠・ボトムプレートの図面、角丸テスト片、Fusion 360から書き出したSTEP、印刷用STL |
 | `measurements/` | DZ60の実測値 |
 | `photos/` | テストカット・試し刷り・組み立ての写真 |
-| `docs/` | 決定事項、基準寸法、Tips、事例とアイデア・進行方式 |
+| `docs/` | 決定事項、基準寸法、Tips、事例とアイデア・進行方式、旧プロジェクトの調査、図（`img/`） |
 | `LOG.md` | 製作ログ |
 
 ## 進め方
