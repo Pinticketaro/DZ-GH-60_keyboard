@@ -59,7 +59,7 @@ def build_scene(frame_hex, top_style):
         mesh_of(parts["frame_left"], hex2rgba(frame_hex), 0.85),
         mesh_of(parts["frame_right"], hex2rgba(frame_hex), 0.85),
         mesh_of(parts["pcb"], hex2rgba("#1d1f22"), 0.5),
-    ] + [mesh_of(f, hex2rgba(frame_hex if g.FOOT_STYLE == "ribs" else "#2a2a2a"), 0.85) for f in parts["feet"]] \
+    ] + [mesh_of(f, hex2rgba(frame_hex if g.FOOT_STYLE in ("ribs", "pairs") else "#2a2a2a"), 0.85) for f in parts["feet"]] \
       + [mesh_of(c, hex2rgba("#ecebe6"), 0.7) for c in b3.keycaps(z["top1"])]
     import manifold3d as m3
     # スイッチの上部ハウジング（簡略：15.6角×高さ6.6、上面は少し小さく）
