@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v04"
+VER = "v05"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -60,6 +60,15 @@ GAP_STIFF_PCB = round(PLATE_TOP_TO_PCB_TOP - TOP_T - STIFF_T, 2)      # 補強�
 FRAME_H = round(GAP_STIFF_PCB + PCB_T + UNDER_PCB, 2)                   # 枠の厚さ（自動計算）
 assert TOP_T <= 1.6, "トッププレートが1.6mmを超えるとMXの爪がかからない"
 assert GAP_STIFF_PCB >= 0.3, "補強板が厚すぎてPCBに当たる"
+# ---- 外観
+FRAME_INSET = 0.3                   # 枠の外周をアクリルより内側へ下げる量。印刷の誤差で枠がはみ出さず、細い影の線になる
+# ---- ボルト・足（ボトムプレートの下にナット受けを兼ねた足。M3ボルトを上から通して全層を共締め）
+BOLT_L = 18.0                       # M3ボルトの長さ（8本共通）
+NUT_AF, NUT_T = 5.5, 2.4            # M3ナット（二面幅・厚さ）
+NUT_POCKET_AF = 6.1                 # 足のナット溝の二面幅（少しきつめ。印刷して調整）
+FOOT_D = 12.0                       # 足（丸い台）の直径。外形より1mm以上内側に収まり、浮いて見える
+TILT_DEG = 5.0                      # キーボードの傾き（仮）。0〜7°程度
+FOOT_SKIN = round(BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) - NUT_T, 2)  # ナットの上に残るPLAの厚さ
 SWILLKB = os.path.join(ROOT, "tools/data/swillkb_switch_layer_2025.svg")
 # -----------------------------------------------------------------------------
 
@@ -69,6 +78,28 @@ OY = PCB_H / 2 - OUTER_H / 2
 
 def outer_pts():
     return sq.rounded_rect_points(OX, OY, OUTER_W, OUTER_H, CORNER_R, CORNER_SMOOTH)
+
+
+def frame_outer_pts():
+    if not FRAME_INSET:
+        return outer_pts()
+    return list(Polygon(outer_pts()).buffer(-FRAME_INSET, join_style=1).exterior.coords)[:-1]
+
+
+def feet():
+    """足（ナット受け）の一覧：中心(x,y)、中心での高さ、ナット溝の深さ。傾きは前のネジ列を基準に後ろを高くする。"""
+    import math
+    hs = holes()
+    y_front = max(y for _, y in hs)
+    tan = math.tan(math.radians(TILT_DEG))
+    nut_r = NUT_POCKET_AF / math.sqrt(3)              # 六角の外接円の半径
+    # 前の足：ナット（＋0.3mm）が傾いた底面から出ない最小の高さ
+    h_front = math.ceil((FOOT_SKIN + NUT_T + 0.3 + nut_r * tan) * 10) / 10
+    out = []
+    for x, y in hs:
+        h = h_front + (y_front - y) * tan
+        out.append(dict(x=x, y=y, h=round(h, 2), pocket_top=FOOT_SKIN))
+    return out, h_front, tan, y_front
 
 
 def holes():
@@ -214,11 +245,48 @@ def main():
     usb_d = (f"M {USB_X - USB_W / 2:.4f},{OY:.4f} L {USB_X - USB_W / 2:.4f},{OY + WALL:.4f} "
              f"L {USB_X + USB_W / 2:.4f},{OY + WALL:.4f} L {USB_X + USB_W / 2:.4f},{OY:.4f}")
     svg(os.path.join(ROOT, f"case/frame_{VER}.svg"),
-        [("outline", "#000000", [sq.to_svg_path(outer_pts()), sq.to_svg_path(inner)], "枠の外形と内側"),
+        [("outline", "#000000", [sq.to_svg_path(frame_outer_pts()), sq.to_svg_path(inner)], f"枠の外形（アクリルより{FRAME_INSET}mm内側）と内側"),
          ("holes", "#000000", [circle_path(c, HOLE_D, False) for c in holes()], "M3穴"),
          ("split", "#0000ff", [split_d], f"分割線 X={SPLIT_X}"),
          ("usb", "#0000ff", [usb_d], f"USB切り欠き 幅{USB_W}（位置は要実測）")],
         f"枠（厚さ{FRAME_H}mm・PLA・左右2分割）", note)
+
+    # フォームの型紙（紙に100%で印刷して切る。PORON＝ポリウレタンはレーザーで切らない）
+    from shapely.geometry import box as _box
+    cav = Polygon(frame_inner_pts()).buffer(-0.5, join_style=1)
+    usb_zone = _box(USB_X - 9, 0, USB_X + 9, 12)                     # USB-C裏側の逃げ（仮・要実測）
+    case_foam = cav.difference(usb_zone)
+    pcb_poly = _box(0, 0, PCB_W, PCB_H).buffer(-2).buffer(2)
+    plate_foam = pcb_poly.buffer(-0.5).difference(
+        __import__("shapely.ops", fromlist=["unary_union"]).unary_union([Polygon(p) for p in st_open]))
+    def poly_ds(geom):
+        gs = list(geom.geoms) if hasattr(geom, "geoms") else [geom]
+        ds = []
+        for gg in gs:
+            ds.append(sq.to_svg_path(list(gg.exterior.coords)[:-1]))
+            ds += [sq.to_svg_path(list(r.coords)[:-1]) for r in gg.interiors]
+        return ds
+    svg(os.path.join(ROOT, f"case/foam_case_{VER}.svg"),
+        [("cut", "#000000", poly_ds(case_foam), f"ケースフォーム兼台座（PCB下、厚さ{UNDER_PCB}＋つぶし代）。USB-C付近は仮の逃げ")],
+        "ケースフォーム型紙（100%で印刷して切る）", note)
+    svg(os.path.join(ROOT, f"case/foam_plate_{VER}.svg"),
+        [("cut", "#000000", poly_ds(plate_foam), f"プレートフォーム（補強板とPCBの間、厚さ{GAP_STIFF_PCB}以下）")],
+        "プレートフォーム型紙（100%で印刷して切る）", note)
+
+    # 足（ナット受け）の平面図
+    fl, h_front, _, _ = feet()
+    foot_ds = [circle_path((f["x"], f["y"]), FOOT_D, False) for f in fl]
+    import math as _m
+    hex_ds = []
+    for f in fl:
+        r = NUT_POCKET_AF / _m.sqrt(3)
+        pts = [(f["x"] + r * _m.cos(_m.radians(60 * k)), f["y"] + r * _m.sin(_m.radians(60 * k))) for k in range(6)]
+        hex_ds.append(sq.to_svg_path(pts))
+    svg(os.path.join(ROOT, f"case/feet_{VER}.svg"),
+        [("outline", "#000000", [sq.to_svg_path(outer_pts())], "参考：ケース外形"),
+         ("feet", "#0000ff", foot_ds, f"足 φ{FOOT_D}×8（前{h_front}mm〜後{max(f['h'] for f in fl)}mm、傾き{TILT_DEG}°）"),
+         ("nut", "#ff0000", hex_ds, f"ナット溝（二面幅{NUT_POCKET_AF}、下から）")],
+        "足（ナット受け）平面図", note)
 
     params = dict(version=VER, pcb=[PCB_W, PCB_H], outer=[OUTER_W, OUTER_H], outer_origin=[OX, OY],
                   wall=WALL, frame_inner=[OUTER_W - 2 * WALL, OUTER_H - 2 * WALL],
@@ -233,7 +301,10 @@ def main():
                   stiff_min_web=web, gap_stiff_pcb=GAP_STIFF_PCB,
                   pcb_t=PCB_T, under_pcb=UNDER_PCB, bottom_t=BOTTOM_T,
                   total_height=round(TOP_T + STIFF_T + FRAME_H + BOTTOM_T, 2),
-                  switch_cutouts=len(sw_ds))
+                  switch_cutouts=len(sw_ds), frame_inset=FRAME_INSET,
+                  bolt=f"M3x{BOLT_L:g}", foot_skin=FOOT_SKIN, tilt_deg=TILT_DEG, foot_d=FOOT_D,
+                  feet=[{k: (round(v, 2) if isinstance(v, float) else v) for k, v in f.items()} for f in fl],
+                  front_height_no_keycap=round(h_front + TOP_T + STIFF_T + FRAME_H + BOTTOM_T, 2))
     open(os.path.join(ROOT, f"case/params_{VER}.json"), "w", encoding="utf-8").write(
         json.dumps(params, ensure_ascii=False, indent=2) + "\n")
     print(json.dumps(params, ensure_ascii=False))
