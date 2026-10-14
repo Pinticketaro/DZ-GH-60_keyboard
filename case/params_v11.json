@@ -1,0 +1,212 @@
+{
+  "version": "v11",
+  "pcb": [
+    285.0,
+    94.6
+  ],
+  "outer": [
+    315.0,
+    126.0
+  ],
+  "outer_origin": [
+    -15.0,
+    -15.700000000000003
+  ],
+  "wall": 14.0,
+  "frame_inner": [
+    287.0,
+    98.0
+  ],
+  "corner_r": 12.0,
+  "corner_smoothing": 0.6,
+  "corner_extent": 18.05,
+  "inner_r": 4.5,
+  "inner_smoothing": 0.6,
+  "inner_corner_extent": 6.77,
+  "pcb_min_clearance": 0.58,
+  "hole_d": 3.4,
+  "holes_pcb": [
+    [
+      -4.55,
+      -8.7
+    ],
+    [
+      92.7,
+      -8.7
+    ],
+    [
+      192.3,
+      -8.7
+    ],
+    [
+      289.55,
+      -8.7
+    ],
+    [
+      -5.3,
+      100.6
+    ],
+    [
+      92.7,
+      103.3
+    ],
+    [
+      192.3,
+      103.3
+    ],
+    [
+      290.3,
+      100.6
+    ]
+  ],
+  "kerf": 0.0,
+  "split_x": 142.5,
+  "usb_x": 18.2,
+  "usb_w": 13.0,
+  "frame_h": 8.1,
+  "top_t": 1.5,
+  "stiff_t": 2.0,
+  "stiff_offset": 0.8,
+  "stiff_openings": 65,
+  "stiff_min_web": 2.7,
+  "gap_stiff_pcb": 1.5,
+  "pcb_t": 1.6,
+  "under_pcb": 5.0,
+  "bottom_t": 3.0,
+  "total_height": 14.6,
+  "switch_cutouts": 65,
+  "frame_inset": 0.3,
+  "bolt": "M3x18",
+  "foot_skin": 1.0,
+  "tilt_deg": 4.14,
+  "foot_d": 12.0,
+  "rear_foot": "brass_rod",
+  "rod": {
+    "y": -8.700000000000003,
+    "d": 12.0,
+    "x0": -12.76,
+    "x1": 297.76,
+    "length": 310.5,
+    "end_mode": "side",
+    "holes_x": [
+      -4.55,
+      92.7,
+      192.3,
+      289.55
+    ],
+    "holes_from_left_end": [
+      8.21,
+      105.46,
+      205.06,
+      302.31
+    ],
+    "plan_overhang_at_rear_corner": 6.5
+  },
+  "rod_bolt": "M3x20",
+  "rod_thread_engagement": 4.6,
+  "rod_tape": {
+    "tape_w": 10.0,
+    "groove_w": 10.5,
+    "groove_depth": 0.8,
+    "groove_dia": 10.4,
+    "tape_t": 1.0,
+    "squeeze_top": 0.19999999999999996,
+    "gap_rod_to_plate": 0.0
+  },
+  "saddle": null,
+  "rear_hole_d": 4.0,
+  "rod_flat_w": 0.0,
+  "rod_flat_depth": 0.0,
+  "rod_center_z": -6.0,
+  "rod_tap_depth": 6.0,
+  "rod_hole_depth": 7.5,
+  "pairs": [
+    {
+      "side": "left",
+      "x0": -11.3,
+      "x1": 98.7,
+      "front_holes": [
+        [
+          -5.3,
+          100.6,
+          4.2
+        ],
+        [
+          92.7,
+          103.3,
+          4.0
+        ]
+      ],
+      "rear_holes": [
+        [
+          -4.55,
+          -8.700000000000003
+        ],
+        [
+          92.7,
+          -8.700000000000003
+        ]
+      ],
+      "front_len": 110.0,
+      "rear_len": 110.0
+    },
+    {
+      "side": "right",
+      "x0": 186.3,
+      "x1": 296.3,
+      "front_holes": [
+        [
+          192.3,
+          103.3,
+          4.0
+        ],
+        [
+          290.3,
+          100.6,
+          4.2
+        ]
+      ],
+      "rear_holes": [
+        [
+          192.3,
+          -8.700000000000003
+        ],
+        [
+          289.55,
+          -8.700000000000003
+        ]
+      ],
+      "front_len": 110.0,
+      "rear_len": 110.0
+    }
+  ],
+  "foot_style": "pairs",
+  "ribs": null,
+  "feet": [
+    {
+      "x": -5.3,
+      "y": 100.6,
+      "h": 4.2,
+      "pocket_top": 1.0
+    },
+    {
+      "x": 92.7,
+      "y": 103.3,
+      "h": 4.0,
+      "pocket_top": 1.0
+    },
+    {
+      "x": 192.3,
+      "y": 103.3,
+      "h": 4.0,
+      "pocket_top": 1.0
+    },
+    {
+      "x": 290.3,
+      "y": 100.6,
+      "h": 4.2,
+      "pocket_top": 1.0
+    }
+  ],
+  "front_height_no_keycap": 18.6
+}

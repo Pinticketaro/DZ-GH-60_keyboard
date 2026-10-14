@@ -114,9 +114,21 @@ def build_parts():
         rodm = m3.Manifold.cylinder(L, g.ROD_D / 2, g.ROD_D / 2, 64).rotate([0, 90, 0]).translate([r["x0"], -r["y"], zc])
         if g.ROD_FLAT_W > 0:   # 上面の平面：ボトムプレートの下面（Z=0）より上を削る
             rodm = rodm ^ m3.Manifold.cube([1000, 1000, 1000]).translate([-500, -500, -1000])
+        tape_on = g.ROD_TAPE and g.ROD_FLAT_W <= 0
+        parts["tape"] = []
+        def xcyl(x0, length, rad, n=96):
+            return m3.Manifold.cylinder(length, rad, rad, n).rotate([0, 90, 0]).translate([x0, -r["y"], zc])
         for x in r["holes_x"]:
-            hole = m3.Manifold.cylinder(g.ROD_HOLE_DEPTH, g.ROD_TAP_DRILL / 2, g.ROD_TAP_DRILL / 2, 24).translate(
-                [x, -r["y"], -gap - g.ROD_HOLE_DEPTH])
+            if tape_on:
+                ring = xcyl(x - g.GROOVE_W / 2, g.GROOVE_W, g.ROD_D / 2 + 1) - xcyl(x - g.GROOVE_W / 2 - 1, g.GROOVE_W + 2, g.ROD_D / 2 - g.GROOVE_DEPTH)
+                rodm = rodm - ring
+                rb = g.ROD_D / 2 - g.GROOVE_DEPTH
+                tp = xcyl(x - g.TAPE_W / 2, g.TAPE_W, rb + g.TAPE_T) - xcyl(x - g.TAPE_W / 2 - 1, g.TAPE_W + 2, rb)
+                tp = tp ^ m3.Manifold.cube([1000, 1000, 1000]).translate([-500, -500, -1000])   # 上はつぶれてプレート下面まで
+                tp = tp - m3.Manifold.cylinder(30, 1.6, 1.6, 24).translate([x, -r["y"], -15])   # ボルトが貫通
+                parts["tape"].append(tp)
+            hole = m3.Manifold.cylinder(g.ROD_HOLE_DEPTH + 0.01, g.ROD_TAP_DRILL / 2, g.ROD_TAP_DRILL / 2, 24).translate(
+                [x, -r["y"], g.rod_hole_top_z() - g.ROD_HOLE_DEPTH])
             rodm = rodm - hole
         parts["rod"] = rodm
         # 受け台：上は平ら（ボトムプレートの下面に接する）、下は丸棒に沿う凹面。左右2分割
@@ -144,7 +156,7 @@ def build_parts():
                 sad = m3.Manifold.extrude(xs(pr["rear_plan"]), hs).translate([0, 0, -hs]) - groove
                 for hx, hy in pr["rear_holes"]:
                     sad = sad - m3.Manifold.cylinder(30, g.REAR_HOLE_D / 2, g.REAR_HOLE_D / 2, 24).translate([hx, -hy, -15])
-                if g.ROD_FLAT_W > 0:     # 平面ありなら奥の受けは不要
+                if g.ROD_FLAT_W > 0 or g.ROD_TAPE:     # 平面またはテープなら奥の受けは不要
                     pieces += [bar]
                     names += [f"foot_front_{pr['side']}"]
                 else:
@@ -249,6 +261,8 @@ def export(parts, z):
         asm = asm + sd
         # 印刷向き：平らな面（ボトムプレート側）を下に
         to_trimesh(sd.rotate([180, 0, 0])).export(os.path.join(OUT, f"rod_saddle_{'left' if k == 0 else 'right'}_{g.VER}.stl"))
+    for tp in parts.get("tape") or []:
+        asm = asm + tp
     if parts.get("rod") is not None:
         asm = asm + parts["rod"]
         to_trimesh(parts["rod"]).export(os.path.join(OUT, f"brass_rod_reference_{g.VER}.stl"))

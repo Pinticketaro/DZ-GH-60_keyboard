@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v10"
+VER = "v11"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -77,7 +77,15 @@ ROD_BOLT_L = 20.0                   # 後ろ4本のボルト長さ（丸棒の�
 ROD_TAP_DRILL = 2.5                 # M3めねじの下穴
 ROD_HOLE_DEPTH = 7.5                # 下穴の深さ（平面または上端から）。φ12なら下に約4mm残る
 ROD_TAP_DEPTH = 6.0                 # 有効ねじ深さ（ねじ込み量より深く）
-ROD_FLAT_W = 6.0                    # 丸棒の上面をフライスで平らにする幅（0＝平面なし、受け台を使う）
+ROD_FLAT_W = 0.0                    # 丸棒の上面をフライスで平らにする幅（0＝平面なし）。v10は6.0
+# ---- v11：旋盤で各ねじ穴の位置に浅い溝を掘り、ゴムテープを巻く（ボトムプレートと机の両方にテープが当たる）
+ROD_TAPE = True
+TAPE_W = 10.0                       # テープの幅
+GROOVE_W = 10.5                     # 溝の幅（テープ＋0.5）
+GROOVE_DEPTH = 0.8                  # 溝の深さ。テープより少し浅く → 締めるとテープが沈み、丸棒の外周がほぼプレートに接する（溝底φ10.4）
+TAPE_T = 1.0                        # テープの厚さ（仮）。溝より0.2厚い分だけ締めるとつぶれる
+TAPE_SQUEEZE_TOP = 1 - GROOVE_DEPTH / TAPE_T   # 上側は溝の深さまでつぶれる＝丸棒の外周がプレートに接する（金属で止まるので4層もしっかり締まる）
+TAPE_SQUEEZE_BOTTOM = 0.1           # 下側（机側）のつぶれ率（自重のみ）
 ROD_END_MODE = "side"               # "side"＝端を側面にそろえる（横から丸がよく見える）／"inside"＝上から見て角丸の内側に収める
 ROD_END_INSET = 0.5                 # 端を側面より内側に下げる量
 ROD_HOLE_FROM_END_MIN = 6.0         # めねじの中心から丸棒の端までの最小距離（割れ防止）
@@ -145,7 +153,7 @@ def feet():
     y_front = max(y for _, y in hs)
     if REAR_FOOT == "brass_rod":
         r = rod()
-        yc, zc, rr = r["y"], rod_center_z(), ROD_D / 2
+        yc, zc, rr = r["y"], rod_center_z(), rod_contact_r()
         tan = 0.05
         for _ in range(60):          # 机の面が丸棒に接する傾きを求める（反復）
             hf = _h_front(tan)
@@ -182,12 +190,29 @@ def rod_flat_depth():
 
 
 def rod_top_gap():
-    """ボトムプレートの下面から丸棒の上端（平面）までの距離。平面ありなら0、なければ受け台の最も薄い所。"""
+    """ボトムプレートの下面から丸棒の上端（外周、平面ありなら平面）までの距離。"""
     if REAR_FOOT != "brass_rod":
         return 0.0
     if ROD_FLAT_W > 0:
         return 0.0
+    if ROD_TAPE:
+        return round(TAPE_T * (1 - TAPE_SQUEEZE_TOP) - GROOVE_DEPTH, 3)
     return SADDLE_T_MIN if SADDLE else 0.0
+
+
+def rod_contact_r():
+    """丸棒の中心から机に当たる所までの距離（テープなら溝底＋つぶれたテープ）。"""
+    if REAR_FOOT == "brass_rod" and ROD_TAPE and ROD_FLAT_W <= 0:
+        return ROD_D / 2 - GROOVE_DEPTH + TAPE_T * (1 - TAPE_SQUEEZE_BOTTOM)
+    return ROD_D / 2
+
+
+def rod_hole_top_z():
+    """めねじの入口（平面・溝底・外周の上端）のZ。"""
+    zt = rod_center_z() + ROD_D / 2 - rod_flat_depth()
+    if REAR_FOOT == "brass_rod" and ROD_TAPE and ROD_FLAT_W <= 0:
+        zt -= GROOVE_DEPTH
+    return zt
 
 
 def rod_center_z():
@@ -512,8 +537,11 @@ def main():
                   bolt=f"M3x{BOLT_L:g}", foot_skin=FOOT_SKIN, tilt_deg=tilt_deg(), foot_d=FOOT_D,
                   rear_foot=REAR_FOOT, rod=rod_info,
                   rod_bolt=(f"M3x{ROD_BOLT_L:g}" if rod_info else None),
-                  rod_thread_engagement=(round(ROD_BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) - rod_top_gap(), 2) if rod_info else None),
-                  saddle=(saddle() if (rod_info and SADDLE and FOOT_STYLE == "separate" and ROD_FLAT_W <= 0) else None), rear_hole_d=REAR_HOLE_D,
+                  rod_thread_engagement=(round(ROD_BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) + rod_hole_top_z(), 2) if rod_info else None),
+                  rod_tape=(dict(tape_w=TAPE_W, groove_w=GROOVE_W, groove_depth=GROOVE_DEPTH, groove_dia=ROD_D - 2 * GROOVE_DEPTH,
+                                 tape_t=TAPE_T, squeeze_top=TAPE_SQUEEZE_TOP, gap_rod_to_plate=rod_top_gap())
+                            if (rod_info and ROD_TAPE and ROD_FLAT_W <= 0) else None),
+                  saddle=(saddle() if (rod_info and SADDLE and FOOT_STYLE == "separate" and ROD_FLAT_W <= 0 and not ROD_TAPE) else None), rear_hole_d=REAR_HOLE_D,
                   rod_flat_w=ROD_FLAT_W, rod_flat_depth=round(rod_flat_depth(), 3), rod_center_z=round(rod_center_z(), 3),
                   rod_tap_depth=ROD_TAP_DEPTH, rod_hole_depth=ROD_HOLE_DEPTH,
                   pairs=([{k: v for k, v in pr.items() if not k.endswith("plan")} for pr in pairs()]

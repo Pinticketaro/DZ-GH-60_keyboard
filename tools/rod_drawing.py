@@ -91,7 +91,19 @@ def main():
     fd = g.rod_flat_depth()
     H = D - fd                                  # 平面から下端まで
     drill_d, drill_depth, tap_depth = g.ROD_TAP_DRILL, g.ROD_HOLE_DEPTH, g.ROD_TAP_DEPTH
-    engage = g.ROD_BOLT_L - (g.TOP_T + g.STIFF_T + g.FRAME_H + g.BOTTOM_T) - g.rod_top_gap()
+    engage = g.ROD_BOLT_L - (g.TOP_T + g.STIFF_T + g.FRAME_H + g.BOTTOM_T) + g.rod_hole_top_z()
+    tape = g.ROD_TAPE and flat_w <= 0
+    gw, gd = g.GROOVE_W, g.GROOVE_DEPTH
+    Dg = D - 2 * gd                             # 溝底の直径
+
+    def stepped(y_edge, sign):
+        """外形線（上下の縁）を溝の所で内側へ段付きにした折れ線。sign=+1は上側の縁。"""
+        pts = [(X0, y_edge)]
+        for x in xs_:
+            a, b = X0 + x - gw / 2, X0 + x + gw / 2
+            pts += [(a, y_edge), (a, y_edge - sign * gd), (b, y_edge - sign * gd), (b, y_edge)]
+        pts.append((X0 + L, y_edge))
+        return pts
 
     fig, ax = setup()
     # 図枠
@@ -100,7 +112,16 @@ def main():
 
     # ---- 平面図（上から見た図。第三角法なので正面図の上に置く）
     yt = 222
-    ax.add_patch(Rectangle((X0, yt - R), L, D, fill=False, lw=THICK))
+    if tape:
+        line(ax, stepped(yt + R, 1), lw=THICK)
+        line(ax, stepped(yt - R, -1), lw=THICK)
+        line(ax, [(X0, yt - R), (X0, yt + R)], lw=THICK)
+        line(ax, [(X0 + L, yt - R), (X0 + L, yt + R)], lw=THICK)
+        for x in xs_:   # 溝の両肩（稜線）
+            for xx in (X0 + x - gw / 2, X0 + x + gw / 2):
+                line(ax, [(xx, yt - R + gd), (xx, yt + R - gd)], lw=THIN)
+    else:
+        ax.add_patch(Rectangle((X0, yt - R), L, D, fill=False, lw=THICK))
     if flat_w > 0:
         line(ax, [(X0, yt - flat_w / 2), (X0 + L, yt - flat_w / 2)], lw=THICK)
         line(ax, [(X0, yt + flat_w / 2), (X0 + L, yt + flat_w / 2)], lw=THICK)
@@ -122,13 +143,27 @@ def main():
         vdim(ax, yt - flat_w / 2, yt + flat_w / 2, X0 + L + 10, X0 + L, f"{flat_w:g}（平面の幅）")
         vdim(ax, yt - R, yt + R, X0 - 10, X0, f"φ{D:g}", right=False)
     leader(ax, (X0 + xs_[0] + 1.1, yt - 1.1), (X0 + 22, yt - 16),
-           f"4-M3×0.5 ねじ深さ{tap_depth:g}／下穴φ{drill_d} 深さ{drill_depth:g}（{'平面' if flat_w > 0 else '上端'}から）")
+           f"4-M3×0.5 ねじ深さ{tap_depth:g}／下穴φ{drill_d} 深さ{drill_depth:g}（{'平面' if flat_w > 0 else ('溝底' if tape else '上端')}から）")
+    if tape:
+        cx2 = X0 + xs_[1]
+        hdim(ax, cx2 - gw / 2, cx2 + gw / 2, yt - R - 7, yt - R + gd, yt - R + gd, f"{gw:g}±0.1", above=False)
+        vdim(ax, yt - R, yt + R, X0 - 10, X0, f"φ{D:g}", right=False)
     ax.text(X0, yt + R + 6 + 5.5 * 4 + 4, "平面図（上面）　尺度 1:1", fontsize=9)
 
     # ---- 正面図（横から見た図）
     yf = 150                                     # 下端
     top = yf + H
-    ax.add_patch(Rectangle((X0, yf), L, H, fill=False, lw=THICK))
+    if tape:
+        line(ax, stepped(yf + D, 1), lw=THICK)
+        line(ax, stepped(yf, -1), lw=THICK)
+        line(ax, [(X0, yf), (X0, yf + D)], lw=THICK)
+        line(ax, [(X0 + L, yf), (X0 + L, yf + D)], lw=THICK)
+        for x in xs_:
+            for xx in (X0 + x - gw / 2, X0 + x + gw / 2):
+                line(ax, [(xx, yf + gd), (xx, yf + D - gd)], lw=THIN)
+        top = yf + D - gd                       # ねじ穴の入口＝溝底
+    else:
+        ax.add_patch(Rectangle((X0, yf), L, H, fill=False, lw=THICK))
     centerline(ax, (X0 - 6, yf + R), (X0 + L + 6, yf + R))
     for x in xs_:
         cx = X0 + x
@@ -142,7 +177,12 @@ def main():
         line(ax, [(cx + 1.5, top), (cx + 1.5, top - tap_depth)], ls=(0, (1.5, 1)))
         centerline(ax, (cx, top + 3), (cx, yf - 3))
     hdim(ax, X0, X0 + L, yf - 12, yf, yf, f"{L:.1f}±{LEN_TOL}", above=False)
-    vdim(ax, yf, top, X0 + L + 10, X0 + L, f"{H:.2f}±0.05" + ("（平面まで）" if flat_w > 0 else ""))
+    if flat_w > 0:
+        vdim(ax, yf, top, X0 + L + 10, X0 + L, f"{H:.2f}±0.1（平面まで）")
+    if tape:
+        cx3 = X0 + xs_[1]
+        leader(ax, (cx3 + gw / 2 - 1, yf + D - gd), (cx3 + 18, yf + D + 9),
+               f"4-溝 φ{Dg:g}±0.05（深さ{gd:g}）幅{gw:g}±0.1、ねじ穴を中心")
     if flat_w <= 0:
         vdim(ax, yf, yf + D, X0 - 10, X0, f"φ{D:g}", right=False)
     leader(ax, (X0 + L - 0.3, top - 0.3), (X0 + L - 25, top + 10), "C0.5（両端）", ha="right")
@@ -157,14 +197,17 @@ def main():
     # ---- 断面 A-A（尺度 5:1）
     S = 5.0
     cxs, cys = 95, 75
-    if flat_w > 0:
+    if tape:
+        ax.add_patch(Circle((cxs, cys), S * R, fill=False, lw=THIN))            # 溝の外の外周（奥に見える）
+        ax.add_patch(Circle((cxs, cys), S * Dg / 2, fill=False, lw=THICK, hatch="////"))
+    elif flat_w > 0:
         a = math.degrees(math.asin((flat_w / 2) / R))
         arc_pts = [(cxs + S * R * math.sin(math.radians(t)), cys + S * R * math.cos(math.radians(t)))
                    for t in [a + (360 - 2 * a) * k / 200 for k in range(201)]]
         ax.add_patch(MPoly(arc_pts, closed=True, fill=False, lw=THICK, hatch="////", ec="k"))
     else:
         ax.add_patch(Circle((cxs, cys), S * R, fill=False, lw=THICK, hatch="////"))
-    ytop = cys + S * (R - fd)
+    ytop = cys + S * (Dg / 2 if tape else (R - fd))
     ax.add_patch(Rectangle((cxs - S * drill_d / 2, ytop - S * drill_depth), S * drill_d, S * drill_depth, fc="white", ec="white"))
     line(ax, [(cxs - S * drill_d / 2, ytop), (cxs - S * drill_d / 2, ytop - S * drill_depth)], lw=THICK)
     line(ax, [(cxs + S * drill_d / 2, ytop), (cxs + S * drill_d / 2, ytop - S * drill_depth)], lw=THICK)
@@ -177,7 +220,11 @@ def main():
     centerline(ax, (cxs - S * R - 6, cys), (cxs + S * R + 6, cys))
     vdim(ax, ytop - S * tap_depth, ytop, cxs + S * R + 10, cxs + S * 1.5, f"ねじ深さ {tap_depth:g}")
     vdim(ax, ytop - S * drill_depth, ytop, cxs + S * R + 26, cxs + S * drill_d / 2, f"下穴深さ {drill_depth:g}")
-    vdim(ax, cys - S * R, ytop, cxs - S * R - 10, cxs - S * R, f"{H:.2f}", right=False)
+    if tape:
+        hdim(ax, cxs - S * Dg / 2, cxs + S * Dg / 2, cys - S * R - 7, cys, cys, f"φ{Dg:g}（溝底）", above=False)
+        hdim(ax, cxs - S * R, cxs + S * R, cys + S * R + 9, cys, cys, f"φ{D:g}")
+    else:
+        vdim(ax, cys - S * R, ytop, cxs - S * R - 10, cxs - S * R, f"{H:.2f}", right=False)
     if flat_w > 0:
         hdim(ax, cxs - S * flat_w / 2, cxs + S * flat_w / 2, ytop + 9, ytop, ytop, f"{flat_w:g}")
     ax.text(cxs - 30, cys - S * R - 16, "断面 A-A　尺度 5:1", fontsize=9)
@@ -188,14 +235,15 @@ def main():
         f"1. 材質：C3604BD（快削黄銅 引抜棒）φ{D:g}",
         f"2. 全長 {L:.1f}±{LEN_TOL}。両端面は軸に直角に仕上げ、C0.5",
         (f"3. 上面に幅{flat_w:g}の平面を全長にわたり加工（平面から下端まで{H:.2f}、削り深さ約{fd:.2f}）" if flat_w > 0
-         else "3. 平面加工なし"),
-        f"4. 4-M3×0.5 めねじ：下穴φ{drill_d} 深さ{drill_depth:g}、有効ねじ深さ{tap_depth:g}以上",
-        f"5. ねじ穴は{'平面' if flat_w > 0 else '上端'}に直角、4穴とも{'平面の幅の中央' if flat_w > 0 else '同一母線'}の一直線上",
+         else (f"3. ねじ穴を中心に全周の溝×4：幅{gw:g}±0.1、溝底φ{Dg:g}±0.05（深さ{gd:g}）。溝の角は糸面取り（旋盤）" if tape
+               else "3. 平面加工なし")),
+        f"4. 4-M3×0.5 めねじ：下穴φ{drill_d} 深さ{drill_depth:g}（{'溝底' if tape else ('平面' if flat_w > 0 else '上端')}から）、有効ねじ深さ{tap_depth:g}以上",
+        f"5. ねじ穴は{'平面' if flat_w > 0 else '軸'}に直角、4穴とも{'平面の幅の中央' if flat_w > 0 else '同一母線'}の一直線上",
         f"6. 穴位置は左端基準、公差±{POS_TOL}（相手側の穴はφ{g.REAR_HOLE_D:g}）",
         "7. 指示のない寸法公差：JIS B 0405 中級（m）",
-        "8. 全周バリなきこと。表面処理なし（磨き・クリア塗装は後工程で行う）",
+        "8. 全周バリなきこと。表面処理なし（磨き・クリア塗装は後工程で行う）。端面は旋盤仕上げ（刃物目のまま）",
         f"9. 使用ボルト：M3×{g.ROD_BOLT_L:g} ボタンヘッド（ねじ込み約{engage:.1f}）",
-    ]
+    ] + ([f"10. 組立時、溝にゴムテープ（幅{g.TAPE_W:g}・厚さ{g.TAPE_T:g}）を巻く（加工範囲外）。ボルトはテープを貫通"] if tape else [])
     ax.text(205, 118, "\n".join(notes), fontsize=8.2, va="top", linespacing=1.75)
 
     # ---- 表題欄
