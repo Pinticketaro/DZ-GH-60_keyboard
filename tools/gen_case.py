@@ -1,10 +1,11 @@
 """積層ケース（旧デザイン2025-03-05踏襲）の図面を生成する。
 
 構成（上から）
-  プレート  … レーザー加工（1.5mm）。スイッチ穴・スタビ穴は旧swillkb出力をそのまま使う
-  枠        … PLAで3Dプリント（Ender-3 Proに収まるよう左右2分割）
-  底板      … レーザー加工
-  3層をM3ネジ8本で共締め。PCBはスイッチを介してプレートからぶら下がる（サンドイッチ方式）
+  トッププレート … アクリル・レーザー加工。スイッチ穴・スタビ穴は旧swillkb出力をそのまま使う
+  枠             … PLAで3Dプリント（Ender-3 Proに収まるよう左右2分割）
+  ボトムプレート … アクリル・レーザー加工
+  3層をM3ネジ8本で共締め。PCBはネジ止めせず、ボトムプレート側の柔らかい台座で下から押し上げ、
+  トッププレートとスイッチで挟み込んで固定する
 
 座標：原点＝PCB外形の左上、X右・Y下、単位mm（README のルール）。
 SVGは viewBox に負の原点を使い、Inkscapeでは外形の左上がページの左上になる。
@@ -23,7 +24,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v02"
+VER = "v03"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -42,7 +43,13 @@ KERF = 0.0                          # レーザーのカーフ（M1で決める�
 SPLIT_X = PCB_W / 2                 # 枠の分割位置（中央）
 USB_X = 142.5 - 124.3               # USB中心X：GH60標準（swillkb −124.3）。要実測
 USB_W = 13.0                        # USB切り欠き幅（ケーブルの太い部分が通る幅。旧10mm）
-FRAME_H = 10.0                      # 枠の厚み（仮）＝プレート下3.5＋PCB1.6＋PCB下クリアランス約4.9
+# ---- 高さ方向（PCBはネジ止めしない。底板側の柔らかい台座で押し上げ、トッププレートとスイッチで挟んで固定）
+TOP_T = 3.0                         # トッププレート（アクリル）厚さ（仮）。1.5mmを超えるとMXのツメはかからない＝挟み込みで固定
+PLATE_TOP_TO_PCB_TOP = 5.0          # MXスイッチの規格寸法（プレート上面〜PCB上面）
+PCB_T = 1.6                         # 要実測
+UNDER_PCB = 5.0                     # PCB下面〜ボトムプレート上面（台座の高さ＝裏面部品・USB-Cより高く）。要実測
+BOTTOM_T = 3.0                      # ボトムプレート（アクリル）厚さ（仮）
+FRAME_H = round(PLATE_TOP_TO_PCB_TOP - TOP_T + PCB_T + UNDER_PCB, 2)   # 枠の厚さ（自動計算）
 SWILLKB = os.path.join(ROOT, "tools/data/swillkb_switch_layer_2025.svg")
 # -----------------------------------------------------------------------------
 
@@ -186,6 +193,9 @@ def main():
                   pcb_min_clearance=pcb_clear,
                   hole_d=HOLE_D, holes_pcb=[[round(a, 3), round(b, 3)] for a, b in holes()],
                   kerf=KERF, split_x=SPLIT_X, usb_x=round(USB_X, 2), usb_w=USB_W, frame_h=FRAME_H,
+                  top_t=TOP_T, pcb_t=PCB_T, under_pcb=UNDER_PCB, bottom_t=BOTTOM_T,
+                  plate_bottom_to_pcb_top=round(PLATE_TOP_TO_PCB_TOP - TOP_T, 2),
+                  total_height=round(TOP_T + FRAME_H + BOTTOM_T, 2),
                   switch_cutouts=len(sw_ds))
     open(os.path.join(ROOT, f"case/params_{VER}.json"), "w", encoding="utf-8").write(
         json.dumps(params, ensure_ascii=False, indent=2) + "\n")

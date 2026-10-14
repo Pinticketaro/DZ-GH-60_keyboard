@@ -1,13 +1,13 @@
 # DZ-GH-60_keyboard
 
-DZ60 V2（はんだ付け版）PCBを使った60%キーボード。旧デザイン（2025年の積層ケース案）を踏襲し、トッププレート（アクリル・CO2レーザー）／枠（PLA・3Dプリント、Ender-3 Proで2分割）／ボトムプレート（アクリル・CO2レーザー）の3層をM3ネジで留める。外形315×126mm、角はApple風の角丸。
+DZ60 V2（はんだ付け版）PCBを使った60%キーボード。旧デザイン（2025年の積層ケース案）を踏襲し、トッププレート（アクリル・CO2レーザー）／枠（PLA・3Dプリント、Ender-3 Proで2分割）／ボトムプレート（アクリル・CO2レーザー）の3層をM3ネジで留める。PCBはネジ止めせず、柔らかい台座とトッププレートで挟み込む。外形315×126mm、角はApple風の角丸。
 
 ## フォルダ構成
 
 | フォルダ | 中身 |
 |---|---|
 | `layout/` | 配列データ（KLE JSON） |
-| `tools/` | 図面生成スクリプト（`gen_case.py`：プレート・枠・底板、`corner_compare.py`：角丸の比較、`overlay.py`：重ね合わせ確認）。`pip install -r tools/requirements.txt` |
+| `tools/` | 図面生成スクリプト（`gen_case.py`：プレート・枠・底板、`corner_compare.py`：角丸の比較、`overlay.py`：重ね合わせ確認、`section.py`：断面図）。`pip install -r tools/requirements.txt` |
 | `plate/` | トッププレートの図面（SVG / DXF） |
 | `case/` | 枠・ボトムプレートの図面、角丸テスト片、Fusion 360から書き出したSTEP、印刷用STL |
 | `measurements/` | DZ60の実測値 |

@@ -1,0 +1,74 @@
+{
+  "version": "v03",
+  "pcb": [
+    285.0,
+    94.6
+  ],
+  "outer": [
+    315.0,
+    126.0
+  ],
+  "outer_origin": [
+    -15.0,
+    -15.700000000000003
+  ],
+  "wall": 14.0,
+  "frame_inner": [
+    287.0,
+    98.0
+  ],
+  "corner_r": 12.0,
+  "corner_smoothing": 0.6,
+  "corner_extent": 18.05,
+  "inner_r": 4.5,
+  "inner_smoothing": 0.6,
+  "inner_corner_extent": 6.77,
+  "pcb_min_clearance": 0.58,
+  "hole_d": 3.4,
+  "holes_pcb": [
+    [
+      -5.3,
+      -6.0
+    ],
+    [
+      92.7,
+      -8.7
+    ],
+    [
+      177.0,
+      -8.7
+    ],
+    [
+      290.3,
+      -6.0
+    ],
+    [
+      -5.3,
+      100.6
+    ],
+    [
+      92.7,
+      103.3
+    ],
+    [
+      177.0,
+      103.3
+    ],
+    [
+      290.3,
+      100.6
+    ]
+  ],
+  "kerf": 0.0,
+  "split_x": 142.5,
+  "usb_x": 18.2,
+  "usb_w": 13.0,
+  "frame_h": 8.6,
+  "top_t": 3.0,
+  "pcb_t": 1.6,
+  "under_pcb": 5.0,
+  "bottom_t": 3.0,
+  "plate_bottom_to_pcb_top": 2.0,
+  "total_height": 14.6,
+  "switch_cutouts": 65
+}
