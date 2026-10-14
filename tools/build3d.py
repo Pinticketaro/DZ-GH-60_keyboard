@@ -102,6 +102,7 @@ def build_parts():
         bolt = m3.Manifold.cylinder(hmax + 2, g.HOLE_D / 2, g.HOLE_D / 2, 24).translate([f["x"], -f["y"], -hmax - 1])
         feet.append(foot - pocket - bolt)
     parts["feet"] = feet
+    big = 1000
 
     # 真鍮丸棒（奥側の足）：X方向の円柱、上面がボトムプレートの下面に接する。M3めねじの下穴つき
     parts["rod"] = None
@@ -117,7 +118,29 @@ def build_parts():
         parts["rod"] = rodm
         # 受け台：上は平ら（ボトムプレートの下面に接する）、下は丸棒に沿う凹面。左右2分割
         parts["saddle"] = []
-        if g.SADDLE:
+        if g.FOOT_STYLE == "ribs":
+            # 前後一体の足×4：厚さRIB_Tの板＋手前の台（机の面まで）−丸棒の溝−ナット溝−ボルト穴
+            ang = math.degrees(math.atan(tan))
+            cutter = m3.Manifold.cube([big, big, big]).translate([-big / 2, -big / 2, -big])
+            cutter = cutter.rotate([-ang, 0, 0]).translate([0, -y_front, -h_front])
+            Rg = g.ROD_D / 2 + g.SADDLE_CLEAR
+            groove = m3.Manifold.cylinder(L + 40, Rg, Rg, 96).rotate([0, 90, 0]).translate([r["x0"] - 20, -r["y"], -gap - g.ROD_D / 2])
+            ribs = []
+            for rb in g.ribs():
+                fx, fy = rb["front"]
+                hx, hy = rb["rear"]
+                plate = m3.Manifold.extrude(xs(rb["plan"]), g.RIB_T).translate([0, 0, -g.RIB_T])
+                hmax = rb["h_front"] + g.RIB_W / 2 * tan + 1
+                pad = m3.Manifold.cylinder(hmax, g.RIB_W / 2, g.RIB_W / 2, SEG).translate([fx, -fy, -hmax]) - cutter
+                body = (plate + pad) - groove
+                rr = g.NUT_POCKET_AF / math.sqrt(3)
+                hexagon = [(fx + rr * math.cos(math.radians(60 * k)), fy + rr * math.sin(math.radians(60 * k))) for k in range(6)]
+                body = body - m3.Manifold.extrude(xs(hexagon), hmax + 1).translate([0, 0, -(hmax + 1) - g.FOOT_SKIN])
+                body = body - m3.Manifold.cylinder(hmax + 2, g.HOLE_D / 2, g.HOLE_D / 2, 24).translate([fx, -fy, -hmax - 1])
+                body = body - m3.Manifold.cylinder(30, g.REAR_HOLE_D / 2, g.REAR_HOLE_D / 2, 24).translate([hx, -hy, -15])
+                ribs.append(body)
+            parts["feet"] = ribs
+        elif g.SADDLE:
             s = g.saddle()
             body = m3.Manifold.cube([s["x1"] - s["x0"], s["w"], s["height"]]).translate([s["x0"], -s["y"] - s["w"] / 2, -s["height"]])
             groove = m3.Manifold.cylinder(L + 40, s["R"], s["R"], 96).rotate([0, 90, 0]).translate([r["x0"] - 20, -r["y"], -gap - g.ROD_D / 2])
@@ -170,11 +193,14 @@ def export(parts, z):
     to_trimesh(parts["frame_right"]).export(os.path.join(OUT, f"frame_right_{g.VER}.stl"))
     # 足は印刷向きに：天地を反転（ボトムプレートに当たる平らな面を下に）して並べる
     feet = []
+    step = 20 if g.FOOT_STYLE != "ribs" else 22
     for i, f in enumerate(parts["feet"]):
         bb = f.bounding_box()
         c = ((bb[0] + bb[3]) / 2, (bb[1] + bb[4]) / 2)
-        f2 = f.translate([-c[0], -c[1], 0]).rotate([180, 0, 0]).translate([(i % 4) * 20, (i // 4) * 20, 0])
+        f2 = f.translate([-c[0], -c[1], 0]).rotate([180, 0, 0]).translate([(i % 4) * step, (i // 4) * step, 0])
         feet.append(f2)
+        if g.FOOT_STYLE == "ribs":
+            to_trimesh(f.translate([-c[0], -c[1], 0]).rotate([180, 0, 0])).export(os.path.join(OUT, f"foot_{i + 1}_{g.VER}.stl"))
     # 足は印刷向きに：前の足だけ（丸棒のとき）
     allfeet = feet[0]
     for f in feet[1:]:

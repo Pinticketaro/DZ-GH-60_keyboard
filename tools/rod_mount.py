@@ -41,7 +41,8 @@ def main():
             pts.append((ry + R * math.sin(a), zrod + R * math.cos(a)))
         pts.append((ry - s["w"] / 2, -s["height"]))
         ax.add_patch(MPoly(pts, closed=True, fc="#e8d9bf", ec="#a7834f"))
-        ax.annotate(f"受け台（PLA・3Dプリント）\n上は平ら・下は丸棒に沿う凹面、最も薄い所{g.SADDLE_T_MIN:g}mm",
+        lab = "前後一体の足（PLA）の奥側＝丸棒受け" if g.FOOT_STYLE == "ribs" else "受け台（PLA・3Dプリント）"
+        ax.annotate(f"{lab}\n上は平ら・下は丸棒に沿う凹面、最も薄い所{g.SADDLE_T_MIN:g}mm",
                     xy=(ry + s["w"] / 2 - 0.5, -1.2), xytext=(ry + 30, -4.0), fontsize=10, color="#7a5a2a",
                     arrowprops=dict(arrowstyle="->", color="#7a5a2a"))
     ax.add_patch(Circle((ry, zrod), D / 2, fc="#d4a85a", ec="#8a6a2a"))

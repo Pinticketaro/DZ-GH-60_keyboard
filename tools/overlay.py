@@ -43,8 +43,13 @@ def main():
         r = g.rod()
         ax.add_patch(plt.Rectangle((r["x0"], r["y"] - g.ROD_D / 2), r["x1"] - r["x0"], g.ROD_D, fc="#d4a85a55", ec="#b8860b",
                                    ls="--", lw=1.0, label=f"真鍮丸棒 φ{g.ROD_D:g}（下面）"))
-    for f in g.feet()[0]:
-        ax.add_patch(Circle((f["x"], f["y"]), g.FOOT_D / 2, fc="none", ec="#555", ls=":", lw=0.9))
+    if getattr(g, "FOOT_STYLE", "") == "ribs" and getattr(g, "REAR_FOOT", "") == "brass_rod":
+        for k, rb in enumerate(g.ribs()):
+            ax.add_patch(MPoly(rb["plan"], closed=True, fc="#9a9a9a22", ec="#555", ls=":", lw=0.9,
+                               label=("前後一体の足×4（下面）" if k == 0 else None)))
+    else:
+        for f in g.feet()[0]:
+            ax.add_patch(Circle((f["x"], f["y"]), g.FOOT_D / 2, fc="none", ec="#555", ls=":", lw=0.9))
     ax.plot([], [], color="#c33", lw=0.8, label="スイッチ・スタビ穴（旧swillkb）")
     ax.plot([], [], "o", color="#333", label="M3ネジ穴×8")
     ax.set_xlim(g.OX - 6, g.OX + g.OUTER_W + 6)

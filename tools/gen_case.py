@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v07"
+VER = "v08"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -85,6 +85,10 @@ SADDLE = True
 SADDLE_T_MIN = 1.0                  # 受け台のいちばん薄い所（丸棒の真上）。ボルトのねじ込み量に直結
 SADDLE_W = 9.0                      # 受け台の幅（前後方向）
 SADDLE_CLEAR = 0.1                  # 受け台の凹面と丸棒のすき間（半径方向）
+# ---- 足の形：手前のナット受けと奥の丸棒受けを、同じ列どうし前後につないだ1本の足×4（2026-10-15）
+FOOT_STYLE = "ribs"                 # "ribs"＝前後一体の足×4／"separate"＝丸台＋受け台（v07まで）
+RIB_W = 12.0                        # 足の幅（左右方向）
+RIB_T = 3.0                         # 足の厚さ（手前の台と奥の丸棒受け以外の部分）。丸棒受けの高さ以上にする
 SWILLKB = os.path.join(ROOT, "tools/data/swillkb_switch_layer_2025.svg")
 # -----------------------------------------------------------------------------
 
@@ -185,6 +189,25 @@ def saddle():
     x1 = OX + OUTER_W - (x0 - OX)
     return dict(y=r["y"], w=SADDLE_W, t_min=SADDLE_T_MIN, height=round(SADDLE_T_MIN + sag, 2), x0=round(x0, 2), x1=round(x1, 2),
                 split_x=SPLIT_X, R=R)
+
+
+def ribs():
+    """前後一体の足：列ごとに、手前の足（ナット受け）と奥の穴（丸棒）を結ぶ。平面形（外形の0.5mm内側で切る）と寸法。"""
+    from shapely.geometry import Point, box as _b
+    from shapely.ops import unary_union
+    fl = feet()[0]
+    r = rod()
+    o = Polygon(outer_pts()).buffer(-0.5)
+    y_rear = r["y"] - SADDLE_W / 2
+    out = []
+    for f in sorted(fl, key=lambda q: q["x"]):
+        hx = min(r["holes_x"], key=lambda x: abs(x - f["x"]))
+        xc = (f["x"] + hx) / 2
+        plan = unary_union([_b(xc - RIB_W / 2, y_rear, xc + RIB_W / 2, f["y"]), Point(f["x"], f["y"]).buffer(RIB_W / 2, quad_segs=24)])
+        plan = plan.intersection(o)
+        out.append(dict(x=round(xc, 2), front=(f["x"], f["y"]), rear=(hx, r["y"]), h_front=f["h"],
+                        length=round(plan.bounds[3] - plan.bounds[1], 1), plan=list(plan.exterior.coords)[:-1]))
+    return out
 
 
 def hole_d(c):
@@ -418,6 +441,9 @@ def main():
                f'下穴φ{ROD_TAP_DRILL}・深さ{ROD_HOLE_DEPTH}→M3タップ。数字は左端からの距離(mm)</text>'
                f'<text x="5" y="{th - 5:.1f}" font-size="3.2" font-family="Hiragino Sans, Noto Sans CJK JP, sans-serif">丸棒の上側（ボトムプレートに当たる線）に4穴を一直線に。V字の台に載せ、ボール盤で垂直に開ける</text></svg>\n')
         open(os.path.join(ROOT, f"case/rod_drill_template_{VER}.svg"), "w", encoding="utf-8").write(tpl)
+    if REAR_FOOT == "brass_rod" and FOOT_STYLE == "ribs":
+        feet_layers.append(("ribs", "#008800", [sq.to_svg_path(rb["plan"]) for rb in ribs()],
+                            f"前後一体の足×4（幅{RIB_W}、厚さ{RIB_T}、手前はナット受け・奥は丸棒受け）"))
     svg(os.path.join(ROOT, f"case/feet_{VER}.svg"), feet_layers, "足（ナット受け）と真鍮丸棒 平面図", note)
 
     params = dict(version=VER, pcb=[PCB_W, PCB_H], outer=[OUTER_W, OUTER_H], outer_origin=[OX, OY],
@@ -438,7 +464,9 @@ def main():
                   rear_foot=REAR_FOOT, rod=rod_info,
                   rod_bolt=(f"M3x{ROD_BOLT_L:g}" if rod_info else None),
                   rod_thread_engagement=(round(ROD_BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) - rod_top_gap(), 2) if rod_info else None),
-                  saddle=(saddle() if (rod_info and SADDLE) else None), rear_hole_d=REAR_HOLE_D,
+                  saddle=(saddle() if (rod_info and SADDLE and FOOT_STYLE != "ribs") else None), rear_hole_d=REAR_HOLE_D,
+                  foot_style=FOOT_STYLE, ribs=([{k: v for k, v in rb.items() if k != "plan"} for rb in ribs()]
+                                               if (rod_info and FOOT_STYLE == "ribs") else None),
                   feet=[{k: (round(v, 2) if isinstance(v, float) else v) for k, v in f.items()} for f in fl],
                   front_height_no_keycap=round(h_front + TOP_T + STIFF_T + FRAME_H + BOTTOM_T, 2))
     open(os.path.join(ROOT, f"case/params_{VER}.json"), "w", encoding="utf-8").write(
