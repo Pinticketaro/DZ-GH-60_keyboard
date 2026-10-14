@@ -1,11 +1,12 @@
 """積層ケース（旧デザイン2025-03-05踏襲）の図面を生成する。
 
 構成（上から）
-  トッププレート … アクリル・レーザー加工。スイッチ穴・スタビ穴は旧swillkb出力をそのまま使う
+  トッププレート … アクリル1.5mm・レーザー加工。スイッチ穴・スタビ穴は旧swillkb出力をそのまま使う
+  補強板         … アクリル・レーザー加工。スイッチの周りを大きめに抜いた板。トッププレートの下に重ねる
   枠             … PLAで3Dプリント（Ender-3 Proに収まるよう左右2分割）
   ボトムプレート … アクリル・レーザー加工
-  3層をM3ネジ8本で共締め。PCBはネジ止めせず、ボトムプレート側の柔らかい台座で下から押し上げ、
-  トッププレートとスイッチで挟み込んで固定する
+  4層をM3ネジ8本で共締め（接着しない）。PCBはネジ止めせず、スイッチの爪（上方向）と肩（下方向）で
+  トッププレートに固定し、ボトムプレート側の柔らかい台座で下から軽く支える
 
 座標：原点＝PCB外形の左上、X右・Y下、単位mm（README のルール）。
 SVGは viewBox に負の原点を使い、Inkscapeでは外形の左上がページの左上になる。
@@ -24,7 +25,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v03"
+VER = "v04"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -43,13 +44,22 @@ KERF = 0.0                          # レーザーのカーフ（M1で決める�
 SPLIT_X = PCB_W / 2                 # 枠の分割位置（中央）
 USB_X = 142.5 - 124.3               # USB中心X：GH60標準（swillkb −124.3）。要実測
 USB_W = 13.0                        # USB切り欠き幅（ケーブルの太い部分が通る幅。旧10mm）
-# ---- 高さ方向（PCBはネジ止めしない。底板側の柔らかい台座で押し上げ、トッププレートとスイッチで挟んで固定）
-TOP_T = 3.0                         # トッププレート（アクリル）厚さ（仮）。1.5mmを超えるとMXのツメはかからない＝挟み込みで固定
+# ---- 高さ方向（PCBはネジ止めしない）
+# スイッチの爪をトッププレート（1.5mm）の裏に引っかけて上方向を止め、肩（フランジ）で下方向を止める。
+# PCBはボトムプレート側の柔らかい台座で軽く押し上げる（支え＋ダンパー）。
+# 剛性はトッププレートの下に重ねる補強板で確保し、補強板は枠との間に挟んでM3ネジで共締めする（接着しない）。
+TOP_T = 1.5                         # トッププレート（アクリル）。MXの爪がかかる厚さ（1.6mm以下）
+STIFF_T = 2.0                       # 補強板（アクリル）厚さ（仮）。3.0にするとPCBとのすき間は0.5mm
+STIFF_OFFSET = 0.8                  # 補強板の抜き：トッププレートの穴より片側この分だけ大きく（スイッチ穴→15.6角。爪が開く空間）
+STIFF_MIN_WEB = 2.0                 # 補強板の穴と穴の間の最小幅（これより細くなる所はつなげて抜く）
 PLATE_TOP_TO_PCB_TOP = 5.0          # MXスイッチの規格寸法（プレート上面〜PCB上面）
 PCB_T = 1.6                         # 要実測
 UNDER_PCB = 5.0                     # PCB下面〜ボトムプレート上面（台座の高さ＝裏面部品・USB-Cより高く）。要実測
 BOTTOM_T = 3.0                      # ボトムプレート（アクリル）厚さ（仮）
-FRAME_H = round(PLATE_TOP_TO_PCB_TOP - TOP_T + PCB_T + UNDER_PCB, 2)   # 枠の厚さ（自動計算）
+GAP_STIFF_PCB = round(PLATE_TOP_TO_PCB_TOP - TOP_T - STIFF_T, 2)      # 補強板の下面〜PCB上面
+FRAME_H = round(GAP_STIFF_PCB + PCB_T + UNDER_PCB, 2)                   # 枠の厚さ（自動計算）
+assert TOP_T <= 1.6, "トッププレートが1.6mmを超えるとMXの爪がかからない"
+assert GAP_STIFF_PCB >= 0.3, "補強板が厚すぎてPCBに当たる"
 SWILLKB = os.path.join(ROOT, "tools/data/swillkb_switch_layer_2025.svg")
 # -----------------------------------------------------------------------------
 
@@ -101,6 +111,23 @@ def switch_cutouts():
     # キー領域の左上はPCB座標で(-0.375, -0.325)（基準寸法.md）
     dx, dy = -5.001 - 0.375, -5.001 - 0.325
     return [[(x + dx, y + dy) for x, y in p] for p in polys]
+
+
+def stiffener_openings():
+    """補強板の抜き：トッププレートの穴を片側STIFF_OFFSET広げ、近すぎる穴どうしはつなげる。"""
+    from shapely.ops import unary_union
+    grown = [Polygon(p).buffer(STIFF_OFFSET, join_style=2) for p in switch_cutouts()]
+    # 穴の間がSTIFF_MIN_WEB未満になる所は、細い棒が残らないようにつなげる
+    merged = unary_union([g.buffer(STIFF_MIN_WEB / 2, join_style=2) for g in grown]).buffer(-STIFF_MIN_WEB / 2, join_style=2)
+    polys = list(merged.geoms) if hasattr(merged, "geoms") else [merged]
+    return [list(q.exterior.coords)[:-1] for q in polys]
+
+
+def stiffener_min_web(openings):
+    ps = [Polygon(p) for p in openings]
+    m = min((ps[i].distance(ps[j]) for i in range(len(ps)) for j in range(i + 1, len(ps))
+             if ps[i].distance(ps[j]) < 10), default=None)
+    return round(m, 2) if m is not None else None
 
 
 def kerf_in(pts):     # 穴：内側へ k/2
@@ -168,6 +195,15 @@ def main():
         "プレート", note)
 
     # 底板
+    st_open = stiffener_openings()
+    st_ds = [sq.to_svg_path(kerf_in(p)) for p in st_open]
+    svg(os.path.join(ROOT, f"plate/stiffener_{VER}_t{STIFF_T:g}_kerf{KERF:g}.svg"),
+        [("openings", "#ff0000", st_ds, f"スイッチ・スタビの逃げ（穴より片側{STIFF_OFFSET}mm大きい）"),
+         ("holes", "#ff0000", hole_ds, "M3穴"),
+         ("outline", "#ff0000", [outer_d], "外形（最後に切る）")],
+        f"補強板（アクリル{STIFF_T}mm・トッププレートの下に重ねて共締め）", note)
+    web = stiffener_min_web(st_open)
+
     svg(os.path.join(ROOT, f"case/bottom_{VER}_kerf{KERF:g}.svg"),
         [("holes", "#ff0000", hole_ds, "M3穴"),
          ("outline", "#ff0000", [outer_d], "外形（最後に切る）")],
@@ -193,9 +229,10 @@ def main():
                   pcb_min_clearance=pcb_clear,
                   hole_d=HOLE_D, holes_pcb=[[round(a, 3), round(b, 3)] for a, b in holes()],
                   kerf=KERF, split_x=SPLIT_X, usb_x=round(USB_X, 2), usb_w=USB_W, frame_h=FRAME_H,
-                  top_t=TOP_T, pcb_t=PCB_T, under_pcb=UNDER_PCB, bottom_t=BOTTOM_T,
-                  plate_bottom_to_pcb_top=round(PLATE_TOP_TO_PCB_TOP - TOP_T, 2),
-                  total_height=round(TOP_T + FRAME_H + BOTTOM_T, 2),
+                  top_t=TOP_T, stiff_t=STIFF_T, stiff_offset=STIFF_OFFSET, stiff_openings=len(st_open),
+                  stiff_min_web=web, gap_stiff_pcb=GAP_STIFF_PCB,
+                  pcb_t=PCB_T, under_pcb=UNDER_PCB, bottom_t=BOTTOM_T,
+                  total_height=round(TOP_T + STIFF_T + FRAME_H + BOTTOM_T, 2),
                   switch_cutouts=len(sw_ds))
     open(os.path.join(ROOT, f"case/params_{VER}.json"), "w", encoding="utf-8").write(
         json.dumps(params, ensure_ascii=False, indent=2) + "\n")

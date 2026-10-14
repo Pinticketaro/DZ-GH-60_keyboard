@@ -26,6 +26,10 @@ def main():
     ax.add_patch(MPoly(g.frame_inner_pts(), closed=True, fc="#ffffff", ec="#8a6", lw=1.2, ls="--", label="枠の内側（3Dプリント）"))
     ax.add_patch(FancyBboxPatch((0, 0), g.PCB_W, g.PCB_H, boxstyle="round,pad=0,rounding_size=2",
                                 fc="#2f6d4f22", ec="#2f6d4f", lw=1.2, label="PCB 285×94.6"))
+    if hasattr(g, "stiffener_openings"):
+        for p in g.stiffener_openings():
+            ax.add_patch(MPoly(p, closed=True, fc="#cfe6f2", ec="#4a8aa8", lw=0.6, ls="--"))
+        ax.plot([], [], color="#4a8aa8", lw=0.8, ls="--", label=f"補強板の抜き（{g.STIFF_T:g}mm）")
     for p in g.switch_cutouts():
         ax.add_patch(MPoly(p, closed=True, fc="none", ec="#c33", lw=0.6))
     for c in g.holes():
