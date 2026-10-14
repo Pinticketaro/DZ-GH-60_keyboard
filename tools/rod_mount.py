@@ -30,8 +30,8 @@ def main():
         ax.add_patch(Rectangle((0, zs), w, t, fc=c, ec="#4a8aa8" if "アクリル" in name else "#a7834f"))
         ax.text(41, zs + t / 2, f"{name} {t:g}", va="center", fontsize=10)
         zs += t
-    zrod = -gap - D / 2
-    if g.SADDLE:
+    zrod = g.rod_center_z()
+    if g.SADDLE and g.ROD_FLAT_W <= 0:
         s = g.saddle()
         R = s["R"]
         pts = [(ry - s["w"] / 2, 0), (ry + s["w"] / 2, 0), (ry + s["w"] / 2, -s["height"])]
@@ -45,7 +45,15 @@ def main():
         ax.annotate(f"{lab}\n上は平ら・下は丸棒に沿う凹面、最も薄い所{g.SADDLE_T_MIN:g}mm",
                     xy=(ry + s["w"] / 2 - 0.5, -1.2), xytext=(ry + 30, -4.0), fontsize=10, color="#7a5a2a",
                     arrowprops=dict(arrowstyle="->", color="#7a5a2a"))
-    ax.add_patch(Circle((ry, zrod), D / 2, fc="#d4a85a", ec="#8a6a2a"))
+    if g.ROD_FLAT_W > 0:
+        a = math.degrees(math.asin((g.ROD_FLAT_W / 2) / (D / 2)))
+        pts = [(ry + D / 2 * math.sin(math.radians(t)), zrod + D / 2 * math.cos(math.radians(t)))
+               for t in [a + (360 - 2 * a) * k / 120 for k in range(121)]]
+        ax.add_patch(MPoly(pts, closed=True, fc="#d4a85a", ec="#8a6a2a"))
+        ax.annotate(f"上面を幅{g.ROD_FLAT_W:g}mmの平面に削り、ボトムプレートに面で当てる", xy=(ry + 2, -0.2), xytext=(ry + 30, -4.0),
+                    fontsize=10, color="#7a5a2a", arrowprops=dict(arrowstyle="->", color="#7a5a2a"))
+    else:
+        ax.add_patch(Circle((ry, zrod), D / 2, fc="#d4a85a", ec="#8a6a2a"))
     ax.add_patch(Rectangle((ry - 1.5, zs - g.ROD_BOLT_L), 3.0, g.ROD_BOLT_L, fc="#9a9da2", ec="#555"))
     ax.add_patch(Rectangle((ry - 2.85, zs), 5.7, 1.65, fc="#9a9da2", ec="#555"))
     ax.add_patch(Rectangle((ry - g.ROD_TAP_DRILL / 2, -gap - g.ROD_HOLE_DEPTH), g.ROD_TAP_DRILL, g.ROD_HOLE_DEPTH,

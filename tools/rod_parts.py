@@ -139,8 +139,9 @@ def main():
         bb = mf.bounding_box()
         print(name, "holes from rod end", d, "jig size", [round(bb[i + 3] - bb[i], 1) for i in range(3)],
               "watertight", b3.to_trimesh(mf).is_watertight)
-    drawing(os.path.join(g.ROOT, f"case/rod_drawing_{g.VER}.pdf"), os.path.join(g.ROOT, f"docs/img/rod_drawing_{g.VER}.png"))
-    print("drawing ok")
+    # 加工図は rod_drawing.py（図枠・表題欄つき）で作る
+    import rod_drawing
+    rod_drawing.main()
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v09"
+VER = "v10"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -75,7 +75,9 @@ REAR_FOOT = "brass_rod"             # "brass_rod" または "pucks"（丸台8個
 ROD_D = 12.0                        # 丸棒の直径。傾きはこれで決まる（φ10≈3°、φ12≈4°、φ14≈5°）
 ROD_BOLT_L = 20.0                   # 後ろ4本のボルト長さ（丸棒のめねじにねじ込む）
 ROD_TAP_DRILL = 2.5                 # M3めねじの下穴
-ROD_HOLE_DEPTH = 7.0                # 下穴の深さ（ねじ込み量＋1.5mm以上。φ12なら下に5mm残る）
+ROD_HOLE_DEPTH = 7.5                # 下穴の深さ（平面または上端から）。φ12なら下に約4mm残る
+ROD_TAP_DEPTH = 6.0                 # 有効ねじ深さ（ねじ込み量より深く）
+ROD_FLAT_W = 6.0                    # 丸棒の上面をフライスで平らにする幅（0＝平面なし、受け台を使う）
 ROD_END_MODE = "side"               # "side"＝端を側面にそろえる（横から丸がよく見える）／"inside"＝上から見て角丸の内側に収める
 ROD_END_INSET = 0.5                 # 端を側面より内側に下げる量
 ROD_HOLE_FROM_END_MIN = 6.0         # めねじの中心から丸棒の端までの最小距離（割れ防止）
@@ -143,7 +145,7 @@ def feet():
     y_front = max(y for _, y in hs)
     if REAR_FOOT == "brass_rod":
         r = rod()
-        yc, zc, rr = r["y"], -(rod_top_gap() + ROD_D / 2), ROD_D / 2
+        yc, zc, rr = r["y"], rod_center_z(), ROD_D / 2
         tan = 0.05
         for _ in range(60):          # 机の面が丸棒に接する傾きを求める（反復）
             hf = _h_front(tan)
@@ -170,9 +172,27 @@ def feet():
     return out, h_front, tan, y_front
 
 
+def rod_flat_depth():
+    """平面の深さ（丸棒の頂点から平面まで）。"""
+    import math
+    if ROD_FLAT_W <= 0:
+        return 0.0
+    R = ROD_D / 2
+    return R - math.sqrt(R * R - (ROD_FLAT_W / 2) ** 2)
+
+
 def rod_top_gap():
-    """ボトムプレートの下面から丸棒の上端までの距離（受け台の最も薄い所）。"""
-    return SADDLE_T_MIN if (REAR_FOOT == "brass_rod" and SADDLE) else 0.0
+    """ボトムプレートの下面から丸棒の上端（平面）までの距離。平面ありなら0、なければ受け台の最も薄い所。"""
+    if REAR_FOOT != "brass_rod":
+        return 0.0
+    if ROD_FLAT_W > 0:
+        return 0.0
+    return SADDLE_T_MIN if SADDLE else 0.0
+
+
+def rod_center_z():
+    """丸棒の中心のZ（ボトムプレートの下面＝0、下向きが負）。"""
+    return -(rod_top_gap() + ROD_D / 2 - rod_flat_depth())
 
 
 def saddle():
@@ -493,7 +513,9 @@ def main():
                   rear_foot=REAR_FOOT, rod=rod_info,
                   rod_bolt=(f"M3x{ROD_BOLT_L:g}" if rod_info else None),
                   rod_thread_engagement=(round(ROD_BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) - rod_top_gap(), 2) if rod_info else None),
-                  saddle=(saddle() if (rod_info and SADDLE and FOOT_STYLE == "separate") else None), rear_hole_d=REAR_HOLE_D,
+                  saddle=(saddle() if (rod_info and SADDLE and FOOT_STYLE == "separate" and ROD_FLAT_W <= 0) else None), rear_hole_d=REAR_HOLE_D,
+                  rod_flat_w=ROD_FLAT_W, rod_flat_depth=round(rod_flat_depth(), 3), rod_center_z=round(rod_center_z(), 3),
+                  rod_tap_depth=ROD_TAP_DEPTH, rod_hole_depth=ROD_HOLE_DEPTH,
                   pairs=([{k: v for k, v in pr.items() if not k.endswith("plan")} for pr in pairs()]
                          if (rod_info and FOOT_STYLE == "pairs") else None),
                   foot_style=FOOT_STYLE, ribs=([{k: v for k, v in rb.items() if k != "plan"} for rb in ribs()]

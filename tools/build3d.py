@@ -110,7 +110,10 @@ def build_parts():
         r = g.rod()
         L = r["x1"] - r["x0"]
         gap = g.rod_top_gap()
-        rodm = m3.Manifold.cylinder(L, g.ROD_D / 2, g.ROD_D / 2, 64).rotate([0, 90, 0]).translate([r["x0"], -r["y"], -gap - g.ROD_D / 2])
+        zc = g.rod_center_z()
+        rodm = m3.Manifold.cylinder(L, g.ROD_D / 2, g.ROD_D / 2, 64).rotate([0, 90, 0]).translate([r["x0"], -r["y"], zc])
+        if g.ROD_FLAT_W > 0:   # 上面の平面：ボトムプレートの下面（Z=0）より上を削る
+            rodm = rodm ^ m3.Manifold.cube([1000, 1000, 1000]).translate([-500, -500, -1000])
         for x in r["holes_x"]:
             hole = m3.Manifold.cylinder(g.ROD_HOLE_DEPTH, g.ROD_TAP_DRILL / 2, g.ROD_TAP_DRILL / 2, 24).translate(
                 [x, -r["y"], -gap - g.ROD_HOLE_DEPTH])
@@ -141,8 +144,12 @@ def build_parts():
                 sad = m3.Manifold.extrude(xs(pr["rear_plan"]), hs).translate([0, 0, -hs]) - groove
                 for hx, hy in pr["rear_holes"]:
                     sad = sad - m3.Manifold.cylinder(30, g.REAR_HOLE_D / 2, g.REAR_HOLE_D / 2, 24).translate([hx, -hy, -15])
-                pieces += [bar, sad]
-                names += [f"foot_front_{pr['side']}", f"rod_saddle_{pr['side']}"]
+                if g.ROD_FLAT_W > 0:     # 平面ありなら奥の受けは不要
+                    pieces += [bar]
+                    names += [f"foot_front_{pr['side']}"]
+                else:
+                    pieces += [bar, sad]
+                    names += [f"foot_front_{pr['side']}", f"rod_saddle_{pr['side']}"]
             parts["feet"] = pieces
             parts["feet_names"] = names
         elif g.FOOT_STYLE == "ribs":

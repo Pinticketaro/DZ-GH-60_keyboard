@@ -7,7 +7,7 @@ DZ60 V2（はんだ付け版）PCBを使った60%キーボード。旧デザイ�
 | フォルダ | 中身 |
 |---|---|
 | `layout/` | 配列データ（KLE JSON） |
-| `tools/` | 図面生成スクリプト（`gen_case.py`：プレート・枠・底板、`corner_compare.py`：角丸の比較、`overlay.py`：重ね合わせ確認、`section.py`：断面図、`build3d.py`：3Dモデル（STL）、`render_preview.py`／`variants.py`：外観プレビュー、`analysis.py`：たわみ・重さ・傾きの見積もり、`rod_parts.py`：丸棒の穴あけ治具と加工図、`rod_mount.py`：丸棒の固定の断面図）。`pip install -r tools/requirements.txt` |
+| `tools/` | 図面生成スクリプト（`gen_case.py`：プレート・枠・底板、`corner_compare.py`：角丸の比較、`overlay.py`：重ね合わせ確認、`section.py`：断面図、`build3d.py`：3Dモデル（STL）、`render_preview.py`／`variants.py`：外観プレビュー、`analysis.py`：たわみ・重さ・傾きの見積もり、`rod_parts.py`：丸棒の穴あけ治具、`rod_drawing.py`：丸棒の加工図（A3）、`rod_mount.py`：丸棒の固定の断面図）。`pip install -r tools/requirements.txt` |
 | `plate/` | トッププレートの図面（SVG / DXF） |
 | `case/` | 枠・ボトムプレート・足・フォーム型紙・真鍮丸棒の穴あけ型紙・加工図、角丸テスト片、印刷用STL（`stl/`）、Fusion 360から書き出したSTEP |
 | `measurements/` | DZ60の実測値 |
