@@ -127,8 +127,9 @@ def build_parts():
                 tp = tp ^ m3.Manifold.cube([1000, 1000, 1000]).translate([-500, -500, -1000])   # 上はつぶれてプレート下面まで
                 tp = tp - m3.Manifold.cylinder(30, 1.6, 1.6, 24).translate([x, -r["y"], -15])   # ボルトが貫通
                 parts["tape"].append(tp)
-            hole = m3.Manifold.cylinder(g.ROD_HOLE_DEPTH + 0.01, g.ROD_TAP_DRILL / 2, g.ROD_TAP_DRILL / 2, 24).translate(
-                [x, -r["y"], g.rod_hole_top_z() - g.ROD_HOLE_DEPTH])
+            hl = g.rod_hole_len() + (1.0 if g.ROD_HOLE_THROUGH else 0.01)
+            hole = m3.Manifold.cylinder(hl + 0.01, g.ROD_TAP_DRILL / 2, g.ROD_TAP_DRILL / 2, 24).translate(
+                [x, -r["y"], g.rod_hole_top_z() - hl])
             rodm = rodm - hole
         parts["rod"] = rodm
         # 受け台：上は平ら（ボトムプレートの下面に接する）、下は丸棒に沿う凹面。左右2分割
@@ -149,6 +150,10 @@ def build_parts():
                     hexagon = [(fx + rr * math.cos(math.radians(60 * k)), fy + rr * math.sin(math.radians(60 * k))) for k in range(6)]
                     bar = bar - m3.Manifold.extrude(xs(hexagon), hmax + 1).translate([0, 0, -(hmax + 1) - g.FOOT_SKIN])
                     bar = bar - m3.Manifold.cylinder(hmax + 2, g.HOLE_D / 2, g.HOLE_D / 2, 24).translate([fx, -fy, -hmax - 1])
+                if g.ROD_FLAT_W > 0 or g.ROD_TAPE:     # 平面またはテープなら奥の受けは不要
+                    pieces += [bar]
+                    names += [f"foot_front_{pr['side']}"]
+                    continue
                 # 奥の丸棒受け
                 Rr = g.ROD_D / 2 + g.SADDLE_CLEAR
                 sag = Rr - math.sqrt(Rr * Rr - (g.SADDLE_W / 2) ** 2)
@@ -156,12 +161,8 @@ def build_parts():
                 sad = m3.Manifold.extrude(xs(pr["rear_plan"]), hs).translate([0, 0, -hs]) - groove
                 for hx, hy in pr["rear_holes"]:
                     sad = sad - m3.Manifold.cylinder(30, g.REAR_HOLE_D / 2, g.REAR_HOLE_D / 2, 24).translate([hx, -hy, -15])
-                if g.ROD_FLAT_W > 0 or g.ROD_TAPE:     # 平面またはテープなら奥の受けは不要
-                    pieces += [bar]
-                    names += [f"foot_front_{pr['side']}"]
-                else:
-                    pieces += [bar, sad]
-                    names += [f"foot_front_{pr['side']}", f"rod_saddle_{pr['side']}"]
+                pieces += [bar, sad]
+                names += [f"foot_front_{pr['side']}", f"rod_saddle_{pr['side']}"]
             parts["feet"] = pieces
             parts["feet_names"] = names
         elif g.FOOT_STYLE == "ribs":

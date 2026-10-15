@@ -25,13 +25,13 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v11"
+VER = "v12"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
 OUTER_W, OUTER_H = 315.0, 126.0     # 旧デザインの外形
 WALL = 14.0                         # 枠の幅 → 枠の内側 287×98（旧デザイン）
-CORNER_R = 12.0                     # 角丸（仮）※比較図を見て決める
+CORNER_R = 8.0                      # 角丸（v12で一旦R8。v11まではR12）
 CORNER_SMOOTH = 0.6                 # 0=普通の円弧、0.6前後=Apple風（仮）
 INNER_R = 4.5                       # 枠の内側の角丸。PCBの角とのすき間0.5mm以上を保てる最大がR4.5（Apple風）
 INNER_SMOOTH = 0.6
@@ -72,11 +72,13 @@ TILT_DEG = 5.0                      # キーボードの傾き（仮）。0〜7�
 FOOT_SKIN = round(BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) - NUT_T, 2)  # ナットの上に残るPLAの厚さ
 # ---- 奥側の足：真鍮の丸棒（ボトムプレートの奥側の下面に沿わせて左右方向に置く。横から見ると端の丸が見える）
 REAR_FOOT = "brass_rod"             # "brass_rod" または "pucks"（丸台8個）
-ROD_D = 12.0                        # 丸棒の直径。傾きはこれで決まる（φ10≈3°、φ12≈4°、φ14≈5°）
+ROD_D = 8.0                         # 丸棒の直径。傾きはこれで決まる（v12で一旦φ8。v11まではφ12）
 ROD_BOLT_L = 20.0                   # 後ろ4本のボルト長さ（丸棒のめねじにねじ込む）
 ROD_TAP_DRILL = 2.5                 # M3めねじの下穴
 ROD_HOLE_DEPTH = 7.5                # 下穴の深さ（平面または上端から）。φ12なら下に約4mm残る
 ROD_TAP_DEPTH = 6.0                 # 有効ねじ深さ（ねじ込み量より深く）
+ROD_HOLE_THROUGH = True             # めねじを貫通にする（φ8では溝底から下まで6.4mmしかないので貫通。ドリル・タップとも通しで加工が楽）
+ROD_TIP_MARGIN_MIN = 1.0            # 貫通のとき、ボルトの先端から穴の下の出口までの最小距離（先端が下のテープを押さない）
 ROD_FLAT_W = 0.0                    # 丸棒の上面をフライスで平らにする幅（0＝平面なし）。v10は6.0
 # ---- v11：旋盤で各ねじ穴の位置に浅い溝を掘り、ゴムテープを巻く（ボトムプレートと机の両方にテープが当たる）
 ROD_TAPE = True
@@ -89,6 +91,7 @@ TAPE_SQUEEZE_BOTTOM = 0.1           # 下側（机側）のつぶれ率（自重
 ROD_END_MODE = "side"               # "side"＝端を側面にそろえる（横から丸がよく見える）／"inside"＝上から見て角丸の内側に収める
 ROD_END_INSET = 0.5                 # 端を側面より内側に下げる量
 ROD_HOLE_FROM_END_MIN = 6.0         # めねじの中心から丸棒の端までの最小距離（割れ防止）
+ROD_GROOVE_END_LAND = 3.0           # 溝の縁から丸棒の端までの最小の幅（端の面取りと溝の間に残す肉）
 HOLE_EDGE_MIN = 4.5                 # 後ろの角の穴を一直線に並べるときの、穴の縁から外周・枠の内側までの最小距離
 REAR_HOLE_D = 4.0                   # 後ろの4穴（全層）。丸棒の穴位置が±0.3mmずれても組めるよう大きめ。ボタンヘッドφ5.7で隠れる
 # ---- 丸棒の受け台（3Dプリント）：ボトムプレートと丸棒の間に挟み、丸棒が線で当たってアクリルが割れるのを防ぐ
@@ -124,6 +127,23 @@ def _h_front(tan):
     return math.ceil((FOOT_SKIN + NUT_T + 0.3 + nut_r * tan) * 10) / 10
 
 
+def rod_end_min():
+    """めねじの中心から丸棒の端までの最小距離（テープの溝があれば、溝の縁から端までROD_GROOVE_END_LANDを残す）。"""
+    m = ROD_HOLE_FROM_END_MIN
+    if ROD_TAPE and ROD_FLAT_W <= 0:
+        m = max(m, GROOVE_W / 2 + ROD_GROOVE_END_LAND)
+    return m
+
+
+def _rod_end_x(y_rear, sx=1):
+    """丸棒の端のX（左端 sx=1／右端 sx=-1）。"""
+    from shapely.geometry import LineString
+    o = Polygon(outer_pts())
+    y_check = y_rear if ROD_END_MODE == "side" else y_rear - ROD_D / 2
+    x0 = max(LineString([(OX - 5, y_check), (OX + OUTER_W + 5, y_check)]).intersection(o).bounds[0], OX) + ROD_END_INSET
+    return x0 if sx == 1 else OX + OUTER_W - (x0 - OX)
+
+
 def rod():
     """真鍮丸棒：中心線のY、直径、両端のX、めねじの位置（丸棒の左端からの距離も）。"""
     hs = holes()
@@ -141,7 +161,7 @@ def rod():
     info = dict(y=y_rear, d=ROD_D, x0=round(x0, 2), x1=round(x1, 2), length=round(x1 - x0, 1), end_mode=ROD_END_MODE,
                 holes_x=rear, holes_from_left_end=[round(x - x0, 2) for x in rear],
                 plan_overhang_at_rear_corner=round(max(0.0, xr - x0), 1))
-    if min(info["holes_from_left_end"][0], x1 - rear[-1]) < ROD_HOLE_FROM_END_MIN:
+    if min(info["holes_from_left_end"][0], x1 - rear[-1]) < rod_end_min() - 0.05:
         raise SystemExit(f"丸棒の端のめねじが端に近すぎる（{info['holes_from_left_end'][0]}mm）。ROD_END_MODEか穴位置を見直す")
     return info
 
@@ -213,6 +233,30 @@ def rod_hole_top_z():
     if REAR_FOOT == "brass_rod" and ROD_TAPE and ROD_FLAT_W <= 0:
         zt -= GROOVE_DEPTH
     return zt
+
+
+def rod_hole_len():
+    """下穴の長さ。貫通なら入口（溝底・平面・上端）から丸棒の下側（溝底）まで。"""
+    if ROD_HOLE_THROUGH:
+        bottom = rod_center_z() - ROD_D / 2 + (GROOVE_DEPTH if (ROD_TAPE and ROD_FLAT_W <= 0) else 0.0)
+        return round(rod_hole_top_z() - bottom, 3)
+    return ROD_HOLE_DEPTH
+
+
+def rod_tap_len():
+    return rod_hole_len() if ROD_HOLE_THROUGH else ROD_TAP_DEPTH
+
+
+def rod_engagement():
+    return round(ROD_BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) + rod_hole_top_z(), 2)
+
+
+def rod_hole_text(entry=True):
+    """図面用のめねじの指示。"""
+    if ROD_HOLE_THROUGH:
+        return f"下穴φ{ROD_TAP_DRILL} 貫通 → M3×0.5 タップ貫通"
+    where = "溝底" if (ROD_TAPE and ROD_FLAT_W <= 0) else ("平面" if ROD_FLAT_W > 0 else "上端")
+    return f"下穴φ{ROD_TAP_DRILL} 深さ{ROD_HOLE_DEPTH:g}（{where}から）→ M3×0.5 タップ 有効深さ{ROD_TAP_DEPTH:g}以上"
 
 
 def rod_center_z():
@@ -309,6 +353,8 @@ def holes():
             x_edge = OX if sx == 1 else OX + OUTER_W
             for i in range(0, 600):
                 q = Point(x_edge + sx * i * 0.05, OY + y)
+                if ROD_TAPE and ROD_FLAT_W <= 0 and abs(q.x - _rod_end_x(OY + y, sx)) < rod_end_min():
+                    continue
                 if ring.contains(q) and min(outer.exterior.distance(q), inner.exterior.distance(q)) - HOLE_D / 2 >= HOLE_EDGE_MIN:
                     c = (round(q.x, 2), round(q.y, 2))
                     break
@@ -412,7 +458,23 @@ def svg(path, layers, title, extra_note=""):
     open(path, "w", encoding="utf-8").write("\n".join(out))
 
 
+def check_rod_hole():
+    """めねじ：ねじ込み量と、貫通のときはボルトの先端が下の出口に届かないこと。"""
+    if REAR_FOOT != "brass_rod":
+        return
+    e = rod_engagement()
+    if e < 3.0:
+        raise SystemExit(f"丸棒へのねじ込みが{e}mmしかない。ROD_BOLT_Lを長くする")
+    if ROD_HOLE_THROUGH:
+        m = rod_hole_len() - e
+        if m < ROD_TIP_MARGIN_MIN:
+            raise SystemExit(f"ボルトの先端が丸棒の下の出口から{m:.2f}mm（最小{ROD_TIP_MARGIN_MIN}）。ROD_BOLT_Lを短くする")
+    elif e > ROD_TAP_DEPTH - 0.5:
+        raise SystemExit(f"ねじ込み{e}mmが有効ねじ深さ{ROD_TAP_DEPTH}に近すぎる")
+
+
 def main():
+    check_rod_hole()
     pcb_clear = check_pcb_clearance()
     outer_d = sq.to_svg_path(kerf_out(outer_pts()))
     hole_ds = [circle_path(c, hole_d(c)) for c in holes()]
@@ -507,7 +569,7 @@ def main():
                f'<rect x="5" y="8" width="{L:.2f}" height="{rd * 3.1416 / 2:.2f}" fill="none" stroke="#000" stroke-width="0.2"/>'
                + "".join(marks) +
                f'<text x="5" y="{th - 10:.1f}" font-size="3.2" font-family="Hiragino Sans, Noto Sans CJK JP, sans-serif">真鍮丸棒 φ{rd:g}×{L:g}mm の穴あけ型紙（100%で印刷）。左端をそろえ、赤丸の中心にポンチ。'
-               f'下穴φ{ROD_TAP_DRILL}・深さ{ROD_HOLE_DEPTH}→M3タップ。数字は左端からの距離(mm)</text>'
+               f'{rod_hole_text()}。数字は左端からの距離(mm)</text>'
                f'<text x="5" y="{th - 5:.1f}" font-size="3.2" font-family="Hiragino Sans, Noto Sans CJK JP, sans-serif">丸棒の上側（ボトムプレートに当たる線）に4穴を一直線に。V字の台に載せ、ボール盤で垂直に開ける</text></svg>\n')
         open(os.path.join(ROOT, f"case/rod_drill_template_{VER}.svg"), "w", encoding="utf-8").write(tpl)
     if REAR_FOOT == "brass_rod" and FOOT_STYLE == "pairs":
@@ -537,13 +599,13 @@ def main():
                   bolt=f"M3x{BOLT_L:g}", foot_skin=FOOT_SKIN, tilt_deg=tilt_deg(), foot_d=FOOT_D,
                   rear_foot=REAR_FOOT, rod=rod_info,
                   rod_bolt=(f"M3x{ROD_BOLT_L:g}" if rod_info else None),
-                  rod_thread_engagement=(round(ROD_BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) + rod_hole_top_z(), 2) if rod_info else None),
+                  rod_thread_engagement=(rod_engagement() if rod_info else None), rod_hole_through=ROD_HOLE_THROUGH, rod_hole_len=(rod_hole_len() if rod_info else None),
                   rod_tape=(dict(tape_w=TAPE_W, groove_w=GROOVE_W, groove_depth=GROOVE_DEPTH, groove_dia=ROD_D - 2 * GROOVE_DEPTH,
                                  tape_t=TAPE_T, squeeze_top=TAPE_SQUEEZE_TOP, gap_rod_to_plate=rod_top_gap())
                             if (rod_info and ROD_TAPE and ROD_FLAT_W <= 0) else None),
                   saddle=(saddle() if (rod_info and SADDLE and FOOT_STYLE == "separate" and ROD_FLAT_W <= 0 and not ROD_TAPE) else None), rear_hole_d=REAR_HOLE_D,
                   rod_flat_w=ROD_FLAT_W, rod_flat_depth=round(rod_flat_depth(), 3), rod_center_z=round(rod_center_z(), 3),
-                  rod_tap_depth=ROD_TAP_DEPTH, rod_hole_depth=ROD_HOLE_DEPTH,
+                  rod_tap_depth=(rod_tap_len() if rod_info else ROD_TAP_DEPTH), rod_hole_depth=(rod_hole_len() if rod_info else ROD_HOLE_DEPTH),
                   pairs=([{k: v for k, v in pr.items() if not k.endswith("plan")} for pr in pairs()]
                          if (rod_info and FOOT_STYLE == "pairs") else None),
                   foot_style=FOOT_STYLE, ribs=([{k: v for k, v in rb.items() if k != "plan"} for rb in ribs()]

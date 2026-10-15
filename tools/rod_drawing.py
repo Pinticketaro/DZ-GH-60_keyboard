@@ -90,7 +90,8 @@ def main():
     flat_w = g.ROD_FLAT_W
     fd = g.rod_flat_depth()
     H = D - fd                                  # 平面から下端まで
-    drill_d, drill_depth, tap_depth = g.ROD_TAP_DRILL, g.ROD_HOLE_DEPTH, g.ROD_TAP_DEPTH
+    drill_d, drill_depth, tap_depth = g.ROD_TAP_DRILL, g.rod_hole_len(), g.rod_tap_len()
+    thru = g.ROD_HOLE_THROUGH
     engage = g.ROD_BOLT_L - (g.TOP_T + g.STIFF_T + g.FRAME_H + g.BOTTOM_T) + g.rod_hole_top_z()
     tape = g.ROD_TAPE and flat_w <= 0
     gw, gd = g.GROOVE_W, g.GROOVE_DEPTH
@@ -143,7 +144,7 @@ def main():
         vdim(ax, yt - flat_w / 2, yt + flat_w / 2, X0 + L + 10, X0 + L, f"{flat_w:g}（平面の幅）")
         vdim(ax, yt - R, yt + R, X0 - 10, X0, f"φ{D:g}", right=False)
     leader(ax, (X0 + xs_[0] + 1.1, yt - 1.1), (X0 + 22, yt - 16),
-           f"4-M3×0.5 ねじ深さ{tap_depth:g}／下穴φ{drill_d} 深さ{drill_depth:g}（{'平面' if flat_w > 0 else ('溝底' if tape else '上端')}から）")
+           (f"4-M3×0.5 貫通（下穴φ{drill_d} 貫通）" if thru else f"4-M3×0.5 ねじ深さ{tap_depth:g}／下穴φ{drill_d} 深さ{drill_depth:g}（{'平面' if flat_w > 0 else ('溝底' if tape else '上端')}から）"))
     if tape:
         cx2 = X0 + xs_[1]
         hdim(ax, cx2 - gw / 2, cx2 + gw / 2, yt - R - 7, yt - R + gd, yt - R + gd, f"{gw:g}±0.1", above=False)
@@ -171,8 +172,9 @@ def main():
         line(ax, [(cx - drill_d / 2, top), (cx - drill_d / 2, top - drill_depth)], ls=(0, (3, 1.5)))
         line(ax, [(cx + drill_d / 2, top), (cx + drill_d / 2, top - drill_depth)], ls=(0, (3, 1.5)))
         tip = drill_d / 2 / math.tan(math.radians(59))
-        line(ax, [(cx - drill_d / 2, top - drill_depth), (cx, top - drill_depth - tip), (cx + drill_d / 2, top - drill_depth)],
-             ls=(0, (3, 1.5)))
+        if not thru:
+            line(ax, [(cx - drill_d / 2, top - drill_depth), (cx, top - drill_depth - tip), (cx + drill_d / 2, top - drill_depth)],
+                 ls=(0, (3, 1.5)))
         line(ax, [(cx - 1.5, top), (cx - 1.5, top - tap_depth)], ls=(0, (1.5, 1)))
         line(ax, [(cx + 1.5, top), (cx + 1.5, top - tap_depth)], ls=(0, (1.5, 1)))
         centerline(ax, (cx, top + 3), (cx, yf - 3))
@@ -212,14 +214,18 @@ def main():
     line(ax, [(cxs - S * drill_d / 2, ytop), (cxs - S * drill_d / 2, ytop - S * drill_depth)], lw=THICK)
     line(ax, [(cxs + S * drill_d / 2, ytop), (cxs + S * drill_d / 2, ytop - S * drill_depth)], lw=THICK)
     tip = drill_d / 2 / math.tan(math.radians(59))
-    ax.add_patch(MPoly([(cxs - S * drill_d / 2, ytop - S * drill_depth), (cxs, ytop - S * (drill_depth + tip)),
-                        (cxs + S * drill_d / 2, ytop - S * drill_depth)], closed=True, fc="white", ec="k", lw=THICK))
+    if not thru:
+        ax.add_patch(MPoly([(cxs - S * drill_d / 2, ytop - S * drill_depth), (cxs, ytop - S * (drill_depth + tip)),
+                            (cxs + S * drill_d / 2, ytop - S * drill_depth)], closed=True, fc="white", ec="k", lw=THICK))
     line(ax, [(cxs - S * 1.5, ytop), (cxs - S * 1.5, ytop - S * tap_depth)], lw=THIN)
     line(ax, [(cxs + S * 1.5, ytop), (cxs + S * 1.5, ytop - S * tap_depth)], lw=THIN)
     centerline(ax, (cxs, ytop + 6), (cxs, cys - S * R - 6))
     centerline(ax, (cxs - S * R - 6, cys), (cxs + S * R + 6, cys))
-    vdim(ax, ytop - S * tap_depth, ytop, cxs + S * R + 10, cxs + S * 1.5, f"ねじ深さ {tap_depth:g}")
-    vdim(ax, ytop - S * drill_depth, ytop, cxs + S * R + 26, cxs + S * drill_d / 2, f"下穴深さ {drill_depth:g}")
+    if thru:
+        ax.text(cxs + S * R + 8, cys, f"M3×0.5 貫通\n（下穴φ{drill_d} 貫通）", fontsize=8.5, va="center")
+    else:
+        vdim(ax, ytop - S * tap_depth, ytop, cxs + S * R + 10, cxs + S * 1.5, f"ねじ深さ {tap_depth:g}")
+        vdim(ax, ytop - S * drill_depth, ytop, cxs + S * R + 26, cxs + S * drill_d / 2, f"下穴深さ {drill_depth:g}")
     if tape:
         hdim(ax, cxs - S * Dg / 2, cxs + S * Dg / 2, cys - S * R - 7, cys, cys, f"φ{Dg:g}（溝底）", above=False)
         hdim(ax, cxs - S * R, cxs + S * R, cys + S * R + 9, cys, cys, f"φ{D:g}")
@@ -237,12 +243,13 @@ def main():
         (f"3. 上面に幅{flat_w:g}の平面を全長にわたり加工（平面から下端まで{H:.2f}、削り深さ約{fd:.2f}）" if flat_w > 0
          else (f"3. ねじ穴を中心に全周の溝×4：幅{gw:g}±0.1、溝底φ{Dg:g}±0.05（深さ{gd:g}）。溝の角は糸面取り（旋盤）" if tape
                else "3. 平面加工なし")),
-        f"4. 4-M3×0.5 めねじ：下穴φ{drill_d} 深さ{drill_depth:g}（{'溝底' if tape else ('平面' if flat_w > 0 else '上端')}から）、有効ねじ深さ{tap_depth:g}以上",
+(f"4. 4-M3×0.5 めねじ：下穴φ{drill_d} 貫通、タップ貫通（溝底から反対側の溝底まで{drill_depth:g}）" if thru else
+         f"4. 4-M3×0.5 めねじ：下穴φ{drill_d} 深さ{drill_depth:g}（{'溝底' if tape else ('平面' if flat_w > 0 else '上端')}から）、有効ねじ深さ{tap_depth:g}以上"),
         f"5. ねじ穴は{'平面' if flat_w > 0 else '軸'}に直角、4穴とも{'平面の幅の中央' if flat_w > 0 else '同一母線'}の一直線上",
         f"6. 穴位置は左端基準、公差±{POS_TOL}（相手側の穴はφ{g.REAR_HOLE_D:g}）",
         "7. 指示のない寸法公差：JIS B 0405 中級（m）",
         "8. 全周バリなきこと。表面処理なし（磨き・クリア塗装は後工程で行う）。端面は旋盤仕上げ（刃物目のまま）",
-        f"9. 使用ボルト：M3×{g.ROD_BOLT_L:g} ボタンヘッド（ねじ込み約{engage:.1f}）",
+        f"9. 使用ボルト：M3×{g.ROD_BOLT_L:g} ボタンヘッド（ねじ込み約{engage:.1f}" + (f"、先端は下の出口から{drill_depth - engage:.1f}手前）" if thru else "）"),
     ] + ([f"10. 組立時、溝にゴムテープ（幅{g.TAPE_W:g}・厚さ{g.TAPE_T:g}）を巻く（加工範囲外）。ボルトはテープを貫通"] if tape else [])
     ax.text(205, 118, "\n".join(notes), fontsize=8.2, va="top", linespacing=1.75)
 

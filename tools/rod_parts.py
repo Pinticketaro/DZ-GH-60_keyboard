@@ -84,7 +84,7 @@ def drawing(path_pdf, path_png):
     ax.add_patch(Rectangle((0, 0), L, D, fc="#f3e4c4", ec="#000", lw=1.2))
     ax.plot([-6, L + 6], [D / 2, D / 2], color="#888", lw=0.6, ls="-.")
     for x in xs:
-        ax.add_patch(Rectangle((x - g.ROD_TAP_DRILL / 2, D - g.ROD_HOLE_DEPTH), g.ROD_TAP_DRILL, g.ROD_HOLE_DEPTH,
+        ax.add_patch(Rectangle((x - g.ROD_TAP_DRILL / 2, D - g.rod_hole_len()), g.ROD_TAP_DRILL, g.rod_hole_len(),
                                fc="white", ec="#000", lw=0.8, ls="--"))
         ax.plot([x, x], [D + 2, D + 4 + 5 * xs.index(x)], color="#c00", lw=0.8)
         ax.annotate("", xy=(0, D + 4 + 5 * xs.index(x)), xytext=(x, D + 4 + 5 * xs.index(x)),
@@ -102,20 +102,20 @@ def drawing(path_pdf, path_png):
     # 断面図
     ax2 = fig.add_axes([0.04, 0.08, 0.22, 0.3])
     ax2.add_patch(Circle((0, 0), D / 2, fc="#f3e4c4", ec="#000", lw=1.2))
-    ax2.add_patch(Rectangle((-g.ROD_TAP_DRILL / 2, D / 2 - g.ROD_HOLE_DEPTH), g.ROD_TAP_DRILL, g.ROD_HOLE_DEPTH,
+    ax2.add_patch(Rectangle((-g.ROD_TAP_DRILL / 2, D / 2 - g.rod_hole_len()), g.ROD_TAP_DRILL, g.rod_hole_len(),
                             fc="white", ec="#000", lw=0.8, ls="--"))
-    ax2.annotate("", xy=(4.5, D / 2), xytext=(4.5, D / 2 - g.ROD_HOLE_DEPTH), arrowprops=dict(arrowstyle="<->", lw=0.8))
-    ax2.text(5, D / 2 - g.ROD_HOLE_DEPTH / 2, f"深さ{g.ROD_HOLE_DEPTH:g}", va="center", fontsize=11)
+    ax2.annotate("", xy=(4.5, D / 2), xytext=(4.5, D / 2 - g.rod_hole_len()), arrowprops=dict(arrowstyle="<->", lw=0.8))
+    ax2.text(5, D / 2 - g.rod_hole_len() / 2, ("貫通" if g.ROD_HOLE_THROUGH else f"深さ{g.rod_hole_len():g}"), va="center", fontsize=11)
     ax2.set_xlim(-10, 14)
     ax2.set_ylim(-9, 10)
     ax2.set_aspect("equal")
     ax2.axis("off")
     ax2.set_title("断面（穴は中心に向かって垂直）", fontsize=12)
-    engage = g.ROD_BOLT_L - (g.TOP_T + g.STIFF_T + g.FRAME_H + g.BOTTOM_T) - g.rod_top_gap()
+    engage = g.rod_engagement()
     notes = [
         "材料：快削黄銅 C3604　丸棒 φ" + f"{D:g}",
         f"長さ：{L:.1f} ±0.3　両端面：直角に仕上げ、C0.5面取り",
-        f"横穴：4か所。下穴φ{g.ROD_TAP_DRILL} 深さ{g.ROD_HOLE_DEPTH:g} → M3×0.5 タップ（有効ねじ深さ5以上）",
+        f"横穴：4か所。{g.rod_hole_text()}",
         "4穴は同じ母線（一直線）上、丸棒の中心軸に向かって垂直",
         f"穴位置の許容：±0.3（相手側の穴をφ{g.REAR_HOLE_D:g}にしてある）",
         f"使用ボルト：M3×{g.ROD_BOLT_L:g} ボタンヘッド（ねじ込み約{engage:.1f}mm）",

@@ -73,12 +73,12 @@ def main():
     ax.add_patch(Rectangle((ry - 1.5, zs - g.ROD_BOLT_L), 3.0, g.ROD_BOLT_L, fc="#9a9da2", ec="#555"))
     ax.add_patch(Rectangle((ry - 2.85, zs), 5.7, 1.65, fc="#9a9da2", ec="#555"))
     ht = g.rod_hole_top_z()
-    ax.add_patch(Rectangle((ry - g.ROD_TAP_DRILL / 2, ht - g.ROD_HOLE_DEPTH), g.ROD_TAP_DRILL, g.ROD_HOLE_DEPTH,
+    ax.add_patch(Rectangle((ry - g.ROD_TAP_DRILL / 2, ht - g.rod_hole_len()), g.ROD_TAP_DRILL, g.rod_hole_len(),
                            fc="none", ec="#c33", ls="--"))
     engage = g.ROD_BOLT_L - zs + ht
     ax.annotate(f"M3×{g.ROD_BOLT_L:g} ボタンヘッド（上から全層を通す。穴はφ{g.REAR_HOLE_D:g}）", xy=(ry, zs + 1.6),
                 xytext=(ry + 8, zs + 6), fontsize=10, arrowprops=dict(arrowstyle="->"))
-    ax.annotate(f"丸棒のめねじにねじ込む（{engage:.1f}mm）\n下穴φ{g.ROD_TAP_DRILL}・深さ{g.ROD_HOLE_DEPTH:g}（{'溝底' if g.ROD_TAPE and g.ROD_FLAT_W <= 0 else '上端'}から）・M3タップ",
+    ax.annotate(f"丸棒のめねじにねじ込む（{engage:.1f}mm）\n{g.rod_hole_text()}",
                 xy=(ry + 1.3, -gap - 4), xytext=(ry + 30, -12.5), fontsize=10, color="#c33",
                 arrowprops=dict(arrowstyle="->", color="#c33"))
     ax.annotate(f"真鍮丸棒 φ{D:g}（4本のボルトで引き寄せて固定）", xy=(ry + 4, zrod - D / 2 + 2), xytext=(ry + 30, -21),
