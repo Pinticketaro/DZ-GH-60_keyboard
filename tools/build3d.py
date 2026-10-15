@@ -1,7 +1,7 @@
 """3Dモデル（STL）と外観プレビューを作る。
 
 出力
-  case/stl/frame_left_<ver>.stl, frame_right_<ver>.stl … 枠（PLA）左右。継ぎ目はほぞ＋M3×20キャップボルト（前後の壁に1組ずつ、v15）
+  case/stl/frame_left_<ver>.stl, frame_right_<ver>.stl … 枠（PLA）左右。継ぎ目はほぞ＋縦向きのM3×6ボタンヘッド（前後の壁に1組ずつ、v15）
   case/stl/feet_<ver>.stl                            … 足（ナット受け）8個を並べたもの
   case/stl/assembly_<ver>.stl                        … 組み立て状態（確認用）
   docs/img/preview_<ver>.png                         … 外観プレビュー（斜め・横）
@@ -75,26 +75,27 @@ def build_parts():
     usb = m3.Manifold.cube([g.USB_W, g.WALL + 2, g.FRAME_H + 2]).translate(
         [g.USB_X - g.USB_W / 2, -(g.OY + g.WALL + 1), z["bot1"] - 1])
     frame = frame - usb
-    # 分割。継ぎ目は v15 からほぞ＋横向きのM3ボルト（前後の壁に1組ずつ）、v14まではφ1.9の位置決め穴
+    # 分割。継ぎ目は v15 からほぞ（左半分の下側の舌）＋縦向きのM3ボルト（前後の壁に1組ずつ）、v14まではφ1.9の位置決め穴
     big = 1000
     left = frame ^ m3.Manifold.cube([big, big, big]).translate([g.SPLIT_X - big, -big / 2, -big / 2])
     right = frame ^ m3.Manifold.cube([big, big, big]).translate([g.SPLIT_X, -big / 2, -big / 2])
     sx, zb = g.SPLIT_X, z["bot1"]
-    if g.JOINT == "tenon_bolt":
-        zc = zb + g.FRAME_H / 2
+    if g.JOINT == "tongue_vbolt":
         top = zb + g.FRAME_H
         def bx(x0, x1, yc, w, z0, z1):     # X・Z範囲と、Yの中心・幅（PCB座標のY）で箱
             return m3.Manifold.cube([x1 - x0, w, z1 - z0]).translate([x0, -yc - w / 2, z0])
+        rr = g.NUT_POCKET_AF / math.sqrt(3)
+        hexa = m3.CrossSection([[(rr * math.cos(math.radians(60 * k)), rr * math.sin(math.radians(60 * k))) for k in range(6)]])
         for yc in g.joint_wall_y():
-            c = g.TENON_CLEAR
-            tenon = bx(sx - g.TENON_L, sx + 0.5, yc, g.TENON_W, zb, zb + g.TENON_H)
-            mortise = bx(sx - g.TENON_L - c, sx + 0.01, yc, g.TENON_W + 2 * c, zb - 1, zb + g.TENON_H + c)
-            hole = m3.Manifold.cylinder(g.JB_HEAD_SEAT + g.JB_NUT_X + g.JB_NUT_SLOT_T + 6, g.HOLE_D / 2, g.HOLE_D / 2, 32).rotate(
-                [0, 90, 0]).translate([sx - g.JB_HEAD_SEAT - 0.01, -yc, zc])
-            pocket = bx(sx - g.JB_HEAD_SEAT - g.JB_POCKET_L, sx - g.JB_HEAD_SEAT, yc, g.JB_POCKET_W, zc - g.JB_HEAD_D / 2 - 0.25, top + 1)
-            nut = bx(sx + g.JB_NUT_X, sx + g.JB_NUT_X + g.JB_NUT_SLOT_T, yc, g.JB_NUT_SLOT_W, zc - 5.5 / math.sqrt(3) - 0.1, top + 1)
-            left = left - mortise - pocket - hole
-            right = (right + tenon) - nut - hole
+            c = g.TONGUE_CLEAR
+            bxp = sx + g.JB_X
+            tongue = bx(sx - 0.5, sx + g.TONGUE_L, yc, g.TONGUE_W, zb, zb + g.TONGUE_T)
+            mortise = bx(sx - 0.01, sx + g.TONGUE_L + c, yc, g.TONGUE_W + 2 * c, zb - 1, zb + g.TONGUE_T + c)
+            hole = m3.Manifold.cylinder(g.FRAME_H + 2, g.HOLE_D / 2, g.HOLE_D / 2, 32).translate([bxp, -yc, zb - 1])
+            cb = m3.Manifold.cylinder(g.JB_CB_DEPTH + 1, g.JB_CB_D / 2, g.JB_CB_D / 2, 40).translate([bxp, -yc, top - g.JB_CB_DEPTH])
+            nut = m3.Manifold.extrude(hexa, g.JB_NUT_DEPTH + 1).translate([bxp, -yc, zb - 1])
+            left = (left + tongue) - hole - nut
+            right = right - mortise - hole - cb
     else:
         for yw in (g.OY + g.WALL / 2, g.OY + g.OUTER_H - g.WALL / 2):
             pin = m3.Manifold.cylinder(12, 0.95, 0.95, 24).rotate([0, 90, 0]).translate([sx - 6, -yw, zb + g.FRAME_H / 2])

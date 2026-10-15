@@ -38,7 +38,7 @@ new GLTFLoader().load('./model.glb',(gl)=>{
   s.add(gl.scene);
   const box=new THREE.Box3().setFromObject(gl.scene); const c=box.getCenter(new THREE.Vector3());
   const p=new THREE.PerspectiveCamera(30,1600/900,1,2000);
-  p.position.set(c.x-38,c.y+62,c.z+70); p.lookAt(c.x+2,c.y-4,c.z);
+  p.position.set(c.x+30,c.y+28,c.z+78); p.lookAt(c.x,c.y-6,c.z);
   r.render(s,p); window.DONE=true;
 });
 </script></body></html>"""
@@ -53,13 +53,15 @@ def main():
     gap = 14.0                                   # 右半分を離して見せる
     L = parts["frame_left"] ^ win
     R = (parts["frame_right"] ^ win.translate([0, 0, 0])).translate([gap, 0, 0])
-    hs = sx - g.JB_HEAD_SEAT
-    bolt = (m3.Manifold.cylinder(g.JB_HEAD_H, g.JB_HEAD_D / 2, g.JB_HEAD_D / 2, 40).rotate([0, 90, 0]).translate([hs - g.JB_HEAD_H, -yc, zc])
-            + m3.Manifold.cylinder(g.JB_L, 1.5, 1.5, 32).rotate([0, 90, 0]).translate([hs, -yc, zc]))
+    bx_ = sx + g.JB_X
+    top = z["bot1"] + g.FRAME_H
+    lift = 12.0                                  # ボルトを持ち上げて見せる
+    bolt = (m3.Manifold.cylinder(1.65, 2.85, 2.6, 40).translate([bx_ + gap, -yc, top - g.JB_CB_DEPTH + lift])
+            + m3.Manifold.cylinder(g.JB_L, 1.5, 1.5, 32).translate([bx_ + gap, -yc, top - g.JB_CB_DEPTH - g.JB_L + lift]))
     rr = 5.5 / math.sqrt(3)
-    hexa = m3.CrossSection([[(rr * math.cos(math.radians(60 * k + 30)), rr * math.sin(math.radians(60 * k + 30))) for k in range(6)]])
-    nut = (m3.Manifold.extrude(hexa, 2.4) - m3.Manifold.cylinder(3, 1.5, 1.5, 24).translate([0, 0, -0.2])).rotate([0, 90, 0]).translate(
-        [sx + g.JB_NUT_X + 0.15 + gap, -yc, zc])
+    hexa = m3.CrossSection([[(rr * math.cos(math.radians(60 * k)), rr * math.sin(math.radians(60 * k))) for k in range(6)]])
+    nut = (m3.Manifold.extrude(hexa, 2.4) - m3.Manifold.cylinder(3, 1.5, 1.5, 24).translate([0, 0, -0.2])).translate(
+        [bx_, -yc, z["bot1"] - 6])
     frame_c = "#d9d4cb"
     meshes = [mesh_of(L, hex2rgba(frame_c), 0.85), mesh_of(R, hex2rgba("#c9c2b6"), 0.85),
               mesh_of(bolt, hex2rgba("#8a8d91"), 0.35, 0.9), mesh_of(nut, hex2rgba("#6f7276"), 0.35, 0.9)]
@@ -72,9 +74,9 @@ def main():
     three = os.environ.get("THREE_DIR", os.path.join(g.ROOT, "tools/.three"))
     shutil.copytree(os.path.join(three, "node_modules/three"), os.path.join(work, "three"))
     scene.export(os.path.join(work, "model.glb"))
-    title = f"枠の継ぎ目 {g.VER}：ほぞ＋M3×{g.JB_L:g}キャップボルト（手前の壁。右半分を{gap:g}mm離して表示）"
-    sub = (f"右半分のほぞ（{g.TENON_W:g}×{g.TENON_H:g}×{g.TENON_L:g}）を左半分のほぞ穴に差し込み、頭は左半分のざぐり、"
-           f"ナットは右半分の溝へ上から落とす。上面は補強板で隠れる")
+    title = f"枠の継ぎ目 {g.VER}：ほぞ＋縦のM3×{g.JB_L:g}ボタンヘッド（手前の壁。右半分を{gap:g}mm離して表示）"
+    sub = (f"左半分の下側のほぞ（{g.TONGUE_W:g}×{g.TONGUE_T:g}×{g.TONGUE_L:g}）が右半分の下の溝に入る。ボルトは上から（頭はざぐりに沈む）、"
+           f"ナットはほぞの下面に埋め込む。上は補強板、下はボトムプレートで隠れる")
     open(os.path.join(work, "index.html"), "w", encoding="utf-8").write(HTML.replace("__TITLE__", title).replace("__SUB__", sub))
 
     class Q(http.server.SimpleHTTPRequestHandler):

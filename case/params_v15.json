@@ -84,21 +84,29 @@
   "rod": null,
   "rod_bolt": null,
   "joint": {
-    "kind": "tenon_bolt",
-    "tenon": [
-      8.0,
-      6.6,
-      6.0
+    "kind": "tongue_vbolt",
+    "tongue": [
+      9.0,
+      4.5,
+      16.0
     ],
     "clear": 0.2,
-    "bolt": "M3x20 cap",
-    "head_seat_from_split": 10.0,
-    "nut_from_split": 5.0,
-    "axis_z_in_frame": 4.05,
+    "bolt": "M3x6 button",
+    "bolt_x_from_split": 8.0,
+    "counterbore": [
+      6.2,
+      1.9
+    ],
+    "nut_depth": 2.6,
     "wall_centers_y": [
       -8.55,
       103.15
-    ]
+    ],
+    "check": {
+      "roof": 3.4,
+      "seat": 6.2,
+      "tip": 0.2
+    }
   },
   "rear_bolt": "M3x18+nut",
   "rear_bar_heights": [

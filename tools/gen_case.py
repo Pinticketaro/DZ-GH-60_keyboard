@@ -43,16 +43,15 @@ HOLES_FROM_OUTER = [(7, 7), (107.7, 7), (207.3, 7), (308, 7),
                     (7, 119), (107.7, 119), (207.3, 119), (308, 119)]
 KERF = 0.0                          # レーザーのカーフ（M1で決める）
 SPLIT_X = PCB_W / 2                 # 枠の分割位置（中央）
-# 枠の継ぎ目（v15）：ほぞ＋横向きのボルト。前後の壁に1組ずつ。ボルトとナットは枠の上面から入れる（上は補強板で隠れる、プレートは貫通しない）
-JOINT = "tenon_bolt"                # "tenon_bolt"＝ほぞ＋M3ボルト／"pin"＝φ1.75フィラメントの位置決めピン（v14まで）
-TENON_W, TENON_H, TENON_L = 8.0, 6.6, 6.0   # ほぞ（右半分から左へ突き出す）：幅（Y）・高さ（Z、下面から）・長さ（X）
-TENON_CLEAR = 0.2                   # ほぞ穴のすき間（片側）
-JB_L = 20.0                         # 継ぎ目のボルト M3×20 キャップボルト（六角穴付き）
-JB_HEAD_D, JB_HEAD_H = 5.5, 3.0     # 頭（ISO 4762）
-JB_HEAD_SEAT = 10.0                 # 継ぎ目から頭の座面まで（左半分）
-JB_POCKET_L, JB_POCKET_W = 16.0, 6.2    # 頭のざぐり（上面から）：長さはL形レンチを入れる分
-JB_NUT_X = 5.0                      # 継ぎ目からナットの溝まで（右半分）
-JB_NUT_SLOT_T, JB_NUT_SLOT_W = 2.7, 5.8  # ナットの溝（上面から落とし込む）：厚さ方向・二面幅方向
+# 枠の継ぎ目（v15）：ほぞ（左半分の下側から出る舌）＋縦向きのM3ボルト。前後の壁に1組ずつ。
+# ボルトは他の8本と同じ縦向き。頭は枠の上面のざぐり（補強板で隠れる）、ナットは舌の下面に埋め込む（ボトムプレートで隠れる）。プレートは貫通しない
+JOINT = "tongue_vbolt"              # "tongue_vbolt"＝ほぞ＋縦ボルト／"pin"＝φ1.75フィラメントの位置決めピン（v14まで）
+TONGUE_W, TONGUE_T, TONGUE_L = 9.0, 4.5, 16.0   # ほぞ（舌）：幅（Y）・厚さ（Z、下面から）・長さ（継ぎ目から右へ）
+TONGUE_CLEAR = 0.2                  # ほぞ穴のすき間（幅は片側、高さと長さも同じだけ）
+JB_L = 6.0                          # 継ぎ目のボルト M3×6 ボタンヘッド（他の8本と同じ種類）
+JB_X = 8.0                          # 継ぎ目からボルトの中心まで（右半分の側）
+JB_CB_D, JB_CB_DEPTH = 6.2, 1.9     # 頭のざぐり（ボタンヘッドφ5.7×1.65）
+JB_NUT_DEPTH = 2.6                  # ナット溝（二面幅 NUT_POCKET_AF、舌の下面から）
 USB_X = 142.5 - 124.3               # USB中心X：GH60標準（swillkb −124.3）。要実測
 USB_W = 13.0                        # USB切り欠き幅（ケーブルの太い部分が通る幅。旧10mm）
 # ---- 高さ方向（PCBはネジ止めしない）
@@ -144,17 +143,17 @@ def joint_wall_y():
 
 
 def check_joint():
-    """継ぎ目の寸法の確認：ボルトの先がナットを越え、穴の中に収まるか、肉厚が残るか。"""
-    if JOINT != "tenon_bolt":
+    """継ぎ目の寸法の確認：ほぞ穴の上の肉、ざぐりの下の肉、ナットの上の肉、ボルトの先がナットの下面と合うか。"""
+    if JOINT != "tongue_vbolt":
         return
-    zc = FRAME_H / 2
-    tip = -JB_HEAD_SEAT + JB_L                   # 継ぎ目からのボルトの先（X）
-    assert tip > JB_NUT_X + JB_NUT_SLOT_T, "ボルトがナットに届かない"
-    assert JB_HEAD_SEAT - (TENON_L + TENON_CLEAR) >= 3.0, "ほぞ穴と頭のざぐりの間の肉が薄い"
-    assert FRAME_H - (TENON_H + TENON_CLEAR) >= 1.2, "ほぞ穴の上の肉が薄い"
-    assert TENON_H - (zc + HOLE_D / 2) >= 0.6, "ほぞの中のボルト穴の上の肉が薄い"
-    assert zc - JB_HEAD_D / 2 - 0.25 >= 0.8, "頭のざぐりの下の肉が薄い"
-    return round(tip, 2)
+    roof = FRAME_H - (TONGUE_T + TONGUE_CLEAR)
+    seat = FRAME_H - JB_CB_DEPTH
+    tip = seat - JB_L
+    assert roof - JB_CB_DEPTH >= 1.2, "ざぐりの下の肉が薄い"
+    assert TONGUE_T - JB_NUT_DEPTH >= 1.5, "ナットの上の肉が薄い"
+    assert 0 <= tip <= JB_NUT_DEPTH - NUT_T + 0.1, f"ボルトの先がナットの下面に合わない（{tip:.2f}）"
+    assert (TONGUE_W - NUT_POCKET_AF * 2 / 3 ** 0.5) / 2 >= 0.9, "ナットの角の外の肉が薄い"
+    return dict(roof=round(roof, 2), seat=round(seat, 2), tip=round(tip, 2))
 
 
 def rod_layout():
@@ -692,9 +691,9 @@ def main():
                   bolt=f"M3x{BOLT_L:g}", foot_skin=FOOT_SKIN, tilt_deg=tilt_deg(), foot_d=FOOT_D,
                   rear_foot=REAR_FOOT, rod=rod_info,
                   rod_bolt=(f"M3x{ROD_BOLT_L:g}" if rod_info else None),
-                  joint=(dict(kind=JOINT, tenon=[TENON_W, TENON_H, TENON_L], clear=TENON_CLEAR, bolt=f"M3x{JB_L:g} cap",
-                              head_seat_from_split=JB_HEAD_SEAT, nut_from_split=JB_NUT_X, axis_z_in_frame=FRAME_H / 2,
-                              wall_centers_y=joint_wall_y()) if JOINT == "tenon_bolt" else dict(kind=JOINT)),
+                  joint=(dict(kind=JOINT, tongue=[TONGUE_W, TONGUE_T, TONGUE_L], clear=TONGUE_CLEAR, bolt=f"M3x{JB_L:g} button",
+                              bolt_x_from_split=JB_X, counterbore=[JB_CB_D, JB_CB_DEPTH], nut_depth=JB_NUT_DEPTH,
+                              wall_centers_y=joint_wall_y(), check=check_joint()) if JOINT == "tongue_vbolt" else dict(kind=JOINT)),
                   rear_bolt=(f"M3x{BOLT_L:g}+nut" if REAR_FOOT == "pla_bars" else None),
                   rear_bar_heights=([h for pr in pairs() for _, _, h in pr["rear_bar_holes"]] if REAR_FOOT == "pla_bars" else None),
                   rod_thread_engagement=(rod_engagement() if rod_info else None), rod_hole_through=ROD_HOLE_THROUGH, rod_hole_len=(rod_hole_len() if rod_info else None),
