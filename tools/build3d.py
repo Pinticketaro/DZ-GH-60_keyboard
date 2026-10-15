@@ -1,7 +1,7 @@
 """3Dモデル（STL）と外観プレビューを作る。
 
 出力
-  case/stl/frame_left_<ver>.stl, frame_right_<ver>.stl … 枠（PLA）左右。継ぎ目にφ1.9の位置決め穴（1.75mmフィラメントを差す）
+  case/stl/frame_left_<ver>.stl, frame_right_<ver>.stl … 枠（PLA）左右。継ぎ目はほぞ＋M3×20キャップボルト（前後の壁に1組ずつ、v15）
   case/stl/feet_<ver>.stl                            … 足（ナット受け）8個を並べたもの
   case/stl/assembly_<ver>.stl                        … 組み立て状態（確認用）
   docs/img/preview_<ver>.png                         … 外観プレビュー（斜め・横）
@@ -75,14 +75,30 @@ def build_parts():
     usb = m3.Manifold.cube([g.USB_W, g.WALL + 2, g.FRAME_H + 2]).translate(
         [g.USB_X - g.USB_W / 2, -(g.OY + g.WALL + 1), z["bot1"] - 1])
     frame = frame - usb
-    # 分割と位置決め穴（前後の壁の中央、継ぎ目の両側に深さ6mm）
+    # 分割。継ぎ目は v15 からほぞ＋横向きのM3ボルト（前後の壁に1組ずつ）、v14まではφ1.9の位置決め穴
     big = 1000
     left = frame ^ m3.Manifold.cube([big, big, big]).translate([g.SPLIT_X - big, -big / 2, -big / 2])
     right = frame ^ m3.Manifold.cube([big, big, big]).translate([g.SPLIT_X, -big / 2, -big / 2])
-    for yw in (g.OY + g.WALL / 2, g.OY + g.OUTER_H - g.WALL / 2):
-        pin = m3.Manifold.cylinder(12, 0.95, 0.95, 24).rotate([0, 90, 0]).translate(
-            [g.SPLIT_X - 6, -yw, z["bot1"] + g.FRAME_H / 2])
-        left, right = left - pin, right - pin
+    sx, zb = g.SPLIT_X, z["bot1"]
+    if g.JOINT == "tenon_bolt":
+        zc = zb + g.FRAME_H / 2
+        top = zb + g.FRAME_H
+        def bx(x0, x1, yc, w, z0, z1):     # X・Z範囲と、Yの中心・幅（PCB座標のY）で箱
+            return m3.Manifold.cube([x1 - x0, w, z1 - z0]).translate([x0, -yc - w / 2, z0])
+        for yc in g.joint_wall_y():
+            c = g.TENON_CLEAR
+            tenon = bx(sx - g.TENON_L, sx + 0.5, yc, g.TENON_W, zb, zb + g.TENON_H)
+            mortise = bx(sx - g.TENON_L - c, sx + 0.01, yc, g.TENON_W + 2 * c, zb - 1, zb + g.TENON_H + c)
+            hole = m3.Manifold.cylinder(g.JB_HEAD_SEAT + g.JB_NUT_X + g.JB_NUT_SLOT_T + 6, g.HOLE_D / 2, g.HOLE_D / 2, 32).rotate(
+                [0, 90, 0]).translate([sx - g.JB_HEAD_SEAT - 0.01, -yc, zc])
+            pocket = bx(sx - g.JB_HEAD_SEAT - g.JB_POCKET_L, sx - g.JB_HEAD_SEAT, yc, g.JB_POCKET_W, zc - g.JB_HEAD_D / 2 - 0.25, top + 1)
+            nut = bx(sx + g.JB_NUT_X, sx + g.JB_NUT_X + g.JB_NUT_SLOT_T, yc, g.JB_NUT_SLOT_W, zc - 5.5 / math.sqrt(3) - 0.1, top + 1)
+            left = left - mortise - pocket - hole
+            right = (right + tenon) - nut - hole
+    else:
+        for yw in (g.OY + g.WALL / 2, g.OY + g.OUTER_H - g.WALL / 2):
+            pin = m3.Manifold.cylinder(12, 0.95, 0.95, 24).rotate([0, 90, 0]).translate([sx - 6, -yw, zb + g.FRAME_H / 2])
+            left, right = left - pin, right - pin
     parts["frame_left"], parts["frame_right"] = left, right
 
     # 足（ナット受け）：円柱を傾いた机の面で切り、下から六角のナット溝

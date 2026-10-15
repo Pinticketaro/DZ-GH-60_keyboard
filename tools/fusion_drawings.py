@@ -293,7 +293,7 @@ def page_assembly(D, pdf, total):
             ["5", "足（同じ形）", "PLA 高さ3.7", "4", "7枚目"],
             ["6", "ボルト", "M3×18 ボタンヘッド", "8", "—"],
             ["7", "ナット", "M3（二面幅5.5・厚さ2.4）", "8", "—"],
-            ["8", "位置決めピン", "φ1.75フィラメント 約11.5", "2", "6枚目"],
+            ["8", "継ぎ目のボルト・ナット", f"M3×{g.JB_L:g} キャップ＋M3ナット", "各2", "6枚目"],
             ["9", "ケースフォーム", f"厚さ{g.UNDER_PCB + 0.5:g}〜{g.UNDER_PCB + 1:g}", "1", "型紙SVG"],
             ["10", "プレートフォーム", f"厚さ{g.GAP_STIFF_PCB:g}", "1", "型紙SVG"]]
     cw = [8, 30, 54, 8, 26]
@@ -534,10 +534,13 @@ def page_frame(D, pdf, total):
     ax.add_patch(Rectangle((x0 + ux - g.USB_W / 2, y0 + g.OUTER_H - g.WALL), g.USB_W, g.WALL, fc="#ddd", ec="k", lw=THICK))
     leader(ax, (x0 + ux + g.USB_W / 2, y0 + g.OUTER_H - 3), (x0 + ux + 20, y0 + g.OUTER_H + 10),
            f"USB切り欠き 幅{g.USB_W:g}（中心X={ux:g}）全高・壁を貫通　※実測で確定")
-    # 位置決め穴
-    for yy in (g.WALL / 2, g.OUTER_H - g.WALL / 2):
-        ax.add_patch(Rectangle((x0 + split - 6, y0 + yy - 0.95), 12, 1.9, fill=False, lw=THIN, ls=(0, (2, 1))))
-    leader(ax, (x0 + split + 6, y0 + g.WALL / 2), (x0 + split + 30, y0 + 24), "位置決め穴 φ1.9 深さ6（左右とも）")
+    # 継ぎ目（ほぞ＋ボルト）の位置
+    for yc in [T((0, y))[1] for y in g.joint_wall_y()]:
+        ax.add_patch(Rectangle((x0 + split - g.JB_HEAD_SEAT - g.JB_POCKET_L, y0 + yc - g.JB_POCKET_W / 2), g.JB_POCKET_L, g.JB_POCKET_W, fill=False, lw=THIN))
+        ax.add_patch(Rectangle((x0 + split + g.JB_NUT_X, y0 + yc - g.JB_NUT_SLOT_W / 2), g.JB_NUT_SLOT_T, g.JB_NUT_SLOT_W, fill=False, lw=THIN))
+        ax.add_patch(Rectangle((x0 + split - g.TENON_L, y0 + yc - g.TENON_W / 2), g.TENON_L, g.TENON_W, fill=False, lw=THIN, ls=(0, (2, 1))))
+    yj = T((0, g.joint_wall_y()[1]))[1]
+    leader(ax, (x0 + split - g.JB_HEAD_SEAT - 8, y0 + yj + g.JB_POCKET_W / 2), (x0 + split - 60, y0 + 30), "継ぎ目：ほぞ＋M3ボルト（前後の壁、詳細は左下）", ha="right")
     origin_mark(ax, x0, y0)
     fi = Polygon(D["frame_inner"]).bounds
     fo = Polygon(D["frame_outer"]).bounds
@@ -548,28 +551,86 @@ def page_frame(D, pdf, total):
     hdim(ax, x0, x0 + fi[0], y0 + 40, y0 + 40, y0 + 40, f"{fi[0]:g}")
     vdim(ax, y0, y0 + fi[1], x0 + 70, x0 + 70, f"{fi[1]:g}")
     ax.text(x0, y0 + g.OUTER_H + 16, "平面図（上から）。外形は2枚目の外形を全周0.3内側へオフセット。内側の角はR4.5・曲率連続（Apple風）", fontsize=8, va="bottom")
-    # 側面の詳細：継ぎ目と位置決め穴（2:1）
-    S = 2.0
-    sx0, sy0 = 40, 62
-    ax.add_patch(Rectangle((sx0, sy0), 60 * S, g.FRAME_H * S, fill=False, lw=THICK))
-    line(ax, [(sx0 + 30 * S, sy0 - 3), (sx0 + 30 * S, sy0 + g.FRAME_H * S + 3)], lw=THIN, ls=(0, (10, 2, 2, 2)))
-    ax.add_patch(Rectangle((sx0 + 24 * S, sy0 + (g.FRAME_H / 2 - 0.95) * S), 12 * S, 1.9 * S, fill=False, lw=THIN, ls=(0, (3, 1.5))))
-    vdim(ax, sy0, sy0 + g.FRAME_H * S, sx0 - 6, sx0, f"{g.FRAME_H:g}", right=False)
-    vdim(ax, sy0, sy0 + g.FRAME_H / 2 * S, sx0 + 60 * S + 6, sx0 + 60 * S, f"{g.FRAME_H / 2:.2f}")
-    hdim(ax, sx0 + 24 * S, sx0 + 30 * S, sy0 + g.FRAME_H * S + 6, sy0 + g.FRAME_H * S, sy0 + g.FRAME_H * S, "6")
-    hdim(ax, sx0 + 30 * S, sx0 + 36 * S, sy0 + g.FRAME_H * S + 6, sy0 + g.FRAME_H * S, sy0 + g.FRAME_H * S, "6")
-    ax.text(sx0, sy0 - 5, "継ぎ目の詳細（手前の壁を手前から見る）　尺度 2:1", fontsize=7.5, va="top")
+    joint_detail(ax, split)
     notes(ax, 175, 118, [
         f"1. 高さ {g.FRAME_H:g}（下面＝ボトムプレートの上面、Z=3）",
         f"2. ネジ穴：手前 φ{g.HOLE_D:g}、奥 φ{g.REAR_HOLE_D:.1f}（全高を貫通）。位置は2枚目",
         f"3. 分割はX={split:g}。左右とも Ender-3 Pro（220角）に収まる",
-        "4. 位置決め穴は手前・奥の壁の中央（Y=7, 119）、高さの中央",
-        "   φ1.75フィラメントを約11.5に切って差す",
+        f"4. 継ぎ目：右半分のほぞ（{g.TENON_W:g}×{g.TENON_H:g}、長さ{g.TENON_L:g}）を左半分のほぞ穴に差し、",
+        f"   M3×{g.JB_L:g}キャップボルトで横から締める。頭とナットは上面から入れる（補強板で隠れる）",
         "5. 印刷の向き：下面（ボトムプレート側）をベッドに。サポート不要",
         "6. 内側の角の正確な形はDXF（dxf/frame_*.dxf）",
     ])
     pdf.savefig(fig)
     return fig
+
+
+def draw_geom(ax, geom, x0, y0, s, hatch=None, lw=THICK, ls="-"):
+    """shapelyの形（穴あきも）を描く。"""
+    from matplotlib.path import Path
+    from matplotlib.patches import PathPatch
+    polys = list(geom.geoms) if hasattr(geom, "geoms") else [geom]
+    for P in polys:
+        verts, codes = [], []
+        for ring in [P.exterior] + list(P.interiors):
+            pts = [(x0 + x * s, y0 + y * s) for x, y in ring.coords]
+            verts += pts
+            codes += [Path.MOVETO] + [Path.LINETO] * (len(pts) - 2) + [Path.CLOSEPOLY]
+        ax.add_patch(PathPatch(Path(verts, codes), fc="none", ec="k", lw=lw, ls=ls, hatch=hatch))
+
+
+def joint_detail(ax, split):
+    """継ぎ目の詳細（奥の壁）：上から見た図と、壁の中心で切った断面。尺度 2:1。u＝継ぎ目からのX、v＝壁の中心からのY。"""
+    from shapely.geometry import box as B
+    S = 2.0
+    u0, u1 = -30, 14
+    wall = g.WALL - g.FRAME_INSET
+    H = g.FRAME_H
+    zc = H / 2
+    c = g.TENON_CLEAR
+    ux0 = 46 - u0 * S                     # u=0（継ぎ目）の紙の上のX
+    # ---- 断面（壁の中心、横から）
+    zy0 = 30
+    leftG = B(u0, 0, 0, H).difference(B(-g.TENON_L - c, -1, 0.01, g.TENON_H + c)).difference(
+        B(-g.JB_HEAD_SEAT - g.JB_POCKET_L, zc - g.JB_HEAD_D / 2 - 0.25, -g.JB_HEAD_SEAT, H + 1)).difference(
+        B(-g.JB_HEAD_SEAT - 0.01, zc - g.HOLE_D / 2, 0.02, zc + g.HOLE_D / 2))
+    rightG = B(0, 0, u1, H).union(B(-g.TENON_L, 0, 0, g.TENON_H)).difference(
+        B(g.JB_NUT_X, zc - 5.5 / math.sqrt(3) - 0.1, g.JB_NUT_X + g.JB_NUT_SLOT_T, H + 1)).difference(
+        B(-g.TENON_L - 0.01, zc - g.HOLE_D / 2, g.JB_NUT_X + g.JB_NUT_SLOT_T + 3.5, zc + g.HOLE_D / 2))
+    draw_geom(ax, leftG, ux0, zy0, S, hatch="////")
+    draw_geom(ax, rightG, ux0, zy0, S, hatch="\\\\")
+    # ボルトとナット（灰色）
+    hs = -g.JB_HEAD_SEAT
+    ax.add_patch(Rectangle((ux0 + (hs - g.JB_HEAD_H) * S, zy0 + (zc - g.JB_HEAD_D / 2) * S), g.JB_HEAD_H * S, g.JB_HEAD_D * S, fc="#b9bcc0", ec="k", lw=THIN))
+    ax.add_patch(Rectangle((ux0 + hs * S, zy0 + (zc - 1.5) * S), g.JB_L * S, 3 * S, fc="#d5d7da", ec="k", lw=THIN))
+    ax.add_patch(Rectangle((ux0 + (g.JB_NUT_X + 0.15) * S, zy0 + (zc - 5.5 / math.sqrt(3)) * S), 2.4 * S, 11 / math.sqrt(3) * S, fc="#9a9da2", ec="k", lw=THIN))
+    centerline(ax, (ux0 + (u0 - 2) * S, zy0 + zc * S), (ux0 + (u1 + 2) * S, zy0 + zc * S))
+    line(ax, [(ux0, zy0 - 3), (ux0, zy0 + H * S + 3)], lw=THIN, ls=(0, (10, 2, 2, 2)))
+    vdim(ax, zy0, zy0 + H * S, ux0 + u0 * S - 4, ux0 + u0 * S, f"{H:g}", right=False)
+    vdim(ax, zy0, zy0 + zc * S, ux0 + u1 * S + 5, ux0 + u1 * S, f"{zc:.2f}（ボルトの軸）")
+    hdim(ax, ux0 + hs * S, ux0, zy0 - 6, zy0, zy0, f"{g.JB_HEAD_SEAT:g}", above=False)
+    hdim(ax, ux0, ux0 + g.JB_NUT_X * S, zy0 - 6, zy0, zy0, f"{g.JB_NUT_X:g}", above=False)
+    hdim(ax, ux0 + (hs - g.JB_POCKET_L) * S, ux0 + hs * S, zy0 + H * S + 5, zy0 + H * S, zy0 + H * S, f"{g.JB_POCKET_L:g}（レンチ用）")
+    hdim(ax, ux0 + (-g.TENON_L - c) * S, ux0, zy0 + H * S + 5, zy0 + H * S, zy0 + H * S, f"{g.TENON_L + c:.1f}")
+    hdim(ax, ux0 + g.JB_NUT_X * S, ux0 + (g.JB_NUT_X + g.JB_NUT_SLOT_T) * S, zy0 + H * S + 5, zy0 + H * S, zy0 + H * S, f"{g.JB_NUT_SLOT_T:g}")
+    ax.text(ux0 + u0 * S, zy0 - 13, f"断面（壁の中心）。高さは下面から：ほぞ{g.TENON_H:g}・ほぞ穴{g.TENON_H + c:.1f}、頭のざぐりの底{zc - g.JB_HEAD_D / 2 - 0.25:.2f}、ナットの溝の底{zc - 5.5 / math.sqrt(3) - 0.1:.2f}", fontsize=6.6, va="top")
+    # ---- 上から見た図（奥の壁、外側が上）
+    py0 = 74
+    v0 = -wall / 2
+    leftP = B(u0, v0, 0, v0 + wall).difference(B(-g.JB_HEAD_SEAT - g.JB_POCKET_L, -g.JB_POCKET_W / 2, -g.JB_HEAD_SEAT, g.JB_POCKET_W / 2))
+    rightP = B(0, v0, u1, v0 + wall).difference(B(g.JB_NUT_X, -g.JB_NUT_SLOT_W / 2, g.JB_NUT_X + g.JB_NUT_SLOT_T, g.JB_NUT_SLOT_W / 2))
+    pv0 = py0 + wall / 2 * S
+    draw_geom(ax, leftP, ux0, pv0, S)
+    draw_geom(ax, rightP, ux0, pv0, S)
+    ax.add_patch(Rectangle((ux0 + (-g.TENON_L - c) * S, pv0 + (-g.TENON_W / 2 - c) * S), (g.TENON_L + c) * S, (g.TENON_W + 2 * c) * S, fill=False, lw=THIN, ls=(0, (3, 1.5))))
+    ax.add_patch(Rectangle((ux0 + hs * S, pv0 - g.HOLE_D / 2 * S), (g.JB_HEAD_SEAT + g.JB_NUT_X + g.JB_NUT_SLOT_T + 3.5) * S, g.HOLE_D * S, fill=False, lw=THIN, ls=(0, (3, 1.5))))
+    centerline(ax, (ux0 + (u0 - 2) * S, pv0), (ux0 + (u1 + 2) * S, pv0))
+    vdim(ax, pv0 - g.JB_POCKET_W / 2 * S, pv0 + g.JB_POCKET_W / 2 * S, ux0 + (hs - g.JB_POCKET_L) * S - 4, ux0 + (hs - g.JB_POCKET_L) * S, f"{g.JB_POCKET_W:g}", right=False)
+    vdim(ax, pv0 - (g.TENON_W / 2 + c) * S, pv0 + (g.TENON_W / 2 + c) * S, ux0 - 3, ux0 + (-g.TENON_L - c) * S, f"{g.TENON_W + 2 * c:.1f}", right=False)
+    vdim(ax, pv0 - g.JB_NUT_SLOT_W / 2 * S, pv0 + g.JB_NUT_SLOT_W / 2 * S, ux0 + u1 * S + 5, ux0 + (g.JB_NUT_X + g.JB_NUT_SLOT_T) * S, f"{g.JB_NUT_SLOT_W:g}（ナット二面幅5.5）")
+    vdim(ax, pv0 - wall / 2 * S, pv0 + wall / 2 * S, ux0 + u0 * S - 4, ux0 + u0 * S, f"{wall:g}", right=False)
+    ax.text(ux0 + u0 * S, py0 + wall * S + 4, f"継ぎ目の詳細（奥の壁、上から。手前の壁も同じ）　尺度 2:1。左＝左半分、右＝右半分", fontsize=7.5, va="bottom")
+    ax.text(ux0 + u0 * S, py0 - 3, f"ほぞ {g.TENON_W:g}×{g.TENON_L:g}（高さ{g.TENON_H:g}、下面から）。ほぞ穴は片側{c:g}大きい（点線）。ボルト穴 φ{g.HOLE_D:g}", fontsize=6.6, va="top")
 
 
 def page_foot(D, pdf, total):
