@@ -199,6 +199,29 @@ def build_parts():
             right = body ^ m3.Manifold.cube([big, big, big]).translate([g.SPLIT_X, -big / 2, -big / 2])
             parts["saddle"] = [left, right]
 
+    if g.REAR_FOOT == "pla_bars":
+        # 手前も奥もPLAのバー（左右ずつ）。底は机の面に合わせて斜め、下から六角のナット溝
+        ang = math.degrees(math.atan(tan))
+        cutter = m3.Manifold.cube([big, big, big]).translate([-big / 2, -big / 2, -big])
+        cutter = cutter.rotate([-ang, 0, 0]).translate([0, -y_front, -h_front])
+
+        def bar(plan, holes):
+            hmax = max(h for _, _, h in holes) + g.RIB_W * tan + 1
+            b = m3.Manifold.extrude(xs(plan), hmax).translate([0, 0, -hmax]) - cutter
+            for hx, hy, _ in holes:
+                rr = g.NUT_POCKET_AF / math.sqrt(3)
+                hexagon = [(hx + rr * math.cos(math.radians(60 * k)), hy + rr * math.sin(math.radians(60 * k))) for k in range(6)]
+                b = b - m3.Manifold.extrude(xs(hexagon), hmax + 1).translate([0, 0, -(hmax + 1) - g.FOOT_SKIN])
+                b = b - m3.Manifold.cylinder(hmax + 2, g.HOLE_D / 2, g.HOLE_D / 2, 24).translate([hx, -hy, -hmax - 1])
+            return b
+
+        pieces, names = [], []
+        for pr in g.pairs():
+            pieces += [bar(pr["front_plan"], pr["front_holes"]), bar(pr["rear_plan"], pr["rear_bar_holes"])]
+            names += [f"foot_front_{pr['side']}", f"foot_rear_{pr['side']}"]
+        parts["feet"] = pieces
+        parts["feet_names"] = names
+
     # 参考：PCB・スイッチ・キーキャップ（簡略形状）
     parts["pcb"] = m3.Manifold.cube([g.PCB_W, g.PCB_H, g.PCB_T]).translate([0, -g.PCB_H, z["pcb0"]])
     return parts, z

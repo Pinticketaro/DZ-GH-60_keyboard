@@ -43,11 +43,13 @@ def main():
         r = g.rod()
         ax.add_patch(plt.Rectangle((r["x0"], r["y"] - g.ROD_D / 2), r["x1"] - r["x0"], g.ROD_D, fc="#d4a85a55", ec="#b8860b",
                                    ls="--", lw=1.0, label=f"真鍮丸棒 φ{g.ROD_D:g}（下面）"))
-    if getattr(g, "FOOT_STYLE", "") == "pairs" and getattr(g, "REAR_FOOT", "") == "brass_rod":
+    if getattr(g, "FOOT_STYLE", "") == "pairs" and g.rod_layout():
+        lab = "足：手前バー×2＋奥バー×2（PLA・下面）" if g.REAR_FOOT == "pla_bars" else "足：手前バー×2＋奥の丸棒受け×2（下面）"
         for k, pr in enumerate(g.pairs()):
-            for pl in (pr["front_plan"], pr["rear_plan"]):
+            pls = (pr["front_plan"], pr["rear_plan"]) if (g.REAR_FOOT == "pla_bars" or g.ROD_FLAT_W <= 0 and not g.ROD_TAPE) else (pr["front_plan"],)
+            for pl in pls:
                 ax.add_patch(MPoly(pl, closed=True, fc="#9a9a9a22", ec="#555", ls=":", lw=0.9,
-                                   label=("足：手前バー×2＋奥の丸棒受け×2（下面）" if (k == 0 and pl is pr["front_plan"]) else None)))
+                                   label=(lab if (k == 0 and pl is pr["front_plan"]) else None)))
     elif getattr(g, "FOOT_STYLE", "") == "ribs" and getattr(g, "REAR_FOOT", "") == "brass_rod":
         for k, rb in enumerate(g.ribs()):
             ax.add_patch(MPoly(rb["plan"], closed=True, fc="#9a9a9a22", ec="#555", ls=":", lw=0.9,

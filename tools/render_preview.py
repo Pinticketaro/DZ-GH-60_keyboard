@@ -148,7 +148,7 @@ def main():
     scene, fh = build_scene(a.frame, a.top)
     scene.export(os.path.join(work, "model.glb"))
     top_name = {"frosted": "すりガラス", "clear": "透明", "smoke": "スモーク"}[a.top]
-    title = (f"外観プレビュー {g.VER}：トッププレート{top_name}・枠{a.frame}、傾き{g.tilt_deg():g}°{"（真鍮丸棒φ%g）" % g.ROD_D if g.REAR_FOOT == "brass_rod" else ""}、"
+    title = (f"外観プレビュー {g.VER}：トッププレート{top_name}・枠{a.frame}、傾き{g.tilt_deg():g}°{"（真鍮丸棒φ%g）" % g.ROD_D if g.REAR_FOOT == "brass_rod" else ("（奥もPLAの足）" if g.REAR_FOOT == "pla_bars" else "")}、"
              f"手前の高さ{fh:.1f}mm（キーキャップ別）、角R{g.CORNER_R:g}・スムージング{g.CORNER_SMOOTH}")
     open(os.path.join(work, "index.html"), "w", encoding="utf-8").write(HTML.replace("__TITLE__", title))
 

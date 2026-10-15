@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v12"
+VER = "v13"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -71,7 +71,7 @@ FOOT_D = 12.0                       # 足（丸い台）の直径。外形より
 TILT_DEG = 5.0                      # キーボードの傾き（仮）。0〜7°程度
 FOOT_SKIN = round(BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) - NUT_T, 2)  # ナットの上に残るPLAの厚さ
 # ---- 奥側の足：真鍮の丸棒（ボトムプレートの奥側の下面に沿わせて左右方向に置く。横から見ると端の丸が見える）
-REAR_FOOT = "brass_rod"             # "brass_rod" または "pucks"（丸台8個）
+REAR_FOOT = "pla_bars"              # "pla_bars"＝奥もPLAのバー（v13、丸棒の代わり。傾き・穴位置は丸棒φ8と同じ）／"brass_rod"／"pucks"（丸台8個）
 ROD_D = 8.0                         # 丸棒の直径。傾きはこれで決まる（v12で一旦φ8。v11まではφ12）
 ROD_BOLT_L = 20.0                   # 後ろ4本のボルト長さ（丸棒のめねじにねじ込む）
 ROD_TAP_DRILL = 2.5                 # M3めねじの下穴
@@ -118,6 +118,11 @@ def frame_outer_pts():
     if not FRAME_INSET:
         return outer_pts()
     return list(Polygon(outer_pts()).buffer(-FRAME_INSET, join_style=1).exterior.coords)[:-1]
+
+
+def rod_layout():
+    """後ろの穴を一直線に並べ、傾きを丸棒（ROD_D）で決める配置。PLAのバーでも同じにして、あとで丸棒に差し替えられるようにする。"""
+    return REAR_FOOT in ("brass_rod", "pla_bars")
 
 
 def _h_front(tan):
@@ -171,7 +176,7 @@ def feet():
     import math
     hs = holes()
     y_front = max(y for _, y in hs)
-    if REAR_FOOT == "brass_rod":
+    if rod_layout():
         r = rod()
         yc, zc, rr = r["y"], rod_center_z(), rod_contact_r()
         tan = 0.05
@@ -211,7 +216,7 @@ def rod_flat_depth():
 
 def rod_top_gap():
     """ボトムプレートの下面から丸棒の上端（外周、平面ありなら平面）までの距離。"""
-    if REAR_FOOT != "brass_rod":
+    if not rod_layout():
         return 0.0
     if ROD_FLAT_W > 0:
         return 0.0
@@ -222,7 +227,7 @@ def rod_top_gap():
 
 def rod_contact_r():
     """丸棒の中心から机に当たる所までの距離（テープなら溝底＋つぶれたテープ）。"""
-    if REAR_FOOT == "brass_rod" and ROD_TAPE and ROD_FLAT_W <= 0:
+    if rod_layout() and ROD_TAPE and ROD_FLAT_W <= 0:
         return ROD_D / 2 - GROOVE_DEPTH + TAPE_T * (1 - TAPE_SQUEEZE_BOTTOM)
     return ROD_D / 2
 
@@ -230,7 +235,7 @@ def rod_contact_r():
 def rod_hole_top_z():
     """めねじの入口（平面・溝底・外周の上端）のZ。"""
     zt = rod_center_z() + ROD_D / 2 - rod_flat_depth()
-    if REAR_FOOT == "brass_rod" and ROD_TAPE and ROD_FLAT_W <= 0:
+    if rod_layout() and ROD_TAPE and ROD_FLAT_W <= 0:
         zt -= GROOVE_DEPTH
     return zt
 
@@ -314,18 +319,24 @@ def pairs():
         x1 = max(max(f["x"] for f in fs), max(hs)) + RIB_W / 2
         # 手前：2つの丸の凸包（角丸のバー）
         front = MultiPoint([(f["x"], f["y"]) for f in fs]).buffer(RIB_W / 2, quad_segs=24).convex_hull.intersection(o)
-        # 奥：丸棒受け（幅SADDLE_W）。両端は手前と同じX範囲
-        rear = _b(x0, r["y"] - SADDLE_W / 2, x1, r["y"] + SADDLE_W / 2).intersection(o)
+        # 奥：PLAのバーなら手前と同じ形（2つの丸の凸包）、丸棒なら丸棒受け（幅SADDLE_W）
+        fl_all, hf, tan, y_front = feet()
+        rear_bar = []
+        if REAR_FOOT == "pla_bars":
+            rear = MultiPoint([(x, r["y"]) for x in hs]).buffer(RIB_W / 2, quad_segs=24).convex_hull.intersection(o)
+            rear_bar = [(x, r["y"], round(hf + (y_front - r["y"]) * tan, 2)) for x in hs]
+        else:
+            rear = _b(x0, r["y"] - SADDLE_W / 2, x1, r["y"] + SADDLE_W / 2).intersection(o)
         out.append(dict(side=side, x0=round(x0, 2), x1=round(x1, 2),
                         front_plan=list(front.exterior.coords)[:-1], rear_plan=list(rear.exterior.coords)[:-1],
-                        front_holes=[(f["x"], f["y"], f["h"]) for f in fs], rear_holes=[(x, r["y"]) for x in hs],
+                        front_holes=[(f["x"], f["y"], f["h"]) for f in fs], rear_holes=[(x, r["y"]) for x in hs], rear_bar_holes=rear_bar,
                         front_len=round(front.bounds[2] - front.bounds[0], 1), rear_len=round(rear.bounds[2] - rear.bounds[0], 1)))
     return out
 
 
 def hole_d(c):
     """穴の直径：後ろの列（丸棒）はREAR_HOLE_D、ほかはHOLE_D。"""
-    if REAR_FOOT == "brass_rod":
+    if rod_layout():
         y_rear = min(y for _, y in holes())
         if abs(c[1] - y_rear) < 1e-6:
             return REAR_HOLE_D
@@ -347,7 +358,7 @@ def holes():
     for x, y in HOLES_FROM_OUTER:
         c = (OX + x, OY + y)
         is_corner = x in (7, 308) and y in (7, 119)
-        if is_corner and REAR_FOOT == "brass_rod" and y == 7:
+        if is_corner and rod_layout() and y == 7:
             # 後ろの角の穴は中央の穴と同じ列に並べる（丸棒にまっすぐ穴を開けるため）
             sx = 1 if x < OUTER_W / 2 else -1
             x_edge = OX if sx == 1 else OX + OUTER_W
@@ -572,11 +583,19 @@ def main():
                f'{rod_hole_text()}。数字は左端からの距離(mm)</text>'
                f'<text x="5" y="{th - 5:.1f}" font-size="3.2" font-family="Hiragino Sans, Noto Sans CJK JP, sans-serif">丸棒の上側（ボトムプレートに当たる線）に4穴を一直線に。V字の台に載せ、ボール盤で垂直に開ける</text></svg>\n')
         open(os.path.join(ROOT, f"case/rod_drill_template_{VER}.svg"), "w", encoding="utf-8").write(tpl)
-    if REAR_FOOT == "brass_rod" and FOOT_STYLE == "pairs":
-        ds = []
+    if rod_layout() and FOOT_STYLE == "pairs":
+        ds, nuts = [], []
         for pr in pairs():
             ds += [sq.to_svg_path(pr["front_plan"]), sq.to_svg_path(pr["rear_plan"])]
-        feet_layers.append(("pairs", "#008800", ds, f"足：手前バー×2（ナット受け）＋奥の丸棒受け×2（左右ずつ）"))
+            if REAR_FOOT == "pla_bars":
+                for hx, hy, _ in pr["rear_bar_holes"]:
+                    rr = NUT_POCKET_AF / _m.sqrt(3)
+                    nuts.append(sq.to_svg_path([(hx + rr * _m.cos(_m.radians(60 * k)), hy + rr * _m.sin(_m.radians(60 * k))) for k in range(6)]))
+        lab = ("足：手前バー×2＋奥バー×2（すべてPLA・ナット受け、左右ずつ）" if REAR_FOOT == "pla_bars"
+               else "足：手前バー×2（ナット受け）＋奥の丸棒受け×2（左右ずつ）")
+        feet_layers.append(("pairs", "#008800", ds, lab))
+        if nuts:
+            feet_layers.append(("nut_rear", "#ff0000", nuts, f"奥バーのナット溝（二面幅{NUT_POCKET_AF}、下から）"))
     if REAR_FOOT == "brass_rod" and FOOT_STYLE == "ribs":
         feet_layers.append(("ribs", "#008800", [sq.to_svg_path(rb["plan"]) for rb in ribs()],
                             f"前後一体の足×4（幅{RIB_W}、厚さ{RIB_T}、手前はナット受け・奥は丸棒受け）"))
@@ -599,6 +618,8 @@ def main():
                   bolt=f"M3x{BOLT_L:g}", foot_skin=FOOT_SKIN, tilt_deg=tilt_deg(), foot_d=FOOT_D,
                   rear_foot=REAR_FOOT, rod=rod_info,
                   rod_bolt=(f"M3x{ROD_BOLT_L:g}" if rod_info else None),
+                  rear_bolt=(f"M3x{BOLT_L:g}+nut" if REAR_FOOT == "pla_bars" else None),
+                  rear_bar_heights=([h for pr in pairs() for _, _, h in pr["rear_bar_holes"]] if REAR_FOOT == "pla_bars" else None),
                   rod_thread_engagement=(rod_engagement() if rod_info else None), rod_hole_through=ROD_HOLE_THROUGH, rod_hole_len=(rod_hole_len() if rod_info else None),
                   rod_tape=(dict(tape_w=TAPE_W, groove_w=GROOVE_W, groove_depth=GROOVE_DEPTH, groove_dia=ROD_D - 2 * GROOVE_DEPTH,
                                  tape_t=TAPE_T, squeeze_top=TAPE_SQUEEZE_TOP, gap_rod_to_plate=rod_top_gap())
@@ -607,7 +628,7 @@ def main():
                   rod_flat_w=ROD_FLAT_W, rod_flat_depth=round(rod_flat_depth(), 3), rod_center_z=round(rod_center_z(), 3),
                   rod_tap_depth=(rod_tap_len() if rod_info else ROD_TAP_DEPTH), rod_hole_depth=(rod_hole_len() if rod_info else ROD_HOLE_DEPTH),
                   pairs=([{k: v for k, v in pr.items() if not k.endswith("plan")} for pr in pairs()]
-                         if (rod_info and FOOT_STYLE == "pairs") else None),
+                         if (rod_layout() and FOOT_STYLE == "pairs") else None),
                   foot_style=FOOT_STYLE, ribs=([{k: v for k, v in rb.items() if k != "plan"} for rb in ribs()]
                                                if (rod_info and FOOT_STYLE == "ribs") else None),
                   feet=[{k: (round(v, 2) if isinstance(v, float) else v) for k, v in f.items()} for f in fl],
