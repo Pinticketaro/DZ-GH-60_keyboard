@@ -218,7 +218,10 @@ def build_parts():
         pieces, names = [], []
         for pr in g.pairs():
             pieces += [bar(pr["front_plan"], pr["front_holes"]), bar(pr["rear_plan"], pr["rear_bar_holes"])]
-            names += [f"foot_front_{pr['side']}", f"foot_rear_{pr['side']}"]
+            if g.is_flat_pla():      # 4本とも同じ形 → 1つのSTLを4個印刷
+                names += ["foot_bar_x4", "foot_bar_x4"]
+            else:
+                names += [f"foot_front_{pr['side']}", f"foot_rear_{pr['side']}"]
         parts["feet"] = pieces
         parts["feet_names"] = names
 

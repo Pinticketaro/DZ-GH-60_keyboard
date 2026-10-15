@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v13"
+VER = "v14"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -71,6 +71,7 @@ FOOT_D = 12.0                       # 足（丸い台）の直径。外形より
 TILT_DEG = 5.0                      # キーボードの傾き（仮）。0〜7°程度
 FOOT_SKIN = round(BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) - NUT_T, 2)  # ナットの上に残るPLAの厚さ
 # ---- 奥側の足：真鍮の丸棒（ボトムプレートの奥側の下面に沿わせて左右方向に置く。横から見ると端の丸が見える）
+PLA_TILT_DEG = 0.0                  # 奥もPLAのとき（pla_bars）の傾き。None＝丸棒（ROD_D）と同じ傾き。v14で0°（平ら）
 REAR_FOOT = "pla_bars"              # "pla_bars"＝奥もPLAのバー（v13、丸棒の代わり。傾き・穴位置は丸棒φ8と同じ）／"brass_rod"／"pucks"（丸台8個）
 ROD_D = 8.0                         # 丸棒の直径。傾きはこれで決まる（v12で一旦φ8。v11まではφ12）
 ROD_BOLT_L = 20.0                   # 後ろ4本のボルト長さ（丸棒のめねじにねじ込む）
@@ -118,6 +119,11 @@ def frame_outer_pts():
     if not FRAME_INSET:
         return outer_pts()
     return list(Polygon(outer_pts()).buffer(-FRAME_INSET, join_style=1).exterior.coords)[:-1]
+
+
+def is_flat_pla():
+    """奥もPLAで傾き0°：足4本を同じ形にする。"""
+    return REAR_FOOT == "pla_bars" and PLA_TILT_DEG is not None and abs(PLA_TILT_DEG) < 1e-9
 
 
 def rod_layout():
@@ -176,7 +182,11 @@ def feet():
     import math
     hs = holes()
     y_front = max(y for _, y in hs)
-    if rod_layout():
+    if REAR_FOOT == "pla_bars" and PLA_TILT_DEG is not None:
+        tan = math.tan(math.radians(PLA_TILT_DEG))
+        h_front = _h_front(tan)
+        front = [(x, y) for x, y in hs if abs(y - y_front) < 8]
+    elif rod_layout():
         r = rod()
         yc, zc, rr = r["y"], rod_center_z(), rod_contact_r()
         tan = 0.05
@@ -327,10 +337,35 @@ def pairs():
             rear_bar = [(x, r["y"], round(hf + (y_front - r["y"]) * tan, 2)) for x in hs]
         else:
             rear = _b(x0, r["y"] - SADDLE_W / 2, x1, r["y"] + SADDLE_W / 2).intersection(o)
-        out.append(dict(side=side, x0=round(x0, 2), x1=round(x1, 2),
+        out.append(dict(side=side, x0=round(x0, 2), x1=round(x1, 2), _front=front, _rear=rear, _fc=fs, _hs=hs,
                         front_plan=list(front.exterior.coords)[:-1], rear_plan=list(rear.exterior.coords)[:-1],
                         front_holes=[(f["x"], f["y"], f["h"]) for f in fs], rear_holes=[(x, r["y"]) for x in hs], rear_bar_holes=rear_bar,
                         front_len=round(front.bounds[2] - front.bounds[0], 1), rear_len=round(rear.bounds[2] - rear.bounds[0], 1)))
+    if is_flat_pla():
+        # 4本を同じ形に：各バーを自分の中心へ移し、全部の共通部分を取り、前後・左右に対称化してから戻す
+        from shapely import affinity
+        def ctr(h2):
+            return ((h2[0][0] + h2[1][0]) / 2, (h2[0][1] + h2[1][1]) / 2)
+        bars = []
+        for pr in out:
+            bars.append((pr["_front"], ctr([(f["x"], f["y"]) for f in pr["_fc"]])))
+            bars.append((pr["_rear"], ctr([(x, r["y"]) for x in pr["_hs"]])))
+        S = None
+        for poly, (cx, cy) in bars:
+            loc = affinity.translate(poly, -cx, -cy)
+            S = loc if S is None else S.intersection(loc)
+        S = S.intersection(affinity.scale(S, -1, 1, origin=(0, 0))).intersection(affinity.scale(S, 1, -1, origin=(0, 0)))
+        S = S.simplify(0.01)
+        for pr in out:
+            fc = ctr([(f["x"], f["y"]) for f in pr["_fc"]])
+            rc = ctr([(x, r["y"]) for x in pr["_hs"]])
+            pr["front_plan"] = list(affinity.translate(S, *fc).exterior.coords)[:-1]
+            pr["rear_plan"] = list(affinity.translate(S, *rc).exterior.coords)[:-1]
+            pr["bar_len"] = round(S.bounds[2] - S.bounds[0], 1)
+            pr["front_len"] = pr["rear_len"] = pr["bar_len"]
+    for pr in out:
+        for k in ("_front", "_rear", "_fc", "_hs"):
+            pr.pop(k, None)
     return out
 
 
@@ -355,8 +390,13 @@ def holes():
     inner = Polygon(frame_inner_pts())
     ring = outer.difference(inner)
     out = []
+    rear_corner = {}
     for x, y in HOLES_FROM_OUTER:
         c = (OX + x, OY + y)
+        if is_flat_pla() and x in (7, 308) and y == 119 and x in rear_corner:
+            # 平らなPLAの足：手前の角の穴を奥の角の穴と前後対称に置く（足4本を同じ形にする）
+            out.append((rear_corner[x], round(OY + OUTER_H - (rear_y - OY), 2)))
+            continue
         is_corner = x in (7, 308) and y in (7, 119)
         if is_corner and rod_layout() and y == 7:
             # 後ろの角の穴は中央の穴と同じ列に並べる（丸棒にまっすぐ穴を開けるため）
@@ -369,6 +409,8 @@ def holes():
                 if ring.contains(q) and min(outer.exterior.distance(q), inner.exterior.distance(q)) - HOLE_D / 2 >= HOLE_EDGE_MIN:
                     c = (round(q.x, 2), round(q.y, 2))
                     break
+            rear_corner[x] = c[0]
+            rear_y = c[1]
             out.append(c)
             continue
         if is_corner and CORNER_R > 0:
