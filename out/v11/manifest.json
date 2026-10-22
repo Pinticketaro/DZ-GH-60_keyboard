@@ -1,0 +1,26 @@
+{
+ "version": "v11",
+ "prev": "v09",
+ "date": "2026-10-15",
+ "stage": "モック",
+ "summary": "丸棒を旋盤の溝×4＋ゴムテープで固定する案。加工は旋盤とボール盤だけ、渡せる加工図つき。",
+ "changes": [
+  "v10：丸棒の上面を平面加工（フライス）する案",
+  "丸棒に全周の溝×4（幅10.5・深さ0.8）、ゴムテープ（幅10・厚さ1）を巻く。締めると丸棒がほぼプレートに接する",
+  "受け台をなくした"
+ ],
+ "questions": [],
+ "images": [
+  {
+   "src": "docs/img/preview_v11.png",
+   "caption": "外観",
+   "group": "外観"
+  },
+  {
+   "src": "docs/img/rod_mount_v11.png",
+   "caption": "丸棒の固定（断面）",
+   "group": "断面"
+  }
+ ],
+ "params_diff": "out/v11/params_diff.json"
+}

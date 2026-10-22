@@ -1,0 +1,91 @@
+{
+ "title": "DZ60ケース v16",
+ "up": "z",
+ "views": [
+  "iso",
+  "back",
+  "side"
+ ],
+ "parts": [
+  {
+   "file": "model/top.stl",
+   "name": "トッププレート",
+   "color": "#e6eef2",
+   "opacity": 0.7,
+   "roughness": 0.55,
+   "metalness": 0
+  },
+  {
+   "file": "model/stiffener.stl",
+   "name": "補強板",
+   "color": "#e6eef2",
+   "opacity": 0.7,
+   "roughness": 0.55,
+   "metalness": 0
+  },
+  {
+   "file": "model/frame_left.stl",
+   "name": "枠（左）",
+   "color": "#d9d4cb",
+   "opacity": 1,
+   "roughness": 0.85,
+   "metalness": 0
+  },
+  {
+   "file": "model/frame_right.stl",
+   "name": "枠（右）",
+   "color": "#cfc9bf",
+   "opacity": 1,
+   "roughness": 0.85,
+   "metalness": 0
+  },
+  {
+   "file": "model/bottom.stl",
+   "name": "ボトムプレート",
+   "color": "#bcd6e4",
+   "opacity": 0.8,
+   "roughness": 0.3,
+   "metalness": 0
+  },
+  {
+   "file": "model/pcb.stl",
+   "name": "PCB",
+   "color": "#2d4a35",
+   "opacity": 1,
+   "roughness": 0.5,
+   "metalness": 0
+  },
+  {
+   "file": "model/foot_1.stl",
+   "name": "足1",
+   "color": "#d9d4cb",
+   "opacity": 1,
+   "roughness": 0.85,
+   "metalness": 0
+  },
+  {
+   "file": "model/foot_2.stl",
+   "name": "足2",
+   "color": "#d9d4cb",
+   "opacity": 1,
+   "roughness": 0.85,
+   "metalness": 0
+  },
+  {
+   "file": "model/foot_3.stl",
+   "name": "足3",
+   "color": "#d9d4cb",
+   "opacity": 1,
+   "roughness": 0.85,
+   "metalness": 0
+  },
+  {
+   "file": "model/foot_4.stl",
+   "name": "足4",
+   "color": "#d9d4cb",
+   "opacity": 1,
+   "roughness": 0.85,
+   "metalness": 0
+  }
+ ]
+}

@@ -1,0 +1,378 @@
+<meta charset="utf-8">
+<title>DZ60キーボード（DZ-GH-60） 確認ボード</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<style>
+/* 作業台のカッティングマット：緑がかった無彩色の地に10mm方眼。版ごとの「見る→書く」を1画面で回す縦長レイアウト（広い画面では右にフィードバック欄） */
+:root{
+  --bg:#f2f4f1; --surface:#ffffff; --sunken:#e8ece7; --fg:#1c2420; --muted:#5b6a62; --line:#d3dbd5;
+  --accent:#2c7552; --accent-ink:#ffffff; --grid:rgba(44,117,82,.10);
+  --good:#2c7552; --fix:#b4561d; --ask:#3a5f9e; --open:#a16a10; --done:#2c7552; --no:#7a837e;
+  --f-display:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111613; --surface:#18201c; --sunken:#0d120f; --fg:#e3ebe6; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#5cbf8b; --accent-ink:#0d1a13; --grid:rgba(92,191,139,.09);
+  --good:#5cbf8b; --fix:#e48a52; --ask:#7ea3e6; --open:#e0a84a; --done:#5cbf8b; --no:#8a948f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111613; --surface:#18201c; --sunken:#0d120f; --fg:#e3ebe6; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#5cbf8b; --accent-ink:#0d1a13; --grid:rgba(92,191,139,.09);
+  --good:#5cbf8b; --fix:#e48a52; --ask:#7ea3e6; --open:#e0a84a; --done:#5cbf8b; --no:#8a948f; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.3}
+h1{font-size:clamp(22px,3.2vw,30px);font-weight:700;letter-spacing:.01em}
+h2{font-size:17px;font-weight:700}
+.num,.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1320px;margin:0 auto}
+header.top{padding-block:22px 18px;margin-bottom:18px;border-bottom:1px solid var(--line);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:20px 20px;background-position:-1px -1px}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;color:var(--muted);font-size:13px;margin-top:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:1px 10px;font-size:12px;background:var(--surface);color:var(--fg);white-space:nowrap}
+.chip.stage{border-color:var(--accent);color:var(--accent)}
+.vers{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.vers button{font:500 13px var(--f-mono);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:4px;padding:3px 10px;cursor:pointer}
+.vers button[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.vers button:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+@media (min-width:1100px){.layout{grid-template-columns:minmax(0,1fr) 360px}.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);align-self:start;max-height:calc(100vh - 24px);overflow:auto}}
+section{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+main{display:grid;grid-template-columns:minmax(0,1fr);gap:30px;min-width:0}
+.summary{font-size:16px;max-width:68ch}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;min-width:0}
+.box h3{font-size:13px;color:var(--muted);font-weight:500;letter-spacing:.06em;margin-bottom:6px}
+.box ul{margin:0;padding-left:1.2em}
+.box li{margin:2px 0}
+.q{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.linkbtn{background:none;border:0;color:var(--accent);cursor:pointer;font:inherit;font-size:13px;padding:0;white-space:nowrap;text-decoration:underline;text-underline-offset:3px}
+.hero{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.hero img{display:block;width:100%;height:auto;cursor:zoom-in}
+.hero .viewer{width:100%;aspect-ratio:16/10;max-width:100%;display:block;background:var(--sunken);touch-action:none}
+.hero .bar{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 12px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);flex-wrap:wrap}
+.btn{font:500 13px var(--f-body);border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:4px;padding:5px 12px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.group-title{font-size:13px;color:var(--muted);letter-spacing:.08em;margin-top:4px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+figure img{display:block;width:100%;height:auto;cursor:zoom-in;background:var(--sunken)}
+figcaption{padding:8px 12px;font-size:13px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.slider{position:relative;overflow:hidden;background:var(--sunken);border-radius:var(--r) var(--r) 0 0;touch-action:pan-y}
+.slider img{display:block;width:100%;height:auto;pointer-events:none;user-select:none}
+.slider .after{position:absolute;inset:0;clip-path:inset(0 0 0 var(--pos,50%))}
+.slider .after img{width:100%;height:100%;object-fit:contain}
+.slider .handle{position:absolute;top:0;bottom:0;left:var(--pos,50%);width:2px;background:var(--accent);transform:translateX(-1px)}
+.slider .tag{position:absolute;top:8px;font:500 12px var(--f-mono);background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:0 6px}
+.slider input[type=range]{position:absolute;inset:auto 0 6px 0;width:calc(100% - 24px);margin:0 12px}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:7px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:12px;letter-spacing:.06em}
+td.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+.up{color:var(--fix)} .down{color:var(--ask)}
+.empty{color:var(--muted);font-size:14px;padding:10px 0}
+/* フィードバック */
+.side{min-width:0}
+.side .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+form{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+label.l{font-size:12px;color:var(--muted);letter-spacing:.06em}
+select,textarea{width:100%;max-width:100%;min-width:0;font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:7px 9px}
+textarea{min-height:92px;resize:vertical}
+.kinds{display:flex;gap:6px;flex-wrap:wrap}
+.kinds label{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px;cursor:pointer}
+.kinds input{accent-color:var(--accent)}
+.fb{display:grid;gap:4px;padding:10px 0;border-top:1px solid var(--line)}
+.fb:first-child{border-top:0}
+.fb .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.fb .text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}
+.fb .reply{font-size:13px;color:var(--muted);border-left:2px solid var(--accent);padding-left:8px}
+.k-good{color:var(--good);border-color:var(--good)} .k-fix{color:var(--fix);border-color:var(--fix)} .k-ask{color:var(--ask);border-color:var(--ask)}
+.s-open{color:var(--open);border-color:var(--open)} .s-applied,.s-answered{color:var(--done);border-color:var(--done)} .s-declined{color:var(--no);border-color:var(--no)}
+.note{font-size:13px;color:var(--muted)}
+.status{font-size:13px;min-height:1.4em}
+dialog{border:0;padding:0;background:transparent;max-width:min(96vw,1800px)}
+dialog::backdrop{background:rgba(10,14,12,.82)}
+dialog img{display:block;max-width:100%;max-height:88vh;height:auto;border-radius:4px}
+dialog p{color:#e9efe9;margin:8px 0 0;font-size:14px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">確認ボード</div>
+    <h1 id="project">DZ60キーボード（DZ-GH-60）</h1>
+    <div class="meta" id="meta"></div>
+    <nav class="vers" id="vers" aria-label="版"></nav>
+  </header>
+  <div class="layout">
+    <main id="main"></main>
+    <aside class="side" aria-label="フィードバック">
+      <div class="panel">
+        <div>
+          <h2>フィードバック</h2>
+          <p class="note" id="fbnote">この版を見て気づいたことを書いてください。次の版の変更点として反映します。</p>
+        </div>
+        <form id="fbform" hidden>
+          <div>
+            <label class="l" for="fbtarget">どこについて</label>
+            <select id="fbtarget"></select>
+          </div>
+          <div class="kinds" role="radiogroup" aria-label="種類">
+            <label><input type="radio" name="kind" id="kind-fix" value="fix" checked> 直したい</label>
+            <label><input type="radio" name="kind" id="kind-good" value="good"> 良い</label>
+            <label><input type="radio" name="kind" id="kind-ask" value="ask"> 質問</label>
+          </div>
+          <div>
+            <label class="l" for="fbtext">内容</label>
+            <textarea id="fbtext" placeholder="例：手前の高さがもう少し低いほうがいい／USBの穴の位置が気になる"></textarea>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
+            <span class="status" id="fbstatus" role="status"></span>
+            <button class="btn" type="submit" id="fbsend">送る</button>
+          </div>
+        </form>
+        <div id="fblist"><p class="empty">フィードバックを読み込んでいます…</p></div>
+      </div>
+    </aside>
+  </div>
+</div>
+<dialog id="lb"><img id="lbimg" alt=""><p id="lbcap"></p></dialog>
+
+<script>
+const BOARD = {"project": "DZ60キーボード（DZ-GH-60）", "versions": [{"version": "v05", "prev": null, "date": "2026-10-15", "stage": "モック", "summary": "足をナット受けの丸台8個（傾き5°仮）にし、PCBの下と補強板の下にフォームを入れた版。打鍵感は板厚より留め方とフォームで決まる、という調査結果を反映。", "changes": ["外観・打鍵感の改善を調査して反映（docs/改善案.md）", "足兼ナット受け：φ12×8、傾き5°（仮）", "ケースフォーム（PCBの台座）とプレートフォームの型紙を追加"], "questions": [], "notes": null, "images": [{"src": "img/v05/img01.webp", "caption": "外観", "group": "外観"}, {"src": "img/v05/img02.webp", "caption": "断面", "group": "断面"}], "compare": [], "params_diff": [], "model": null}, {"version": "v06", "prev": "v05", "date": "2026-10-15", "stage": "モック", "summary": "奥側の足を真鍮丸棒φ12に。横から端の丸が見える「アイコニック」な案。", "changes": ["奥の足を真鍮丸棒φ12（仮）に。後ろの4穴を一直線に並べ、M3×20を丸棒のめねじへ", "傾きは丸棒の太さから自動計算"], "questions": [], "notes": null, "images": [{"src": "img/v06/img01.webp", "caption": "外観", "group": "外観"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v05", "after": "v06", "kind": "changed"}, {"key": "holes_pcb", "label": "holes_pcb", "unit": "", "before": [[-5.3, -6.0], [92.7, -8.7], [177.0, -8.7], [290.3, -6.0], [-5.3, 100.6], [92.7, 103.3], [177.0, 103.3], [290.3, 100.6]], "after": [[-4.55, -8.7], [92.7, -8.7], [177.0, -8.7], [289.55, -8.7], [-5.3, 100.6], [92.7, 103.3], [177.0, 103.3], [290.3, 100.6]], "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 5.0, "after": 4.09, "kind": "changed", "delta": -0.91}, {"key": "rear_foot", "label": "rear_foot", "unit": "", "before": null, "after": "brass_rod", "kind": "added"}, {"key": "rod.y", "label": "rod.y", "unit": "", "before": null, "after": -8.700000000000003, "kind": "added"}, {"key": "rod.d", "label": "rod.d", "unit": "", "before": null, "after": 12.0, "kind": "added"}, {"key": "rod.x0", "label": "rod.x0", "unit": "", "before": null, "after": -12.76, "kind": "added"}, {"key": "rod.x1", "label": "rod.x1", "unit": "", "before": null, "after": 297.76, "kind": "added"}, {"key": "rod.length", "label": "rod.length", "unit": "", "before": null, "after": 310.5, "kind": "added"}, {"key": "rod.end_mode", "label": "rod.end_mode", "unit": "", "before": null, "after": "side", "kind": "added"}, {"key": "rod.holes_x", "label": "rod.holes_x", "unit": "", "before": null, "after": [-4.55, 92.7, 177.0, 289.55], "kind": "added"}, {"key": "rod.holes_from_left_end", "label": "rod.holes_from_left_end", "unit": "", "before": null, "after": [8.21, 105.46, 189.76, 302.31], "kind": "added"}, {"key": "rod.plan_overhang_at_rear_corner", "label": "rod.plan_overhang_at_rear_corner", "unit": "", "before": null, "after": 6.5, "kind": "added"}, {"key": "rod_bolt", "label": "rod_bolt", "unit": "", "before": null, "after": "M3x20", "kind": "added"}, {"key": "rod_thread_engagement", "label": "rod_thread_engagement", "unit": "", "before": null, "after": 5.4, "kind": "added"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.3, "y": -6.0, "h": 13.66, "pocket_top": 1.0}, {"x": 92.7, "y": -8.7, "h": 13.9, "pocket_top": 1.0}, {"x": 177.0, "y": -8.7, "h": 13.9, "pocket_top": 1.0}, {"x": 290.3, "y": -6.0, "h": 13.66, "pocket_top": 1.0}, {"x": -5.3, "y": 100.6, "h": 4.34, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.1, "pocket_top": 1.0}, {"x": 177.0, "y": 103.3, "h": 4.1, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.34, "pocket_top": 1.0}], "after": [{"x": -5.3, "y": 100.6, "h": 4.19, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 177.0, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.19, "pocket_top": 1.0}], "kind": "changed"}, {"key": "front_height_no_keycap", "label": "front_height_no_keycap", "unit": "", "before": 18.7, "after": 18.6, "kind": "changed", "delta": -0.1}], "model": null}, {"version": "v09", "prev": "v06", "date": "2026-10-15", "stage": "モック", "summary": "足を左右ずつまとめた形（手前バー×2＋奥の丸棒受け×2）。中央2本のネジを左右対称にして、左右の部品を同じ形に。", "changes": ["v07：丸棒とボトムプレートの間にPLAの受け台（割れ防止）", "v08：前後一体の足（取り消し）", "足を左右ずつまとめる（手前バー×2＋奥の丸棒受け×2）", "中央2本のネジを左右対称（X=92.7／192.3）"], "questions": [], "notes": null, "images": [{"src": "img/v09/img01.webp", "caption": "外観", "group": "外観"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v06", "after": "v09", "kind": "changed"}, {"key": "holes_pcb", "label": "holes_pcb", "unit": "", "before": [[-4.55, -8.7], [92.7, -8.7], [177.0, -8.7], [289.55, -8.7], [-5.3, 100.6], [92.7, 103.3], [177.0, 103.3], [290.3, 100.6]], "after": [[-4.55, -8.7], [92.7, -8.7], [192.3, -8.7], [289.55, -8.7], [-5.3, 100.6], [92.7, 103.3], [192.3, 103.3], [290.3, 100.6]], "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 4.09, "after": 4.6, "kind": "changed", "delta": 0.51}, {"key": "rod.holes_x", "label": "rod.holes_x", "unit": "", "before": [-4.55, 92.7, 177.0, 289.55], "after": [-4.55, 92.7, 192.3, 289.55], "kind": "changed"}, {"key": "rod.holes_from_left_end", "label": "rod.holes_from_left_end", "unit": "", "before": [8.21, 105.46, 189.76, 302.31], "after": [8.21, 105.46, 205.06, 302.31], "kind": "changed"}, {"key": "rod_thread_engagement", "label": "rod_thread_engagement", "unit": "", "before": 5.4, "after": 4.4, "kind": "changed", "delta": -1.0}, {"key": "saddle", "label": "saddle", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "rear_hole_d", "label": "rear_hole_d", "unit": "", "before": null, "after": 4.0, "kind": "added"}, {"key": "pairs", "label": "pairs", "unit": "", "before": null, "after": [{"side": "left", "x0": -11.3, "x1": 98.7, "front_holes": [[-5.3, 100.6, 4.22], [92.7, 103.3, 4.0]], "rear_holes": [[-4.55, -8.700000000000003], [92.7, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}, {"side": "right", "x0": 186.3, "x1": 296.3, "front_holes": [[192.3, 103.3, 4.0], [290.3, 100.6, 4.22]], "rear_holes": [[192.3, -8.700000000000003], [289.55, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}], "kind": "added"}, {"key": "foot_style", "label": "foot_style", "unit": "", "before": null, "after": "pairs", "kind": "added"}, {"key": "ribs", "label": "ribs", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.3, "y": 100.6, "h": 4.19, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 177.0, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.19, "pocket_top": 1.0}], "after": [{"x": -5.3, "y": 100.6, "h": 4.22, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.22, "pocket_top": 1.0}], "kind": "changed"}], "model": null}, {"version": "v11", "prev": "v09", "date": "2026-10-15", "stage": "モック", "summary": "丸棒を旋盤の溝×4＋ゴムテープで固定する案。加工は旋盤とボール盤だけ、渡せる加工図つき。", "changes": ["v10：丸棒の上面を平面加工（フライス）する案", "丸棒に全周の溝×4（幅10.5・深さ0.8）、ゴムテープ（幅10・厚さ1）を巻く。締めると丸棒がほぼプレートに接する", "受け台をなくした"], "questions": [], "notes": null, "images": [{"src": "img/v11/img01.webp", "caption": "外観", "group": "外観"}, {"src": "img/v11/img02.webp", "caption": "丸棒の固定（断面）", "group": "断面"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v09", "after": "v11", "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 4.6, "after": 4.14, "kind": "changed", "delta": -0.46}, {"key": "rod_thread_engagement", "label": "rod_thread_engagement", "unit": "", "before": 4.4, "after": 4.6, "kind": "changed", "delta": 0.2}, {"key": "rod_tape.tape_w", "label": "rod_tape.tape_w", "unit": "", "before": null, "after": 10.0, "kind": "added"}, {"key": "rod_tape.groove_w", "label": "rod_tape.groove_w", "unit": "", "before": null, "after": 10.5, "kind": "added"}, {"key": "rod_tape.groove_depth", "label": "rod_tape.groove_depth", "unit": "", "before": null, "after": 0.8, "kind": "added"}, {"key": "rod_tape.groove_dia", "label": "rod_tape.groove_dia", "unit": "", "before": null, "after": 10.4, "kind": "added"}, {"key": "rod_tape.tape_t", "label": "rod_tape.tape_t", "unit": "", "before": null, "after": 1.0, "kind": "added"}, {"key": "rod_tape.squeeze_top", "label": "rod_tape.squeeze_top", "unit": "", "before": null, "after": 0.19999999999999996, "kind": "added"}, {"key": "rod_tape.gap_rod_to_plate", "label": "rod_tape.gap_rod_to_plate", "unit": "", "before": null, "after": 0.0, "kind": "added"}, {"key": "rod_flat_w", "label": "rod_flat_w", "unit": "", "before": null, "after": 0.0, "kind": "added"}, {"key": "rod_flat_depth", "label": "rod_flat_depth", "unit": "", "before": null, "after": 0.0, "kind": "added"}, {"key": "rod_center_z", "label": "rod_center_z", "unit": "", "before": null, "after": -6.0, "kind": "added"}, {"key": "rod_tap_depth", "label": "rod_tap_depth", "unit": "", "before": null, "after": 6.0, "kind": "added"}, {"key": "rod_hole_depth", "label": "rod_hole_depth", "unit": "", "before": null, "after": 7.5, "kind": "added"}, {"key": "pairs", "label": "pairs", "unit": "", "before": [{"side": "left", "x0": -11.3, "x1": 98.7, "front_holes": [[-5.3, 100.6, 4.22], [92.7, 103.3, 4.0]], "rear_holes": [[-4.55, -8.700000000000003], [92.7, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}, {"side": "right", "x0": 186.3, "x1": 296.3, "front_holes": [[192.3, 103.3, 4.0], [290.3, 100.6, 4.22]], "rear_holes": [[192.3, -8.700000000000003], [289.55, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}], "after": [{"side": "left", "x0": -11.3, "x1": 98.7, "front_holes": [[-5.3, 100.6, 4.2], [92.7, 103.3, 4.0]], "rear_holes": [[-4.55, -8.700000000000003], [92.7, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}, {"side": "right", "x0": 186.3, "x1": 296.3, "front_holes": [[192.3, 103.3, 4.0], [290.3, 100.6, 4.2]], "rear_holes": [[192.3, -8.700000000000003], [289.55, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}], "kind": "changed"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.3, "y": 100.6, "h": 4.22, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.22, "pocket_top": 1.0}], "after": [{"x": -5.3, "y": 100.6, "h": 4.2, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.2, "pocket_top": 1.0}], "kind": "changed"}], "model": null}, {"version": "v13", "prev": "v11", "date": "2026-10-15", "stage": "モック", "summary": "丸棒の加工がネックなので、奥の足も一旦PLAのバーに。穴位置と傾きは丸棒φ8版と同じで、あとで差し替えられる。", "changes": ["v12：角R8・丸棒φ8（めねじは貫通）", "奥の足もPLAのバー×2（高さ8.1）。ボルトは8本ともM3×18＋ナット", "傾き約2.2°"], "questions": [], "notes": null, "images": [{"src": "img/v13/img01.webp", "caption": "外観", "group": "外観"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v11", "after": "v13", "kind": "changed"}, {"key": "corner_r", "label": "corner_r", "unit": "", "before": 12.0, "after": 8.0, "kind": "changed", "delta": -4.0}, {"key": "corner_extent", "label": "corner_extent", "unit": "", "before": 18.05, "after": 12.04, "kind": "changed", "delta": -6.01}, {"key": "holes_pcb", "label": "holes_pcb", "unit": "", "before": [[-4.55, -8.7], [92.7, -8.7], [192.3, -8.7], [289.55, -8.7], [-5.3, 100.6], [92.7, 103.3], [192.3, 103.3], [290.3, 100.6]], "after": [[-5.85, -8.7], [92.7, -8.7], [192.3, -8.7], [290.85, -8.7], [-5.9, 101.2], [92.7, 103.3], [192.3, 103.3], [290.9, 101.2]], "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 4.14, "after": 2.15, "kind": "changed", "delta": -1.99}, {"key": "rear_foot", "label": "rear_foot", "unit": "", "before": "brass_rod", "after": "pla_bars", "kind": "changed"}, {"key": "rod", "label": "rod", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "rod_bolt", "label": "rod_bolt", "unit": "", "before": "M3x20", "after": null, "kind": "changed"}, {"key": "rear_bolt", "label": "rear_bolt", "unit": "", "before": null, "after": "M3x18+nut", "kind": "added"}, {"key": "rear_bar_heights", "label": "rear_bar_heights", "unit": "", "before": null, "after": [8.1, 8.1, 8.1, 8.1], "kind": "added"}, {"key": "rod_thread_engagement", "label": "rod_thread_engagement", "unit": "", "before": 4.6, "after": null, "kind": "changed"}, {"key": "rod_hole_through", "label": "rod_hole_through", "unit": "", "before": null, "after": true, "kind": "added"}, {"key": "rod_hole_len", "label": "rod_hole_len", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "rod_tape", "label": "rod_tape", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "rod_center_z", "label": "rod_center_z", "unit": "", "before": -6.0, "after": -4.0, "kind": "changed", "delta": 2.0}, {"key": "pairs", "label": "pairs", "unit": "", "before": [{"side": "left", "x0": -11.3, "x1": 98.7, "front_holes": [[-5.3, 100.6, 4.2], [92.7, 103.3, 4.0]], "rear_holes": [[-4.55, -8.700000000000003], [92.7, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}, {"side": "right", "x0": 186.3, "x1": 296.3, "front_holes": [[192.3, 103.3, 4.0], [290.3, 100.6, 4.2]], "rear_holes": [[192.3, -8.700000000000003], [289.55, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}], "after": [{"side": "left", "x0": -11.9, "x1": 98.7, "front_holes": [[-5.9, 101.2, 3.98], [92.7, 103.3, 3.9]], "rear_holes": [[-5.85, -8.700000000000003], [92.7, -8.700000000000003]], "rear_bar_holes": [[-5.85, -8.700000000000003, 8.1], [92.7, -8.700000000000003, 8.1]], "front_len": 110.6, "rear_len": 110.5}, {"side": "right", "x0": 186.3, "x1": 296.9, "front_holes": [[192.3, 103.3, 3.9], [290.9, 101.2, 3.98]], "rear_holes": [[192.3, -8.700000000000003], [290.85, -8.700000000000003]], "rear_bar_holes": [[192.3, -8.700000000000003, 8.1], [290.85, -8.700000000000003, 8.1]], "front_len": 110.6, "rear_len": 110.6}], "kind": "changed"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.3, "y": 100.6, "h": 4.2, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.2, "pocket_top": 1.0}], "after": [{"x": -5.9, "y": 101.2, "h": 3.98, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 3.9, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 3.9, "pocket_top": 1.0}, {"x": 290.9, "y": 101.2, "h": 3.98, "pocket_top": 1.0}], "kind": "changed"}, {"key": "front_height_no_keycap", "label": "front_height_no_keycap", "unit": "", "before": 18.6, "after": 18.5, "kind": "changed", "delta": -0.1}, {"key": "rod.d", "label": "rod.d", "unit": "", "before": 12.0, "after": null, "kind": "removed"}, {"key": "rod.end_mode", "label": "rod.end_mode", "unit": "", "before": "side", "after": null, "kind": "removed"}, {"key": "rod.holes_from_left_end", "label": "rod.holes_from_left_end", "unit": "", "before": [8.21, 105.46, 205.06, 302.31], "after": null, "kind": "removed"}, {"key": "rod.holes_x", "label": "rod.holes_x", "unit": "", "before": [-4.55, 92.7, 192.3, 289.55], "after": null, "kind": "removed"}, {"key": "rod.length", "label": "rod.length", "unit": "", "before": 310.5, "after": null, "kind": "removed"}, {"key": "rod.plan_overhang_at_rear_corner", "label": "rod.plan_overhang_at_rear_corner", "unit": "", "before": 6.5, "after": null, "kind": "removed"}, {"key": "rod.x0", "label": "rod.x0", "unit": "", "before": -12.76, "after": null, "kind": "removed"}, {"key": "rod.x1", "label": "rod.x1", "unit": "", "before": 297.76, "after": null, "kind": "removed"}, {"key": "rod.y", "label": "rod.y", "unit": "", "before": -8.700000000000003, "after": null, "kind": "removed"}, {"key": "rod_tape.gap_rod_to_plate", "label": "rod_tape.gap_rod_to_plate", "unit": "", "before": 0.0, "after": null, "kind": "removed"}, {"key": "rod_tape.groove_depth", "label": "rod_tape.groove_depth", "unit": "", "before": 0.8, "after": null, "kind": "removed"}, {"key": "rod_tape.groove_dia", "label": "rod_tape.groove_dia", "unit": "", "before": 10.4, "after": null, "kind": "removed"}, {"key": "rod_tape.groove_w", "label": "rod_tape.groove_w", "unit": "", "before": 10.5, "after": null, "kind": "removed"}, {"key": "rod_tape.squeeze_top", "label": "rod_tape.squeeze_top", "unit": "", "before": 0.19999999999999996, "after": null, "kind": "removed"}, {"key": "rod_tape.tape_t", "label": "rod_tape.tape_t", "unit": "", "before": 1.0, "after": null, "kind": "removed"}, {"key": "rod_tape.tape_w", "label": "rod_tape.tape_w", "unit": "", "before": 10.0, "after": null, "kind": "removed"}], "model": null}, {"version": "v14", "prev": "v13", "date": "2026-10-15", "stage": "モック", "summary": "傾きをなくし（0°）、足を同じ形のPLAのバー×4に。部品の種類が減って、手前の高さ18.3mm。", "changes": ["傾き0°（手首の反りを減らすため）", "手前の角の穴を奥と前後対称に移し、足4本を同じ形に（foot_bar_x4）", "Fusion用の図面セット（A3）・DXF・CSVを追加"], "questions": [], "notes": null, "images": [{"src": "img/v14/img01.webp", "caption": "外観", "group": "外観"}, {"src": "img/v14/img02.webp", "caption": "断面", "group": "断面"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v13", "after": "v14", "kind": "changed"}, {"key": "holes_pcb", "label": "holes_pcb", "unit": "", "before": [[-5.85, -8.7], [92.7, -8.7], [192.3, -8.7], [290.85, -8.7], [-5.9, 101.2], [92.7, 103.3], [192.3, 103.3], [290.9, 101.2]], "after": [[-5.85, -8.7], [92.7, -8.7], [192.3, -8.7], [290.85, -8.7], [-5.85, 103.3], [92.7, 103.3], [192.3, 103.3], [290.85, 103.3]], "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 2.15, "after": 0.0, "kind": "changed", "delta": -2.15}, {"key": "rear_bar_heights", "label": "rear_bar_heights", "unit": "", "before": [8.1, 8.1, 8.1, 8.1], "after": [3.7, 3.7, 3.7, 3.7], "kind": "changed"}, {"key": "pairs", "label": "pairs", "unit": "", "before": [{"side": "left", "x0": -11.9, "x1": 98.7, "front_holes": [[-5.9, 101.2, 3.98], [92.7, 103.3, 3.9]], "rear_holes": [[-5.85, -8.700000000000003], [92.7, -8.700000000000003]], "rear_bar_holes": [[-5.85, -8.700000000000003, 8.1], [92.7, -8.700000000000003, 8.1]], "front_len": 110.6, "rear_len": 110.5}, {"side": "right", "x0": 186.3, "x1": 296.9, "front_holes": [[192.3, 103.3, 3.9], [290.9, 101.2, 3.98]], "rear_holes": [[192.3, -8.700000000000003], [290.85, -8.700000000000003]], "rear_bar_holes": [[192.3, -8.700000000000003, 8.1], [290.85, -8.700000000000003, 8.1]], "front_len": 110.6, "rear_len": 110.6}], "after": [{"side": "left", "x0": -11.85, "x1": 98.7, "front_holes": [[-5.85, 103.3, 3.7], [92.7, 103.3, 3.7]], "rear_holes": [[-5.85, -8.700000000000003], [92.7, -8.700000000000003]], "rear_bar_holes": [[-5.85, -8.700000000000003, 3.7], [92.7, -8.700000000000003, 3.7]], "front_len": 110.6, "rear_len": 110.6, "bar_len": 110.6}, {"side": "right", "x0": 186.3, "x1": 296.85, "front_holes": [[192.3, 103.3, 3.7], [290.85, 103.3, 3.7]], "rear_holes": [[192.3, -8.700000000000003], [290.85, -8.700000000000003]], "rear_bar_holes": [[192.3, -8.700000000000003, 3.7], [290.85, -8.700000000000003, 3.7]], "front_len": 110.6, "rear_len": 110.6, "bar_len": 110.6}], "kind": "changed"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.9, "y": 101.2, "h": 3.98, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 3.9, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 3.9, "pocket_top": 1.0}, {"x": 290.9, "y": 101.2, "h": 3.98, "pocket_top": 1.0}], "after": [{"x": -5.85, "y": 103.3, "h": 3.7, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 3.7, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 3.7, "pocket_top": 1.0}, {"x": 290.85, "y": 103.3, "h": 3.7, "pocket_top": 1.0}], "kind": "changed"}, {"key": "front_height_no_keycap", "label": "front_height_no_keycap", "unit": "", "before": 18.5, "after": 18.3, "kind": "changed", "delta": -0.2}], "model": null}, {"version": "v15", "prev": "v14", "date": "2026-10-15", "stage": "モック", "summary": "枠の左右の継ぎ目を、ピンからほぞ＋縦向きのM3×6ボタンヘッドに。剛性のため。", "changes": ["継ぎ目：ほぞ（左半分の下側の舌 9×4.5×16）＋縦のM3×6（前後の壁に1組ずつ）", "最初の横向きボルト案は取り消し（他のボルトと同じ縦向きに）", "Fusion 360で寸法ベースに組み立てるスクリプトとSTEPを追加"], "questions": [], "notes": null, "images": [{"src": "img/v15/img01.webp", "caption": "外観", "group": "外観"}, {"src": "img/v15/img02.webp", "caption": "継ぎ目", "group": "継ぎ目"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v14", "after": "v15", "kind": "changed"}, {"key": "joint.kind", "label": "joint.kind", "unit": "", "before": null, "after": "tongue_vbolt", "kind": "added"}, {"key": "joint.tongue", "label": "joint.tongue", "unit": "", "before": null, "after": [9.0, 4.5, 16.0], "kind": "added"}, {"key": "joint.clear", "label": "joint.clear", "unit": "", "before": null, "after": 0.2, "kind": "added"}, {"key": "joint.bolt", "label": "joint.bolt", "unit": "", "before": null, "after": "M3x6 button", "kind": "added"}, {"key": "joint.bolt_x_from_split", "label": "joint.bolt_x_from_split", "unit": "", "before": null, "after": 8.0, "kind": "added"}, {"key": "joint.counterbore", "label": "joint.counterbore", "unit": "", "before": null, "after": [6.2, 1.9], "kind": "added"}, {"key": "joint.nut_depth", "label": "joint.nut_depth", "unit": "", "before": null, "after": 2.6, "kind": "added"}, {"key": "joint.wall_centers_y", "label": "joint.wall_centers_y", "unit": "", "before": null, "after": [-8.55, 103.15], "kind": "added"}, {"key": "joint.check.roof", "label": "joint.check.roof", "unit": "", "before": null, "after": 3.4, "kind": "added"}, {"key": "joint.check.seat", "label": "joint.check.seat", "unit": "", "before": null, "after": 6.2, "kind": "added"}, {"key": "joint.check.tip", "label": "joint.check.tip", "unit": "", "before": null, "after": 0.2, "kind": "added"}], "model": null}, {"version": "v16", "prev": "v15", "date": "2026-10-22", "stage": "モック", "summary": "ソリッド感を出すため、枠を下へスカート状に延ばしてボトムプレートを内側に収めた版。横から見えるのは枠と上のアクリル2枚だけ。高さは18.3mmのまま。", "changes": ["枠の下にスカート（厚さ2・高さ2.9）。ボトムプレートは内側にはめ込み、約310×121に（外部レビュー「塊か積層か」→ 塊を選択）", "ボトムプレートのネジ穴をU字の切り欠きに（位置はスカートで決まり、足と共締めのため）", "枠は上面を下にして印刷する前提に。継ぎ目のほぞを上側へ移し、ナットは右半分の下面（ボトムプレートで隠れる）", "図面8枚・DXF・STEP・Fusionスクリプトを更新"], "questions": ["補強板も枠の掘り込みに入れて、側面に見えるアクリルをトッププレート1.5mmだけにするか", "箱型（底一体のPLAトレイ）案と比べるか", "傾き：0°のままか、レビューの指摘どおり3〜5°にするか（手前の高さはキーキャップ込みで約27mm）", "天面のボルト：頭の低いもの／ケースと同じ色にするか", "手前の壁の中央に出る継ぎ目の線：浅いV溝で見せるか、そのままか", "色の組み合わせ（3トーンまで）"], "notes": "本番の前に試し片で測る値：レーザーのカーフ（今は0）、スイッチ穴14.0のはまり、ほぞのすき間0.2、スカートのすき間0.2、ナット溝の二面幅6.1。DZ60の実測（USBの位置）とボトムプレートの実際の厚さ（スカート2.9に対して）も必要。", "images": [{"src": "img/v16/img01.webp", "caption": "外観（キーキャップ付き）", "group": "外観"}, {"src": "img/v16/img02.webp", "caption": "ケースだけ（斜め上・斜め後ろ・右横）", "group": "外観"}, {"src": "img/v16/img03.webp", "caption": "継ぎ目（ほぞを上側へ）", "group": "継ぎ目"}, {"src": "img/v16/img04.webp", "caption": "断面（手前のネジの列）：スカートとボトムプレート", "group": "断面"}, {"src": "img/v16/img05.webp", "caption": "平面図（各部品の輪郭の重ね合わせ）", "group": "平面"}], "compare": [{"before": "img/v16/cmp01a.webp", "after": "img/v16/cmp01b.webp", "caption": "外観 v15 → v16"}, {"src": "img/v16/cmp02.webp", "caption": "横から：ボトムプレートの層が消えた"}], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v15", "after": "v16", "kind": "changed"}, {"key": "skirt.t", "label": "skirt.t", "unit": "", "before": null, "after": 2.0, "kind": "added"}, {"key": "skirt.clear", "label": "skirt.clear", "unit": "", "before": null, "after": 0.2, "kind": "added"}, {"key": "skirt.h", "label": "skirt.h", "unit": "", "before": null, "after": 2.9, "kind": "added"}, {"key": "skirt.bottom_plate_size", "label": "skirt.bottom_plate_size", "unit": "", "before": null, "after": [310.0, 121.0], "kind": "added"}, {"key": "skirt.notch", "label": "skirt.notch", "unit": "", "before": null, "after": true, "kind": "added"}, {"key": "joint.tongue", "label": "joint.tongue", "unit": "", "before": [9.0, 4.5, 16.0], "after": [9.0, 3.8, 16.0], "kind": "changed"}, {"key": "joint.check.under", "label": "joint.check.under", "unit": "", "before": null, "after": 4.1, "kind": "added"}, {"key": "joint.check.roof", "label": "joint.check.roof", "unit": "", "before": 3.4, "after": null, "kind": "removed"}], "model": "img/v16/model.glb.txt"}]};
+const KIND = {fix:"直したい", good:"良い", ask:"質問"};
+const STATUS = {open:"未対応", applied:"反映済み", answered:"回答済み", declined:"見送り"};
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const vers = BOARD.versions;
+let cur = vers[vers.length - 1];
+let feedback = [];         // db から
+let names = {};            // 投稿者の表示名
+let canWrite = false;
+
+function pickFromHash(){
+  const h = decodeURIComponent(location.hash.slice(1));
+  const v = vers.find(x => x.version === h);
+  if (v) cur = v;
+}
+
+function fmt(v, unit){ if (v === null || v === undefined) return "—"; return esc(v) + (typeof v === "number" && unit ? `<span style="color:var(--muted)"> ${esc(unit)}</span>` : ""); }
+
+function renderHeader(){
+  $("#meta").innerHTML = [
+    cur.stage ? `<span class="chip stage">${esc(cur.stage)}</span>` : "",
+    `<span class="num">${esc(cur.version)}</span>`,
+    cur.date ? `<span class="num">${esc(cur.date)}</span>` : "",
+    cur.prev ? `<span>前の版 <span class="num">${esc(cur.prev)}</span></span>` : ""
+  ].join("");
+  $("#vers").innerHTML = vers.map(v => `<button type="button" data-v="${esc(v.version)}" aria-current="${v === cur}">${esc(v.version)}</button>`).join("");
+  $("#vers").querySelectorAll("button").forEach(b => b.onclick = () => { cur = vers.find(v => v.version === b.dataset.v); history.replaceState(null, "", "#" + cur.version); renderAll(); });
+}
+
+function heroHTML(){
+  const img = cur.images[0];
+  if (!img) return "";
+  return `<section aria-label="外観"><div class="hero" id="hero">
+    <img src="${esc(img.src)}" alt="${esc(img.caption)}" data-cap="${esc(img.caption)}">
+    <div class="bar"><span>${esc(img.caption)}</span>
+    ${cur.model ? `<button class="btn ghost" type="button" id="spin">回して見る</button>` : ""}</div></div></section>`;
+}
+
+function mainHTML(){
+  const out = [];
+  out.push(heroHTML());
+  const lists = [];
+  if (cur.summary) out.push(`<p class="summary">${esc(cur.summary)}</p>`);
+  if (cur.changes?.length) lists.push(`<div class="box"><h3>この版で変えたこと</h3><ul>${cur.changes.map(c => `<li>${esc(c)}</li>`).join("")}</ul></div>`);
+  if (cur.questions?.length) lists.push(`<div class="box"><h3>決めてほしいこと</h3><ul>${cur.questions.map((q, i) =>
+      `<li><div class="q"><span>${esc(q)}</span><button type="button" class="linkbtn" data-q="${i}">書く</button></div></li>`).join("")}</ul></div>`);
+  if (lists.length) out.push(`<section class="cols">${lists.join("")}</section>`);
+
+  if (cur.compare?.length){
+    out.push(`<section aria-label="前の版との比較"><h2>前の版との比較</h2><div class="gallery">${cur.compare.map((c, i) => c.before ? `
+      <figure><div class="slider" style="--pos:50%" data-i="${i}">
+        <img src="${esc(c.before)}" alt="${esc(cur.prev || "前の版")}：${esc(c.caption)}">
+        <div class="after"><img src="${esc(c.after)}" alt="${esc(cur.version)}：${esc(c.caption)}"></div>
+        <div class="handle"></div>
+        <span class="tag" style="left:8px">${esc(cur.prev || "前")}</span><span class="tag" style="right:8px">${esc(cur.version)}</span>
+        <input type="range" min="0" max="100" value="50" id="cmp-${esc(cur.version)}-${i}" aria-label="比較の位置">
+      </div><figcaption><span>${esc(c.caption)}</span></figcaption></figure>` : `
+      <figure><img src="${esc(c.src)}" alt="${esc(c.caption)}" data-cap="${esc(c.caption)}"><figcaption><span>${esc(c.caption)}</span></figcaption></figure>`).join("")}</div></section>`);
+  }
+
+  const rest = cur.images.slice(1);
+  if (rest.length){
+    const groups = {};
+    rest.forEach(im => (groups[im.group || "図"] ??= []).push(im));
+    out.push(`<section aria-label="図"><h2>図</h2>${Object.entries(groups).map(([g, ims]) => `
+      <div class="group-title">${esc(g)}</div><div class="gallery">${ims.map(im => `
+        <figure><img src="${esc(im.src)}" alt="${esc(im.caption)}" data-cap="${esc(im.caption)}" loading="lazy">
+        <figcaption><span>${esc(im.caption)}</span></figcaption></figure>`).join("")}</div>`).join("")}</section>`);
+  }
+
+  if (cur.params_diff?.length){
+    out.push(`<section aria-label="寸法の変化"><h2>寸法の変化 <span class="num" style="color:var(--muted);font-weight:400;font-size:13px">${esc(cur.prev || "")} → ${esc(cur.version)}</span></h2>
+      <div class="tablewrap"><table><thead><tr><th>項目</th><th style="text-align:right">前</th><th style="text-align:right">今</th><th style="text-align:right">差</th></tr></thead><tbody>
+      ${cur.params_diff.map(r => `<tr><td>${esc(r.label)}</td><td class="n">${fmt(r.before, r.unit)}</td><td class="n">${fmt(r.after, r.unit)}</td>
+        <td class="n ${r.delta > 0 ? "up" : r.delta < 0 ? "down" : ""}">${r.delta !== undefined ? (r.delta > 0 ? "+" : "") + esc(r.delta) : (r.kind === "added" ? "追加" : r.kind === "removed" ? "削除" : "")}</td></tr>`).join("")}
+      </tbody></table></div></section>`);
+  }
+  if (cur.notes) out.push(`<section><div class="box"><h3>メモ</h3><p style="margin:0;white-space:pre-wrap">${esc(cur.notes)}</p></div></section>`);
+  return out.join("");
+}
+
+function wireMain(){
+  document.querySelectorAll("#main img[data-cap]").forEach(im => im.onclick = () => {
+    $("#lbimg").src = im.src; $("#lbimg").alt = im.alt; $("#lbcap").textContent = im.dataset.cap; $("#lb").showModal();
+  });
+  document.querySelectorAll(".slider").forEach(sl => {
+    const r = sl.querySelector("input");
+    r.oninput = () => sl.style.setProperty("--pos", r.value + "%");
+  });
+  document.querySelectorAll("[data-q]").forEach(b => b.onclick = () => {
+    const t = $("#fbtarget"); t.value = "q:" + b.dataset.q; $("#fbtext").focus();
+  });
+  const spin = $("#spin");
+  if (spin) spin.onclick = () => openViewer(spin);
+}
+
+async function openViewer(btn){
+  btn.disabled = true; btn.textContent = "読み込み中…";
+  try {
+    const THREE = await import("three");
+    const {GLTFLoader} = await import("three/addons/loaders/GLTFLoader.js");
+    const {OrbitControls} = await import("three/addons/controls/OrbitControls.js");
+    const hero = $("#hero");
+    const canvas = document.createElement("canvas"); canvas.className = "viewer";
+    hero.querySelector("img").replaceWith(canvas);
+    const r = new THREE.WebGLRenderer({canvas, antialias: true});
+    r.setPixelRatio(Math.min(2, devicePixelRatio)); r.outputColorSpace = THREE.SRGBColorSpace;
+    const bg = getComputedStyle(document.documentElement).getPropertyValue("--sunken").trim();
+    const s = new THREE.Scene(); s.background = new THREE.Color(bg || "#e8ece7");
+    s.add(new THREE.HemisphereLight(0xffffff, 0x8a948f, 1.6));
+    const d = new THREE.DirectionalLight(0xffffff, 1.8); s.add(d);
+    const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 1e5);
+    const ctl = new OrbitControls(cam, canvas); ctl.enableDamping = true;
+    // 3Dモデルは base64 のテキストで載せている（アーティファクトが .glb を配信しないため）
+    const b64 = (await (await fetch(cur.model)).text()).trim();
+    const bin = Uint8Array.from(atob(b64), ch => ch.charCodeAt(0));
+    const gl = await new GLTFLoader().parseAsync(bin.buffer, "");
+    gl.scene.traverse(o => { if (o.isMesh && o.material.transparent) o.material.depthWrite = false; });
+    s.add(gl.scene);
+    const box = new THREE.Box3().setFromObject(gl.scene), c = box.getCenter(new THREE.Vector3()), R = box.getSize(new THREE.Vector3()).length();
+    cam.position.set(c.x - 0.45 * R, c.y + 0.55 * R, c.z + 0.85 * R); ctl.target.copy(c); cam.near = R / 200; cam.far = R * 20; cam.updateProjectionMatrix();
+    d.position.set(c.x - R, c.y + 2 * R, c.z + R);
+    const size = () => { const w = canvas.clientWidth, h = canvas.clientHeight; r.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); };
+    new ResizeObserver(size).observe(canvas); size();
+    (function loop(){ ctl.update(); r.render(s, cam); requestAnimationFrame(loop); })();
+    btn.textContent = "ドラッグで回転・ピンチで拡大";
+  } catch (e) {
+    btn.textContent = "3Dを読み込めませんでした"; console.error(e);
+  }
+}
+
+function targets(){
+  const t = [["all", "全体"]];
+  cur.images.forEach((im, i) => t.push(["img:" + i, im.caption]));
+  (cur.compare || []).forEach((c, i) => t.push(["cmp:" + i, "比較：" + c.caption]));
+  (cur.questions || []).forEach((q, i) => t.push(["q:" + i, "決めてほしいこと：" + q]));
+  return t;
+}
+function targetLabel(f){
+  const v = vers.find(x => x.version === f.version) || cur;
+  const [k, i] = String(f.target || "all").split(":");
+  if (k === "img") return v.images[i]?.caption || "図";
+  if (k === "cmp") return "比較：" + (v.compare?.[i]?.caption || "");
+  if (k === "q") return v.questions?.[i] || "決めてほしいこと";
+  return "全体";
+}
+
+function fbItem(f){
+  const who = names[f.author] || "";
+  const when = f.createdAt ? new Date(f.createdAt).toLocaleString("ja-JP", {month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"}) : "";
+  return `<div class="fb"><div class="row">
+      <span class="chip k-${esc(f.kind)}">${esc(KIND[f.kind] || f.kind)}</span>
+      <span class="chip s-${esc(f.status || "open")}">${esc(STATUS[f.status || "open"])}${f.resolvedIn ? " " + esc(f.resolvedIn) : ""}</span>
+      <span>${esc(targetLabel(f))}</span></div>
+    <div class="text">${esc(f.text)}</div>
+    ${f.reply ? `<div class="reply">${esc(f.reply)}</div>` : ""}
+    <div class="row"><span class="num">${esc(f.version)}</span><span>${esc(who)}</span><span class="num">${esc(when)}</span></div></div>`;
+}
+
+function renderFeedback(){
+  const sel = $("#fbtarget"), keep = sel.value;
+  sel.innerHTML = targets().map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join("");
+  if ([...sel.options].some(o => o.value === keep)) sel.value = keep;
+  const mine = feedback.filter(f => f.version === cur.version).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+  const older = feedback.filter(f => f.version !== cur.version && (f.status || "open") === "open" && f.version < cur.version);
+  let html = "";
+  html += mine.length ? mine.map(fbItem).join("") : `<p class="empty">${esc(cur.version)} へのフィードバックはまだありません。</p>`;
+  if (older.length) html += `<h3 class="group-title" style="margin-top:12px">前の版からの未対応 ${older.length}件</h3>` + older.map(fbItem).join("");
+  $("#fblist").innerHTML = html;
+}
+
+function renderAll(){
+  pickFromHash();
+  renderHeader();
+  $("#main").innerHTML = mainHTML();
+  wireMain();
+  renderFeedback();
+}
+
+window.addEventListener("hashchange", renderAll);
+renderAll();
+
+// ---- フィードバックの保存（db）。使えない画面では読み取りだけにする
+(async () => {
+  const c = window.claude;
+  const db = c ? await c.use("db") : null;
+  const user = c ? await c.use("user") : null;
+  if (!db){
+    $("#fbnote").textContent = "この画面ではフィードバックを読み書きできません。コメント機能で書き込んでください。";
+    $("#fblist").innerHTML = "";
+    return;
+  }
+  const may = user ? await user.can("data.write") : null;
+  canWrite = may !== false;
+  const myId = user ? await user.id() : null;
+  $("#fbform").hidden = !canWrite;
+  if (!canWrite) $("#fbnote").textContent = "閲覧のみの権限です。書き込むには編集できる権限が必要です。";
+  db.collection("feedback").onSnapshot(async snap => {
+    feedback = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    const ids = [...new Set(feedback.map(f => f.author).filter(Boolean))];
+    if (user && ids.length){
+      try { const ps = await user.profiles(ids); ids.forEach(id => names[id] = ps[id]?.name || ""); } catch (e) {}
+    }
+    renderFeedback();
+  }, err => { $("#fblist").innerHTML = `<p class="empty">フィードバックを読み込めませんでした（${esc(err.code)}）。ページを開き直してください。</p>`; });
+
+  $("#fbform").onsubmit = async e => {
+    e.preventDefault();
+    const text = $("#fbtext").value.trim();
+    if (!text){ $("#fbstatus").textContent = "内容を書いてください"; return; }
+    $("#fbsend").disabled = true; $("#fbstatus").textContent = "送っています…";
+    try {
+      await db.collection("feedback").add({
+        version: cur.version, target: $("#fbtarget").value,
+        kind: document.querySelector('input[name="kind"]:checked').value,
+        text, author: myId, createdAt: new Date().toISOString(), status: "open"
+      });
+      $("#fbtext").value = ""; $("#fbstatus").textContent = "送りました";
+    } catch (err) {
+      $("#fbstatus").textContent = err.code === "invalid_argument" ? "この権限では書き込めません" : "送れませんでした。少し待ってからもう一度送ってください";
+      if (err.code === "invalid_argument"){ canWrite = false; $("#fbform").hidden = true; }
+    } finally { $("#fbsend").disabled = false; }
+  };
+})();
+</script>

@@ -1,0 +1,108 @@
+[
+ {
+  "key": "version",
+  "label": "version",
+  "unit": "",
+  "before": "v14",
+  "after": "v15",
+  "kind": "changed"
+ },
+ {
+  "key": "joint.kind",
+  "label": "joint.kind",
+  "unit": "",
+  "before": null,
+  "after": "tongue_vbolt",
+  "kind": "added"
+ },
+ {
+  "key": "joint.tongue",
+  "label": "joint.tongue",
+  "unit": "",
+  "before": null,
+  "after": [
+   9.0,
+   4.5,
+   16.0
+  ],
+  "kind": "added"
+ },
+ {
+  "key": "joint.clear",
+  "label": "joint.clear",
+  "unit": "",
+  "before": null,
+  "after": 0.2,
+  "kind": "added"
+ },
+ {
+  "key": "joint.bolt",
+  "label": "joint.bolt",
+  "unit": "",
+  "before": null,
+  "after": "M3x6 button",
+  "kind": "added"
+ },
+ {
+  "key": "joint.bolt_x_from_split",
+  "label": "joint.bolt_x_from_split",
+  "unit": "",
+  "before": null,
+  "after": 8.0,
+  "kind": "added"
+ },
+ {
+  "key": "joint.counterbore",
+  "label": "joint.counterbore",
+  "unit": "",
+  "before": null,
+  "after": [
+   6.2,
+   1.9
+  ],
+  "kind": "added"
+ },
+ {
+  "key": "joint.nut_depth",
+  "label": "joint.nut_depth",
+  "unit": "",
+  "before": null,
+  "after": 2.6,
+  "kind": "added"
+ },
+ {
+  "key": "joint.wall_centers_y",
+  "label": "joint.wall_centers_y",
+  "unit": "",
+  "before": null,
+  "after": [
+   -8.55,
+   103.15
+  ],
+  "kind": "added"
+ },
+ {
+  "key": "joint.check.roof",
+  "label": "joint.check.roof",
+  "unit": "",
+  "before": null,
+  "after": 3.4,
+  "kind": "added"
+ },
+ {
+  "key": "joint.check.seat",
+  "label": "joint.check.seat",
+  "unit": "",
+  "before": null,
+  "after": 6.2,
+  "kind": "added"
+ },
+ {
+  "key": "joint.check.tip",
+  "label": "joint.check.tip",
+  "unit": "",
+  "before": null,
+  "after": 0.2,
+  "kind": "added"
+ }
+]

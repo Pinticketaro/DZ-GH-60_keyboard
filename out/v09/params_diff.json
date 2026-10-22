@@ -1,0 +1,295 @@
+[
+ {
+  "key": "version",
+  "label": "version",
+  "unit": "",
+  "before": "v06",
+  "after": "v09",
+  "kind": "changed"
+ },
+ {
+  "key": "holes_pcb",
+  "label": "holes_pcb",
+  "unit": "",
+  "before": [
+   [
+    -4.55,
+    -8.7
+   ],
+   [
+    92.7,
+    -8.7
+   ],
+   [
+    177.0,
+    -8.7
+   ],
+   [
+    289.55,
+    -8.7
+   ],
+   [
+    -5.3,
+    100.6
+   ],
+   [
+    92.7,
+    103.3
+   ],
+   [
+    177.0,
+    103.3
+   ],
+   [
+    290.3,
+    100.6
+   ]
+  ],
+  "after": [
+   [
+    -4.55,
+    -8.7
+   ],
+   [
+    92.7,
+    -8.7
+   ],
+   [
+    192.3,
+    -8.7
+   ],
+   [
+    289.55,
+    -8.7
+   ],
+   [
+    -5.3,
+    100.6
+   ],
+   [
+    92.7,
+    103.3
+   ],
+   [
+    192.3,
+    103.3
+   ],
+   [
+    290.3,
+    100.6
+   ]
+  ],
+  "kind": "changed"
+ },
+ {
+  "key": "tilt_deg",
+  "label": "tilt_deg",
+  "unit": "",
+  "before": 4.09,
+  "after": 4.6,
+  "kind": "changed",
+  "delta": 0.51
+ },
+ {
+  "key": "rod.holes_x",
+  "label": "rod.holes_x",
+  "unit": "",
+  "before": [
+   -4.55,
+   92.7,
+   177.0,
+   289.55
+  ],
+  "after": [
+   -4.55,
+   92.7,
+   192.3,
+   289.55
+  ],
+  "kind": "changed"
+ },
+ {
+  "key": "rod.holes_from_left_end",
+  "label": "rod.holes_from_left_end",
+  "unit": "",
+  "before": [
+   8.21,
+   105.46,
+   189.76,
+   302.31
+  ],
+  "after": [
+   8.21,
+   105.46,
+   205.06,
+   302.31
+  ],
+  "kind": "changed"
+ },
+ {
+  "key": "rod_thread_engagement",
+  "label": "rod_thread_engagement",
+  "unit": "",
+  "before": 5.4,
+  "after": 4.4,
+  "kind": "changed",
+  "delta": -1.0
+ },
+ {
+  "key": "saddle",
+  "label": "saddle",
+  "unit": "",
+  "before": null,
+  "after": null,
+  "kind": "added"
+ },
+ {
+  "key": "rear_hole_d",
+  "label": "rear_hole_d",
+  "unit": "",
+  "before": null,
+  "after": 4.0,
+  "kind": "added"
+ },
+ {
+  "key": "pairs",
+  "label": "pairs",
+  "unit": "",
+  "before": null,
+  "after": [
+   {
+    "side": "left",
+    "x0": -11.3,
+    "x1": 98.7,
+    "front_holes": [
+     [
+      -5.3,
+      100.6,
+      4.22
+     ],
+     [
+      92.7,
+      103.3,
+      4.0
+     ]
+    ],
+    "rear_holes": [
+     [
+      -4.55,
+      -8.700000000000003
+     ],
+     [
+      92.7,
+      -8.700000000000003
+     ]
+    ],
+    "front_len": 110.0,
+    "rear_len": 110.0
+   },
+   {
+    "side": "right",
+    "x0": 186.3,
+    "x1": 296.3,
+    "front_holes": [
+     [
+      192.3,
+      103.3,
+      4.0
+     ],
+     [
+      290.3,
+      100.6,
+      4.22
+     ]
+    ],
+    "rear_holes": [
+     [
+      192.3,
+      -8.700000000000003
+     ],
+     [
+      289.55,
+      -8.700000000000003
+     ]
+    ],
+    "front_len": 110.0,
+    "rear_len": 110.0
+   }
+  ],
+  "kind": "added"
+ },
+ {
+  "key": "foot_style",
+  "label": "foot_style",
+  "unit": "",
+  "before": null,
+  "after": "pairs",
+  "kind": "added"
+ },
+ {
+  "key": "ribs",
+  "label": "ribs",
+  "unit": "",
+  "before": null,
+  "after": null,
+  "kind": "added"
+ },
+ {
+  "key": "feet",
+  "label": "feet",
+  "unit": "",
+  "before": [
+   {
+    "x": -5.3,
+    "y": 100.6,
+    "h": 4.19,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 92.7,
+    "y": 103.3,
+    "h": 4.0,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 177.0,
+    "y": 103.3,
+    "h": 4.0,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 290.3,
+    "y": 100.6,
+    "h": 4.19,
+    "pocket_top": 1.0
+   }
+  ],
+  "after": [
+   {
+    "x": -5.3,
+    "y": 100.6,
+    "h": 4.22,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 92.7,
+    "y": 103.3,
+    "h": 4.0,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 192.3,
+    "y": 103.3,
+    "h": 4.0,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 290.3,
+    "y": 100.6,
+    "h": 4.22,
+    "pocket_top": 1.0
+   }
+  ],
+  "kind": "changed"
+ }
+]

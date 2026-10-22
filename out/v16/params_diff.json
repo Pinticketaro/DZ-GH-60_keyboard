@@ -1,0 +1,85 @@
+[
+ {
+  "key": "version",
+  "label": "version",
+  "unit": "",
+  "before": "v15",
+  "after": "v16",
+  "kind": "changed"
+ },
+ {
+  "key": "skirt.t",
+  "label": "skirt.t",
+  "unit": "",
+  "before": null,
+  "after": 2.0,
+  "kind": "added"
+ },
+ {
+  "key": "skirt.clear",
+  "label": "skirt.clear",
+  "unit": "",
+  "before": null,
+  "after": 0.2,
+  "kind": "added"
+ },
+ {
+  "key": "skirt.h",
+  "label": "skirt.h",
+  "unit": "",
+  "before": null,
+  "after": 2.9,
+  "kind": "added"
+ },
+ {
+  "key": "skirt.bottom_plate_size",
+  "label": "skirt.bottom_plate_size",
+  "unit": "",
+  "before": null,
+  "after": [
+   310.0,
+   121.0
+  ],
+  "kind": "added"
+ },
+ {
+  "key": "skirt.notch",
+  "label": "skirt.notch",
+  "unit": "",
+  "before": null,
+  "after": true,
+  "kind": "added"
+ },
+ {
+  "key": "joint.tongue",
+  "label": "joint.tongue",
+  "unit": "",
+  "before": [
+   9.0,
+   4.5,
+   16.0
+  ],
+  "after": [
+   9.0,
+   3.8,
+   16.0
+  ],
+  "kind": "changed"
+ },
+ {
+  "key": "joint.check.under",
+  "label": "joint.check.under",
+  "unit": "",
+  "before": null,
+  "after": 4.1,
+  "kind": "added"
+ },
+ {
+  "key": "joint.check.roof",
+  "label": "joint.check.roof",
+  "unit": "",
+  "before": 3.4,
+  "after": null,
+  "kind": "removed"
+ }
+]

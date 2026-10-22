@@ -1,0 +1,20 @@
+{
+ "version": "v06",
+ "prev": "v05",
+ "date": "2026-10-15",
+ "stage": "モック",
+ "summary": "奥側の足を真鍮丸棒φ12に。横から端の丸が見える「アイコニック」な案。",
+ "changes": [
+  "奥の足を真鍮丸棒φ12（仮）に。後ろの4穴を一直線に並べ、M3×20を丸棒のめねじへ",
+  "傾きは丸棒の太さから自動計算"
+ ],
+ "questions": [],
+ "images": [
+  {
+   "src": "docs/img/preview_v06.png",
+   "caption": "外観",
+   "group": "外観"
+  }
+ ],
+ "params_diff": "out/v06/params_diff.json"
+}

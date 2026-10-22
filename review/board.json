@@ -1,0 +1,2240 @@
+{
+ "project": "DZ60キーボード（DZ-GH-60）",
+ "versions": [
+  {
+   "version": "v05",
+   "prev": null,
+   "date": "2026-10-15",
+   "stage": "モック",
+   "summary": "足をナット受けの丸台8個（傾き5°仮）にし、PCBの下と補強板の下にフォームを入れた版。打鍵感は板厚より留め方とフォームで決まる、という調査結果を反映。",
+   "changes": [
+    "外観・打鍵感の改善を調査して反映（docs/改善案.md）",
+    "足兼ナット受け：φ12×8、傾き5°（仮）",
+    "ケースフォーム（PCBの台座）とプレートフォームの型紙を追加"
+   ],
+   "questions": [],
+   "notes": null,
+   "images": [
+    {
+     "src": "img/v05/img01.webp",
+     "caption": "外観",
+     "group": "外観"
+    },
+    {
+     "src": "img/v05/img02.webp",
+     "caption": "断面",
+     "group": "断面"
+    }
+   ],
+   "compare": [],
+   "params_diff": [],
+   "model": null
+  },
+  {
+   "version": "v06",
+   "prev": "v05",
+   "date": "2026-10-15",
+   "stage": "モック",
+   "summary": "奥側の足を真鍮丸棒φ12に。横から端の丸が見える「アイコニック」な案。",
+   "changes": [
+    "奥の足を真鍮丸棒φ12（仮）に。後ろの4穴を一直線に並べ、M3×20を丸棒のめねじへ",
+    "傾きは丸棒の太さから自動計算"
+   ],
+   "questions": [],
+   "notes": null,
+   "images": [
+    {
+     "src": "img/v06/img01.webp",
+     "caption": "外観",
+     "group": "外観"
+    }
+   ],
+   "compare": [],
+   "params_diff": [
+    {
+     "key": "version",
+     "label": "version",
+     "unit": "",
+     "before": "v05",
+     "after": "v06",
+     "kind": "changed"
+    },
+    {
+     "key": "holes_pcb",
+     "label": "holes_pcb",
+     "unit": "",
+     "before": [
+      [
+       -5.3,
+       -6.0
+      ],
+      [
+       92.7,
+       -8.7
+      ],
+      [
+       177.0,
+       -8.7
+      ],
+      [
+       290.3,
+       -6.0
+      ],
+      [
+       -5.3,
+       100.6
+      ],
+      [
+       92.7,
+       103.3
+      ],
+      [
+       177.0,
+       103.3
+      ],
+      [
+       290.3,
+       100.6
+      ]
+     ],
+     "after": [
+      [
+       -4.55,
+       -8.7
+      ],
+      [
+       92.7,
+       -8.7
+      ],
+      [
+       177.0,
+       -8.7
+      ],
+      [
+       289.55,
+       -8.7
+      ],
+      [
+       -5.3,
+       100.6
+      ],
+      [
+       92.7,
+       103.3
+      ],
+      [
+       177.0,
+       103.3
+      ],
+      [
+       290.3,
+       100.6
+      ]
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "tilt_deg",
+     "label": "tilt_deg",
+     "unit": "",
+     "before": 5.0,
+     "after": 4.09,
+     "kind": "changed",
+     "delta": -0.91
+    },
+    {
+     "key": "rear_foot",
+     "label": "rear_foot",
+     "unit": "",
+     "before": null,
+     "after": "brass_rod",
+     "kind": "added"
+    },
+    {
+     "key": "rod.y",
+     "label": "rod.y",
+     "unit": "",
+     "before": null,
+     "after": -8.700000000000003,
+     "kind": "added"
+    },
+    {
+     "key": "rod.d",
+     "label": "rod.d",
+     "unit": "",
+     "before": null,
+     "after": 12.0,
+     "kind": "added"
+    },
+    {
+     "key": "rod.x0",
+     "label": "rod.x0",
+     "unit": "",
+     "before": null,
+     "after": -12.76,
+     "kind": "added"
+    },
+    {
+     "key": "rod.x1",
+     "label": "rod.x1",
+     "unit": "",
+     "before": null,
+     "after": 297.76,
+     "kind": "added"
+    },
+    {
+     "key": "rod.length",
+     "label": "rod.length",
+     "unit": "",
+     "before": null,
+     "after": 310.5,
+     "kind": "added"
+    },
+    {
+     "key": "rod.end_mode",
+     "label": "rod.end_mode",
+     "unit": "",
+     "before": null,
+     "after": "side",
+     "kind": "added"
+    },
+    {
+     "key": "rod.holes_x",
+     "label": "rod.holes_x",
+     "unit": "",
+     "before": null,
+     "after": [
+      -4.55,
+      92.7,
+      177.0,
+      289.55
+     ],
+     "kind": "added"
+    },
+    {
+     "key": "rod.holes_from_left_end",
+     "label": "rod.holes_from_left_end",
+     "unit": "",
+     "before": null,
+     "after": [
+      8.21,
+      105.46,
+      189.76,
+      302.31
+     ],
+     "kind": "added"
+    },
+    {
+     "key": "rod.plan_overhang_at_rear_corner",
+     "label": "rod.plan_overhang_at_rear_corner",
+     "unit": "",
+     "before": null,
+     "after": 6.5,
+     "kind": "added"
+    },
+    {
+     "key": "rod_bolt",
+     "label": "rod_bolt",
+     "unit": "",
+     "before": null,
+     "after": "M3x20",
+     "kind": "added"
+    },
+    {
+     "key": "rod_thread_engagement",
+     "label": "rod_thread_engagement",
+     "unit": "",
+     "before": null,
+     "after": 5.4,
+     "kind": "added"
+    },
+    {
+     "key": "feet",
+     "label": "feet",
+     "unit": "",
+     "before": [
+      {
+       "x": -5.3,
+       "y": -6.0,
+       "h": 13.66,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 92.7,
+       "y": -8.7,
+       "h": 13.9,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 177.0,
+       "y": -8.7,
+       "h": 13.9,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 290.3,
+       "y": -6.0,
+       "h": 13.66,
+       "pocket_top": 1.0
+      },
+      {
+       "x": -5.3,
+       "y": 100.6,
+       "h": 4.34,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 92.7,
+       "y": 103.3,
+       "h": 4.1,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 177.0,
+       "y": 103.3,
+       "h": 4.1,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 290.3,
+       "y": 100.6,
+       "h": 4.34,
+       "pocket_top": 1.0
+      }
+     ],
+     "after": [
+      {
+       "x": -5.3,
+       "y": 100.6,
+       "h": 4.19,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 92.7,
+       "y": 103.3,
+       "h": 4.0,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 177.0,
+       "y": 103.3,
+       "h": 4.0,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 290.3,
+       "y": 100.6,
+       "h": 4.19,
+       "pocket_top": 1.0
+      }
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "front_height_no_keycap",
+     "label": "front_height_no_keycap",
+     "unit": "",
+     "before": 18.7,
+     "after": 18.6,
+     "kind": "changed",
+     "delta": -0.1
+    }
+   ],
+   "model": null
+  },
+  {
+   "version": "v09",
+   "prev": "v06",
+   "date": "2026-10-15",
+   "stage": "モック",
+   "summary": "足を左右ずつまとめた形（手前バー×2＋奥の丸棒受け×2）。中央2本のネジを左右対称にして、左右の部品を同じ形に。",
+   "changes": [
+    "v07：丸棒とボトムプレートの間にPLAの受け台（割れ防止）",
+    "v08：前後一体の足（取り消し）",
+    "足を左右ずつまとめる（手前バー×2＋奥の丸棒受け×2）",
+    "中央2本のネジを左右対称（X=92.7／192.3）"
+   ],
+   "questions": [],
+   "notes": null,
+   "images": [
+    {
+     "src": "img/v09/img01.webp",
+     "caption": "外観",
+     "group": "外観"
+    }
+   ],
+   "compare": [],
+   "params_diff": [
+    {
+     "key": "version",
+     "label": "version",
+     "unit": "",
+     "before": "v06",
+     "after": "v09",
+     "kind": "changed"
+    },
+    {
+     "key": "holes_pcb",
+     "label": "holes_pcb",
+     "unit": "",
+     "before": [
+      [
+       -4.55,
+       -8.7
+      ],
+      [
+       92.7,
+       -8.7
+      ],
+      [
+       177.0,
+       -8.7
+      ],
+      [
+       289.55,
+       -8.7
+      ],
+      [
+       -5.3,
+       100.6
+      ],
+      [
+       92.7,
+       103.3
+      ],
+      [
+       177.0,
+       103.3
+      ],
+      [
+       290.3,
+       100.6
+      ]
+     ],
+     "after": [
+      [
+       -4.55,
+       -8.7
+      ],
+      [
+       92.7,
+       -8.7
+      ],
+      [
+       192.3,
+       -8.7
+      ],
+      [
+       289.55,
+       -8.7
+      ],
+      [
+       -5.3,
+       100.6
+      ],
+      [
+       92.7,
+       103.3
+      ],
+      [
+       192.3,
+       103.3
+      ],
+      [
+       290.3,
+       100.6
+      ]
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "tilt_deg",
+     "label": "tilt_deg",
+     "unit": "",
+     "before": 4.09,
+     "after": 4.6,
+     "kind": "changed",
+     "delta": 0.51
+    },
+    {
+     "key": "rod.holes_x",
+     "label": "rod.holes_x",
+     "unit": "",
+     "before": [
+      -4.55,
+      92.7,
+      177.0,
+      289.55
+     ],
+     "after": [
+      -4.55,
+      92.7,
+      192.3,
+      289.55
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "rod.holes_from_left_end",
+     "label": "rod.holes_from_left_end",
+     "unit": "",
+     "before": [
+      8.21,
+      105.46,
+      189.76,
+      302.31
+     ],
+     "after": [
+      8.21,
+      105.46,
+      205.06,
+      302.31
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "rod_thread_engagement",
+     "label": "rod_thread_engagement",
+     "unit": "",
+     "before": 5.4,
+     "after": 4.4,
+     "kind": "changed",
+     "delta": -1.0
+    },
+    {
+     "key": "saddle",
+     "label": "saddle",
+     "unit": "",
+     "before": null,
+     "after": null,
+     "kind": "added"
+    },
+    {
+     "key": "rear_hole_d",
+     "label": "rear_hole_d",
+     "unit": "",
+     "before": null,
+     "after": 4.0,
+     "kind": "added"
+    },
+    {
+     "key": "pairs",
+     "label": "pairs",
+     "unit": "",
+     "before": null,
+     "after": [
+      {
+       "side": "left",
+       "x0": -11.3,
+       "x1": 98.7,
+       "front_holes": [
+        [
+         -5.3,
+         100.6,
+         4.22
+        ],
+        [
+         92.7,
+         103.3,
+         4.0
+        ]
+       ],
+       "rear_holes": [
+        [
+         -4.55,
+         -8.700000000000003
+        ],
+        [
+         92.7,
+         -8.700000000000003
+        ]
+       ],
+       "front_len": 110.0,
+       "rear_len": 110.0
+      },
+      {
+       "side": "right",
+       "x0": 186.3,
+       "x1": 296.3,
+       "front_holes": [
+        [
+         192.3,
+         103.3,
+         4.0
+        ],
+        [
+         290.3,
+         100.6,
+         4.22
+        ]
+       ],
+       "rear_holes": [
+        [
+         192.3,
+         -8.700000000000003
+        ],
+        [
+         289.55,
+         -8.700000000000003
+        ]
+       ],
+       "front_len": 110.0,
+       "rear_len": 110.0
+      }
+     ],
+     "kind": "added"
+    },
+    {
+     "key": "foot_style",
+     "label": "foot_style",
+     "unit": "",
+     "before": null,
+     "after": "pairs",
+     "kind": "added"
+    },
+    {
+     "key": "ribs",
+     "label": "ribs",
+     "unit": "",
+     "before": null,
+     "after": null,
+     "kind": "added"
+    },
+    {
+     "key": "feet",
+     "label": "feet",
+     "unit": "",
+     "before": [
+      {
+       "x": -5.3,
+       "y": 100.6,
+       "h": 4.19,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 92.7,
+       "y": 103.3,
+       "h": 4.0,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 177.0,
+       "y": 103.3,
+       "h": 4.0,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 290.3,
+       "y": 100.6,
+       "h": 4.19,
+       "pocket_top": 1.0
+      }
+     ],
+     "after": [
+      {
+       "x": -5.3,
+       "y": 100.6,
+       "h": 4.22,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 92.7,
+       "y": 103.3,
+       "h": 4.0,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 192.3,
+       "y": 103.3,
+       "h": 4.0,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 290.3,
+       "y": 100.6,
+       "h": 4.22,
+       "pocket_top": 1.0
+      }
+     ],
+     "kind": "changed"
+    }
+   ],
+   "model": null
+  },
+  {
+   "version": "v11",
+   "prev": "v09",
+   "date": "2026-10-15",
+   "stage": "モック",
+   "summary": "丸棒を旋盤の溝×4＋ゴムテープで固定する案。加工は旋盤とボール盤だけ、渡せる加工図つき。",
+   "changes": [
+    "v10：丸棒の上面を平面加工（フライス）する案",
+    "丸棒に全周の溝×4（幅10.5・深さ0.8）、ゴムテープ（幅10・厚さ1）を巻く。締めると丸棒がほぼプレートに接する",
+    "受け台をなくした"
+   ],
+   "questions": [],
+   "notes": null,
+   "images": [
+    {
+     "src": "img/v11/img01.webp",
+     "caption": "外観",
+     "group": "外観"
+    },
+    {
+     "src": "img/v11/img02.webp",
+     "caption": "丸棒の固定（断面）",
+     "group": "断面"
+    }
+   ],
+   "compare": [],
+   "params_diff": [
+    {
+     "key": "version",
+     "label": "version",
+     "unit": "",
+     "before": "v09",
+     "after": "v11",
+     "kind": "changed"
+    },
+    {
+     "key": "tilt_deg",
+     "label": "tilt_deg",
+     "unit": "",
+     "before": 4.6,
+     "after": 4.14,
+     "kind": "changed",
+     "delta": -0.46
+    },
+    {
+     "key": "rod_thread_engagement",
+     "label": "rod_thread_engagement",
+     "unit": "",
+     "before": 4.4,
+     "after": 4.6,
+     "kind": "changed",
+     "delta": 0.2
+    },
+    {
+     "key": "rod_tape.tape_w",
+     "label": "rod_tape.tape_w",
+     "unit": "",
+     "before": null,
+     "after": 10.0,
+     "kind": "added"
+    },
+    {
+     "key": "rod_tape.groove_w",
+     "label": "rod_tape.groove_w",
+     "unit": "",
+     "before": null,
+     "after": 10.5,
+     "kind": "added"
+    },
+    {
+     "key": "rod_tape.groove_depth",
+     "label": "rod_tape.groove_depth",
+     "unit": "",
+     "before": null,
+     "after": 0.8,
+     "kind": "added"
+    },
+    {
+     "key": "rod_tape.groove_dia",
+     "label": "rod_tape.groove_dia",
+     "unit": "",
+     "before": null,
+     "after": 10.4,
+     "kind": "added"
+    },
+    {
+     "key": "rod_tape.tape_t",
+     "label": "rod_tape.tape_t",
+     "unit": "",
+     "before": null,
+     "after": 1.0,
+     "kind": "added"
+    },
+    {
+     "key": "rod_tape.squeeze_top",
+     "label": "rod_tape.squeeze_top",
+     "unit": "",
+     "before": null,
+     "after": 0.19999999999999996,
+     "kind": "added"
+    },
+    {
+     "key": "rod_tape.gap_rod_to_plate",
+     "label": "rod_tape.gap_rod_to_plate",
+     "unit": "",
+     "before": null,
+     "after": 0.0,
+     "kind": "added"
+    },
+    {
+     "key": "rod_flat_w",
+     "label": "rod_flat_w",
+     "unit": "",
+     "before": null,
+     "after": 0.0,
+     "kind": "added"
+    },
+    {
+     "key": "rod_flat_depth",
+     "label": "rod_flat_depth",
+     "unit": "",
+     "before": null,
+     "after": 0.0,
+     "kind": "added"
+    },
+    {
+     "key": "rod_center_z",
+     "label": "rod_center_z",
+     "unit": "",
+     "before": null,
+     "after": -6.0,
+     "kind": "added"
+    },
+    {
+     "key": "rod_tap_depth",
+     "label": "rod_tap_depth",
+     "unit": "",
+     "before": null,
+     "after": 6.0,
+     "kind": "added"
+    },
+    {
+     "key": "rod_hole_depth",
+     "label": "rod_hole_depth",
+     "unit": "",
+     "before": null,
+     "after": 7.5,
+     "kind": "added"
+    },
+    {
+     "key": "pairs",
+     "label": "pairs",
+     "unit": "",
+     "before": [
+      {
+       "side": "left",
+       "x0": -11.3,
+       "x1": 98.7,
+       "front_holes": [
+        [
+         -5.3,
+         100.6,
+         4.22
+        ],
+        [
+         92.7,
+         103.3,
+         4.0
+        ]
+       ],
+       "rear_holes": [
+        [
+         -4.55,
+         -8.700000000000003
+        ],
+        [
+         92.7,
+         -8.700000000000003
+        ]
+       ],
+       "front_len": 110.0,
+       "rear_len": 110.0
+      },
+      {
+       "side": "right",
+       "x0": 186.3,
+       "x1": 296.3,
+       "front_holes": [
+        [
+         192.3,
+         103.3,
+         4.0
+        ],
+        [
+         290.3,
+         100.6,
+         4.22
+        ]
+       ],
+       "rear_holes": [
+        [
+         192.3,
+         -8.700000000000003
+        ],
+        [
+         289.55,
+         -8.700000000000003
+        ]
+       ],
+       "front_len": 110.0,
+       "rear_len": 110.0
+      }
+     ],
+     "after": [
+      {
+       "side": "left",
+       "x0": -11.3,
+       "x1": 98.7,
+       "front_holes": [
+        [
+         -5.3,
+         100.6,
+         4.2
+        ],
+        [
+         92.7,
+         103.3,
+         4.0
+        ]
+       ],
+       "rear_holes": [
+        [
+         -4.55,
+         -8.700000000000003
+        ],
+        [
+         92.7,
+         -8.700000000000003
+        ]
+       ],
+       "front_len": 110.0,
+       "rear_len": 110.0
+      },
+      {
+       "side": "right",
+       "x0": 186.3,
+       "x1": 296.3,
+       "front_holes": [
+        [
+         192.3,
+         103.3,
+         4.0
+        ],
+        [
+         290.3,
+         100.6,
+         4.2
+        ]
+       ],
+       "rear_holes": [
+        [
+         192.3,
+         -8.700000000000003
+        ],
+        [
+         289.55,
+         -8.700000000000003
+        ]
+       ],
+       "front_len": 110.0,
+       "rear_len": 110.0
+      }
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "feet",
+     "label": "feet",
+     "unit": "",
+     "before": [
+      {
+       "x": -5.3,
+       "y": 100.6,
+       "h": 4.22,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 92.7,
+       "y": 103.3,
+       "h": 4.0,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 192.3,
+       "y": 103.3,
+       "h": 4.0,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 290.3,
+       "y": 100.6,
+       "h": 4.22,
+       "pocket_top": 1.0
+      }
+     ],
+     "after": [
+      {
+       "x": -5.3,
+       "y": 100.6,
+       "h": 4.2,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 92.7,
+       "y": 103.3,
+       "h": 4.0,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 192.3,
+       "y": 103.3,
+       "h": 4.0,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 290.3,
+       "y": 100.6,
+       "h": 4.2,
+       "pocket_top": 1.0
+      }
+     ],
+     "kind": "changed"
+    }
+   ],
+   "model": null
+  },
+  {
+   "version": "v13",
+   "prev": "v11",
+   "date": "2026-10-15",
+   "stage": "モック",
+   "summary": "丸棒の加工がネックなので、奥の足も一旦PLAのバーに。穴位置と傾きは丸棒φ8版と同じで、あとで差し替えられる。",
+   "changes": [
+    "v12：角R8・丸棒φ8（めねじは貫通）",
+    "奥の足もPLAのバー×2（高さ8.1）。ボルトは8本ともM3×18＋ナット",
+    "傾き約2.2°"
+   ],
+   "questions": [],
+   "notes": null,
+   "images": [
+    {
+     "src": "img/v13/img01.webp",
+     "caption": "外観",
+     "group": "外観"
+    }
+   ],
+   "compare": [],
+   "params_diff": [
+    {
+     "key": "version",
+     "label": "version",
+     "unit": "",
+     "before": "v11",
+     "after": "v13",
+     "kind": "changed"
+    },
+    {
+     "key": "corner_r",
+     "label": "corner_r",
+     "unit": "",
+     "before": 12.0,
+     "after": 8.0,
+     "kind": "changed",
+     "delta": -4.0
+    },
+    {
+     "key": "corner_extent",
+     "label": "corner_extent",
+     "unit": "",
+     "before": 18.05,
+     "after": 12.04,
+     "kind": "changed",
+     "delta": -6.01
+    },
+    {
+     "key": "holes_pcb",
+     "label": "holes_pcb",
+     "unit": "",
+     "before": [
+      [
+       -4.55,
+       -8.7
+      ],
+      [
+       92.7,
+       -8.7
+      ],
+      [
+       192.3,
+       -8.7
+      ],
+      [
+       289.55,
+       -8.7
+      ],
+      [
+       -5.3,
+       100.6
+      ],
+      [
+       92.7,
+       103.3
+      ],
+      [
+       192.3,
+       103.3
+      ],
+      [
+       290.3,
+       100.6
+      ]
+     ],
+     "after": [
+      [
+       -5.85,
+       -8.7
+      ],
+      [
+       92.7,
+       -8.7
+      ],
+      [
+       192.3,
+       -8.7
+      ],
+      [
+       290.85,
+       -8.7
+      ],
+      [
+       -5.9,
+       101.2
+      ],
+      [
+       92.7,
+       103.3
+      ],
+      [
+       192.3,
+       103.3
+      ],
+      [
+       290.9,
+       101.2
+      ]
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "tilt_deg",
+     "label": "tilt_deg",
+     "unit": "",
+     "before": 4.14,
+     "after": 2.15,
+     "kind": "changed",
+     "delta": -1.99
+    },
+    {
+     "key": "rear_foot",
+     "label": "rear_foot",
+     "unit": "",
+     "before": "brass_rod",
+     "after": "pla_bars",
+     "kind": "changed"
+    },
+    {
+     "key": "rod",
+     "label": "rod",
+     "unit": "",
+     "before": null,
+     "after": null,
+     "kind": "added"
+    },
+    {
+     "key": "rod_bolt",
+     "label": "rod_bolt",
+     "unit": "",
+     "before": "M3x20",
+     "after": null,
+     "kind": "changed"
+    },
+    {
+     "key": "rear_bolt",
+     "label": "rear_bolt",
+     "unit": "",
+     "before": null,
+     "after": "M3x18+nut",
+     "kind": "added"
+    },
+    {
+     "key": "rear_bar_heights",
+     "label": "rear_bar_heights",
+     "unit": "",
+     "before": null,
+     "after": [
+      8.1,
+      8.1,
+      8.1,
+      8.1
+     ],
+     "kind": "added"
+    },
+    {
+     "key": "rod_thread_engagement",
+     "label": "rod_thread_engagement",
+     "unit": "",
+     "before": 4.6,
+     "after": null,
+     "kind": "changed"
+    },
+    {
+     "key": "rod_hole_through",
+     "label": "rod_hole_through",
+     "unit": "",
+     "before": null,
+     "after": true,
+     "kind": "added"
+    },
+    {
+     "key": "rod_hole_len",
+     "label": "rod_hole_len",
+     "unit": "",
+     "before": null,
+     "after": null,
+     "kind": "added"
+    },
+    {
+     "key": "rod_tape",
+     "label": "rod_tape",
+     "unit": "",
+     "before": null,
+     "after": null,
+     "kind": "added"
+    },
+    {
+     "key": "rod_center_z",
+     "label": "rod_center_z",
+     "unit": "",
+     "before": -6.0,
+     "after": -4.0,
+     "kind": "changed",
+     "delta": 2.0
+    },
+    {
+     "key": "pairs",
+     "label": "pairs",
+     "unit": "",
+     "before": [
+      {
+       "side": "left",
+       "x0": -11.3,
+       "x1": 98.7,
+       "front_holes": [
+        [
+         -5.3,
+         100.6,
+         4.2
+        ],
+        [
+         92.7,
+         103.3,
+         4.0
+        ]
+       ],
+       "rear_holes": [
+        [
+         -4.55,
+         -8.700000000000003
+        ],
+        [
+         92.7,
+         -8.700000000000003
+        ]
+       ],
+       "front_len": 110.0,
+       "rear_len": 110.0
+      },
+      {
+       "side": "right",
+       "x0": 186.3,
+       "x1": 296.3,
+       "front_holes": [
+        [
+         192.3,
+         103.3,
+         4.0
+        ],
+        [
+         290.3,
+         100.6,
+         4.2
+        ]
+       ],
+       "rear_holes": [
+        [
+         192.3,
+         -8.700000000000003
+        ],
+        [
+         289.55,
+         -8.700000000000003
+        ]
+       ],
+       "front_len": 110.0,
+       "rear_len": 110.0
+      }
+     ],
+     "after": [
+      {
+       "side": "left",
+       "x0": -11.9,
+       "x1": 98.7,
+       "front_holes": [
+        [
+         -5.9,
+         101.2,
+         3.98
+        ],
+        [
+         92.7,
+         103.3,
+         3.9
+        ]
+       ],
+       "rear_holes": [
+        [
+         -5.85,
+         -8.700000000000003
+        ],
+        [
+         92.7,
+         -8.700000000000003
+        ]
+       ],
+       "rear_bar_holes": [
+        [
+         -5.85,
+         -8.700000000000003,
+         8.1
+        ],
+        [
+         92.7,
+         -8.700000000000003,
+         8.1
+        ]
+       ],
+       "front_len": 110.6,
+       "rear_len": 110.5
+      },
+      {
+       "side": "right",
+       "x0": 186.3,
+       "x1": 296.9,
+       "front_holes": [
+        [
+         192.3,
+         103.3,
+         3.9
+        ],
+        [
+         290.9,
+         101.2,
+         3.98
+        ]
+       ],
+       "rear_holes": [
+        [
+         192.3,
+         -8.700000000000003
+        ],
+        [
+         290.85,
+         -8.700000000000003
+        ]
+       ],
+       "rear_bar_holes": [
+        [
+         192.3,
+         -8.700000000000003,
+         8.1
+        ],
+        [
+         290.85,
+         -8.700000000000003,
+         8.1
+        ]
+       ],
+       "front_len": 110.6,
+       "rear_len": 110.6
+      }
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "feet",
+     "label": "feet",
+     "unit": "",
+     "before": [
+      {
+       "x": -5.3,
+       "y": 100.6,
+       "h": 4.2,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 92.7,
+       "y": 103.3,
+       "h": 4.0,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 192.3,
+       "y": 103.3,
+       "h": 4.0,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 290.3,
+       "y": 100.6,
+       "h": 4.2,
+       "pocket_top": 1.0
+      }
+     ],
+     "after": [
+      {
+       "x": -5.9,
+       "y": 101.2,
+       "h": 3.98,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 92.7,
+       "y": 103.3,
+       "h": 3.9,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 192.3,
+       "y": 103.3,
+       "h": 3.9,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 290.9,
+       "y": 101.2,
+       "h": 3.98,
+       "pocket_top": 1.0
+      }
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "front_height_no_keycap",
+     "label": "front_height_no_keycap",
+     "unit": "",
+     "before": 18.6,
+     "after": 18.5,
+     "kind": "changed",
+     "delta": -0.1
+    },
+    {
+     "key": "rod.d",
+     "label": "rod.d",
+     "unit": "",
+     "before": 12.0,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod.end_mode",
+     "label": "rod.end_mode",
+     "unit": "",
+     "before": "side",
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod.holes_from_left_end",
+     "label": "rod.holes_from_left_end",
+     "unit": "",
+     "before": [
+      8.21,
+      105.46,
+      205.06,
+      302.31
+     ],
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod.holes_x",
+     "label": "rod.holes_x",
+     "unit": "",
+     "before": [
+      -4.55,
+      92.7,
+      192.3,
+      289.55
+     ],
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod.length",
+     "label": "rod.length",
+     "unit": "",
+     "before": 310.5,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod.plan_overhang_at_rear_corner",
+     "label": "rod.plan_overhang_at_rear_corner",
+     "unit": "",
+     "before": 6.5,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod.x0",
+     "label": "rod.x0",
+     "unit": "",
+     "before": -12.76,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod.x1",
+     "label": "rod.x1",
+     "unit": "",
+     "before": 297.76,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod.y",
+     "label": "rod.y",
+     "unit": "",
+     "before": -8.700000000000003,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod_tape.gap_rod_to_plate",
+     "label": "rod_tape.gap_rod_to_plate",
+     "unit": "",
+     "before": 0.0,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod_tape.groove_depth",
+     "label": "rod_tape.groove_depth",
+     "unit": "",
+     "before": 0.8,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod_tape.groove_dia",
+     "label": "rod_tape.groove_dia",
+     "unit": "",
+     "before": 10.4,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod_tape.groove_w",
+     "label": "rod_tape.groove_w",
+     "unit": "",
+     "before": 10.5,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod_tape.squeeze_top",
+     "label": "rod_tape.squeeze_top",
+     "unit": "",
+     "before": 0.19999999999999996,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod_tape.tape_t",
+     "label": "rod_tape.tape_t",
+     "unit": "",
+     "before": 1.0,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "rod_tape.tape_w",
+     "label": "rod_tape.tape_w",
+     "unit": "",
+     "before": 10.0,
+     "after": null,
+     "kind": "removed"
+    }
+   ],
+   "model": null
+  },
+  {
+   "version": "v14",
+   "prev": "v13",
+   "date": "2026-10-15",
+   "stage": "モック",
+   "summary": "傾きをなくし（0°）、足を同じ形のPLAのバー×4に。部品の種類が減って、手前の高さ18.3mm。",
+   "changes": [
+    "傾き0°（手首の反りを減らすため）",
+    "手前の角の穴を奥と前後対称に移し、足4本を同じ形に（foot_bar_x4）",
+    "Fusion用の図面セット（A3）・DXF・CSVを追加"
+   ],
+   "questions": [],
+   "notes": null,
+   "images": [
+    {
+     "src": "img/v14/img01.webp",
+     "caption": "外観",
+     "group": "外観"
+    },
+    {
+     "src": "img/v14/img02.webp",
+     "caption": "断面",
+     "group": "断面"
+    }
+   ],
+   "compare": [],
+   "params_diff": [
+    {
+     "key": "version",
+     "label": "version",
+     "unit": "",
+     "before": "v13",
+     "after": "v14",
+     "kind": "changed"
+    },
+    {
+     "key": "holes_pcb",
+     "label": "holes_pcb",
+     "unit": "",
+     "before": [
+      [
+       -5.85,
+       -8.7
+      ],
+      [
+       92.7,
+       -8.7
+      ],
+      [
+       192.3,
+       -8.7
+      ],
+      [
+       290.85,
+       -8.7
+      ],
+      [
+       -5.9,
+       101.2
+      ],
+      [
+       92.7,
+       103.3
+      ],
+      [
+       192.3,
+       103.3
+      ],
+      [
+       290.9,
+       101.2
+      ]
+     ],
+     "after": [
+      [
+       -5.85,
+       -8.7
+      ],
+      [
+       92.7,
+       -8.7
+      ],
+      [
+       192.3,
+       -8.7
+      ],
+      [
+       290.85,
+       -8.7
+      ],
+      [
+       -5.85,
+       103.3
+      ],
+      [
+       92.7,
+       103.3
+      ],
+      [
+       192.3,
+       103.3
+      ],
+      [
+       290.85,
+       103.3
+      ]
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "tilt_deg",
+     "label": "tilt_deg",
+     "unit": "",
+     "before": 2.15,
+     "after": 0.0,
+     "kind": "changed",
+     "delta": -2.15
+    },
+    {
+     "key": "rear_bar_heights",
+     "label": "rear_bar_heights",
+     "unit": "",
+     "before": [
+      8.1,
+      8.1,
+      8.1,
+      8.1
+     ],
+     "after": [
+      3.7,
+      3.7,
+      3.7,
+      3.7
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "pairs",
+     "label": "pairs",
+     "unit": "",
+     "before": [
+      {
+       "side": "left",
+       "x0": -11.9,
+       "x1": 98.7,
+       "front_holes": [
+        [
+         -5.9,
+         101.2,
+         3.98
+        ],
+        [
+         92.7,
+         103.3,
+         3.9
+        ]
+       ],
+       "rear_holes": [
+        [
+         -5.85,
+         -8.700000000000003
+        ],
+        [
+         92.7,
+         -8.700000000000003
+        ]
+       ],
+       "rear_bar_holes": [
+        [
+         -5.85,
+         -8.700000000000003,
+         8.1
+        ],
+        [
+         92.7,
+         -8.700000000000003,
+         8.1
+        ]
+       ],
+       "front_len": 110.6,
+       "rear_len": 110.5
+      },
+      {
+       "side": "right",
+       "x0": 186.3,
+       "x1": 296.9,
+       "front_holes": [
+        [
+         192.3,
+         103.3,
+         3.9
+        ],
+        [
+         290.9,
+         101.2,
+         3.98
+        ]
+       ],
+       "rear_holes": [
+        [
+         192.3,
+         -8.700000000000003
+        ],
+        [
+         290.85,
+         -8.700000000000003
+        ]
+       ],
+       "rear_bar_holes": [
+        [
+         192.3,
+         -8.700000000000003,
+         8.1
+        ],
+        [
+         290.85,
+         -8.700000000000003,
+         8.1
+        ]
+       ],
+       "front_len": 110.6,
+       "rear_len": 110.6
+      }
+     ],
+     "after": [
+      {
+       "side": "left",
+       "x0": -11.85,
+       "x1": 98.7,
+       "front_holes": [
+        [
+         -5.85,
+         103.3,
+         3.7
+        ],
+        [
+         92.7,
+         103.3,
+         3.7
+        ]
+       ],
+       "rear_holes": [
+        [
+         -5.85,
+         -8.700000000000003
+        ],
+        [
+         92.7,
+         -8.700000000000003
+        ]
+       ],
+       "rear_bar_holes": [
+        [
+         -5.85,
+         -8.700000000000003,
+         3.7
+        ],
+        [
+         92.7,
+         -8.700000000000003,
+         3.7
+        ]
+       ],
+       "front_len": 110.6,
+       "rear_len": 110.6,
+       "bar_len": 110.6
+      },
+      {
+       "side": "right",
+       "x0": 186.3,
+       "x1": 296.85,
+       "front_holes": [
+        [
+         192.3,
+         103.3,
+         3.7
+        ],
+        [
+         290.85,
+         103.3,
+         3.7
+        ]
+       ],
+       "rear_holes": [
+        [
+         192.3,
+         -8.700000000000003
+        ],
+        [
+         290.85,
+         -8.700000000000003
+        ]
+       ],
+       "rear_bar_holes": [
+        [
+         192.3,
+         -8.700000000000003,
+         3.7
+        ],
+        [
+         290.85,
+         -8.700000000000003,
+         3.7
+        ]
+       ],
+       "front_len": 110.6,
+       "rear_len": 110.6,
+       "bar_len": 110.6
+      }
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "feet",
+     "label": "feet",
+     "unit": "",
+     "before": [
+      {
+       "x": -5.9,
+       "y": 101.2,
+       "h": 3.98,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 92.7,
+       "y": 103.3,
+       "h": 3.9,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 192.3,
+       "y": 103.3,
+       "h": 3.9,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 290.9,
+       "y": 101.2,
+       "h": 3.98,
+       "pocket_top": 1.0
+      }
+     ],
+     "after": [
+      {
+       "x": -5.85,
+       "y": 103.3,
+       "h": 3.7,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 92.7,
+       "y": 103.3,
+       "h": 3.7,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 192.3,
+       "y": 103.3,
+       "h": 3.7,
+       "pocket_top": 1.0
+      },
+      {
+       "x": 290.85,
+       "y": 103.3,
+       "h": 3.7,
+       "pocket_top": 1.0
+      }
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "front_height_no_keycap",
+     "label": "front_height_no_keycap",
+     "unit": "",
+     "before": 18.5,
+     "after": 18.3,
+     "kind": "changed",
+     "delta": -0.2
+    }
+   ],
+   "model": null
+  },
+  {
+   "version": "v15",
+   "prev": "v14",
+   "date": "2026-10-15",
+   "stage": "モック",
+   "summary": "枠の左右の継ぎ目を、ピンからほぞ＋縦向きのM3×6ボタンヘッドに。剛性のため。",
+   "changes": [
+    "継ぎ目：ほぞ（左半分の下側の舌 9×4.5×16）＋縦のM3×6（前後の壁に1組ずつ）",
+    "最初の横向きボルト案は取り消し（他のボルトと同じ縦向きに）",
+    "Fusion 360で寸法ベースに組み立てるスクリプトとSTEPを追加"
+   ],
+   "questions": [],
+   "notes": null,
+   "images": [
+    {
+     "src": "img/v15/img01.webp",
+     "caption": "外観",
+     "group": "外観"
+    },
+    {
+     "src": "img/v15/img02.webp",
+     "caption": "継ぎ目",
+     "group": "継ぎ目"
+    }
+   ],
+   "compare": [],
+   "params_diff": [
+    {
+     "key": "version",
+     "label": "version",
+     "unit": "",
+     "before": "v14",
+     "after": "v15",
+     "kind": "changed"
+    },
+    {
+     "key": "joint.kind",
+     "label": "joint.kind",
+     "unit": "",
+     "before": null,
+     "after": "tongue_vbolt",
+     "kind": "added"
+    },
+    {
+     "key": "joint.tongue",
+     "label": "joint.tongue",
+     "unit": "",
+     "before": null,
+     "after": [
+      9.0,
+      4.5,
+      16.0
+     ],
+     "kind": "added"
+    },
+    {
+     "key": "joint.clear",
+     "label": "joint.clear",
+     "unit": "",
+     "before": null,
+     "after": 0.2,
+     "kind": "added"
+    },
+    {
+     "key": "joint.bolt",
+     "label": "joint.bolt",
+     "unit": "",
+     "before": null,
+     "after": "M3x6 button",
+     "kind": "added"
+    },
+    {
+     "key": "joint.bolt_x_from_split",
+     "label": "joint.bolt_x_from_split",
+     "unit": "",
+     "before": null,
+     "after": 8.0,
+     "kind": "added"
+    },
+    {
+     "key": "joint.counterbore",
+     "label": "joint.counterbore",
+     "unit": "",
+     "before": null,
+     "after": [
+      6.2,
+      1.9
+     ],
+     "kind": "added"
+    },
+    {
+     "key": "joint.nut_depth",
+     "label": "joint.nut_depth",
+     "unit": "",
+     "before": null,
+     "after": 2.6,
+     "kind": "added"
+    },
+    {
+     "key": "joint.wall_centers_y",
+     "label": "joint.wall_centers_y",
+     "unit": "",
+     "before": null,
+     "after": [
+      -8.55,
+      103.15
+     ],
+     "kind": "added"
+    },
+    {
+     "key": "joint.check.roof",
+     "label": "joint.check.roof",
+     "unit": "",
+     "before": null,
+     "after": 3.4,
+     "kind": "added"
+    },
+    {
+     "key": "joint.check.seat",
+     "label": "joint.check.seat",
+     "unit": "",
+     "before": null,
+     "after": 6.2,
+     "kind": "added"
+    },
+    {
+     "key": "joint.check.tip",
+     "label": "joint.check.tip",
+     "unit": "",
+     "before": null,
+     "after": 0.2,
+     "kind": "added"
+    }
+   ],
+   "model": null
+  },
+  {
+   "version": "v16",
+   "prev": "v15",
+   "date": "2026-10-22",
+   "stage": "モック",
+   "summary": "ソリッド感を出すため、枠を下へスカート状に延ばしてボトムプレートを内側に収めた版。横から見えるのは枠と上のアクリル2枚だけ。高さは18.3mmのまま。",
+   "changes": [
+    "枠の下にスカート（厚さ2・高さ2.9）。ボトムプレートは内側にはめ込み、約310×121に（外部レビュー「塊か積層か」→ 塊を選択）",
+    "ボトムプレートのネジ穴をU字の切り欠きに（位置はスカートで決まり、足と共締めのため）",
+    "枠は上面を下にして印刷する前提に。継ぎ目のほぞを上側へ移し、ナットは右半分の下面（ボトムプレートで隠れる）",
+    "図面8枚・DXF・STEP・Fusionスクリプトを更新"
+   ],
+   "questions": [
+    "補強板も枠の掘り込みに入れて、側面に見えるアクリルをトッププレート1.5mmだけにするか",
+    "箱型（底一体のPLAトレイ）案と比べるか",
+    "傾き：0°のままか、レビューの指摘どおり3〜5°にするか（手前の高さはキーキャップ込みで約27mm）",
+    "天面のボルト：頭の低いもの／ケースと同じ色にするか",
+    "手前の壁の中央に出る継ぎ目の線：浅いV溝で見せるか、そのままか",
+    "色の組み合わせ（3トーンまで）"
+   ],
+   "notes": "本番の前に試し片で測る値：レーザーのカーフ（今は0）、スイッチ穴14.0のはまり、ほぞのすき間0.2、スカートのすき間0.2、ナット溝の二面幅6.1。DZ60の実測（USBの位置）とボトムプレートの実際の厚さ（スカート2.9に対して）も必要。",
+   "images": [
+    {
+     "src": "img/v16/img01.webp",
+     "caption": "外観（キーキャップ付き）",
+     "group": "外観"
+    },
+    {
+     "src": "img/v16/img02.webp",
+     "caption": "ケースだけ（斜め上・斜め後ろ・右横）",
+     "group": "外観"
+    },
+    {
+     "src": "img/v16/img03.webp",
+     "caption": "継ぎ目（ほぞを上側へ）",
+     "group": "継ぎ目"
+    },
+    {
+     "src": "img/v16/img04.webp",
+     "caption": "断面（手前のネジの列）：スカートとボトムプレート",
+     "group": "断面"
+    },
+    {
+     "src": "img/v16/img05.webp",
+     "caption": "平面図（各部品の輪郭の重ね合わせ）",
+     "group": "平面"
+    }
+   ],
+   "compare": [
+    {
+     "before": "img/v16/cmp01a.webp",
+     "after": "img/v16/cmp01b.webp",
+     "caption": "外観 v15 → v16"
+    },
+    {
+     "src": "img/v16/cmp02.webp",
+     "caption": "横から：ボトムプレートの層が消えた"
+    }
+   ],
+   "params_diff": [
+    {
+     "key": "version",
+     "label": "version",
+     "unit": "",
+     "before": "v15",
+     "after": "v16",
+     "kind": "changed"
+    },
+    {
+     "key": "skirt.t",
+     "label": "skirt.t",
+     "unit": "",
+     "before": null,
+     "after": 2.0,
+     "kind": "added"
+    },
+    {
+     "key": "skirt.clear",
+     "label": "skirt.clear",
+     "unit": "",
+     "before": null,
+     "after": 0.2,
+     "kind": "added"
+    },
+    {
+     "key": "skirt.h",
+     "label": "skirt.h",
+     "unit": "",
+     "before": null,
+     "after": 2.9,
+     "kind": "added"
+    },
+    {
+     "key": "skirt.bottom_plate_size",
+     "label": "skirt.bottom_plate_size",
+     "unit": "",
+     "before": null,
+     "after": [
+      310.0,
+      121.0
+     ],
+     "kind": "added"
+    },
+    {
+     "key": "skirt.notch",
+     "label": "skirt.notch",
+     "unit": "",
+     "before": null,
+     "after": true,
+     "kind": "added"
+    },
+    {
+     "key": "joint.tongue",
+     "label": "joint.tongue",
+     "unit": "",
+     "before": [
+      9.0,
+      4.5,
+      16.0
+     ],
+     "after": [
+      9.0,
+      3.8,
+      16.0
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "joint.check.under",
+     "label": "joint.check.under",
+     "unit": "",
+     "before": null,
+     "after": 4.1,
+     "kind": "added"
+    },
+    {
+     "key": "joint.check.roof",
+     "label": "joint.check.roof",
+     "unit": "",
+     "before": 3.4,
+     "after": null,
+     "kind": "removed"
+    }
+   ],
+   "model": "img/v16/model.glb.txt"
+  }
+ ]
+}

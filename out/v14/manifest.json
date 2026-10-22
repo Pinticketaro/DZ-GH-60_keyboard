@@ -1,0 +1,26 @@
+{
+ "version": "v14",
+ "prev": "v13",
+ "date": "2026-10-15",
+ "stage": "モック",
+ "summary": "傾きをなくし（0°）、足を同じ形のPLAのバー×4に。部品の種類が減って、手前の高さ18.3mm。",
+ "changes": [
+  "傾き0°（手首の反りを減らすため）",
+  "手前の角の穴を奥と前後対称に移し、足4本を同じ形に（foot_bar_x4）",
+  "Fusion用の図面セット（A3）・DXF・CSVを追加"
+ ],
+ "questions": [],
+ "images": [
+  {
+   "src": "docs/img/preview_v14.png",
+   "caption": "外観",
+   "group": "外観"
+  },
+  {
+   "src": "docs/img/section_v14.png",
+   "caption": "断面",
+   "group": "断面"
+  }
+ ],
+ "params_diff": "out/v14/params_diff.json"
+}

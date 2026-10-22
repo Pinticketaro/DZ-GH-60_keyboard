@@ -1,0 +1,26 @@
+{
+ "version": "v15",
+ "prev": "v14",
+ "date": "2026-10-15",
+ "stage": "モック",
+ "summary": "枠の左右の継ぎ目を、ピンからほぞ＋縦向きのM3×6ボタンヘッドに。剛性のため。",
+ "changes": [
+  "継ぎ目：ほぞ（左半分の下側の舌 9×4.5×16）＋縦のM3×6（前後の壁に1組ずつ）",
+  "最初の横向きボルト案は取り消し（他のボルトと同じ縦向きに）",
+  "Fusion 360で寸法ベースに組み立てるスクリプトとSTEPを追加"
+ ],
+ "questions": [],
+ "images": [
+  {
+   "src": "docs/img/preview_v15.png",
+   "caption": "外観",
+   "group": "外観"
+  },
+  {
+   "src": "docs/img/joint_v15.png",
+   "caption": "継ぎ目",
+   "group": "継ぎ目"
+  }
+ ],
+ "params_diff": "out/v15/params_diff.json"
+}

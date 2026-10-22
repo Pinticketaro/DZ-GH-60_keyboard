@@ -1,0 +1,290 @@
+[
+ {
+  "key": "version",
+  "label": "version",
+  "unit": "",
+  "before": "v05",
+  "after": "v06",
+  "kind": "changed"
+ },
+ {
+  "key": "holes_pcb",
+  "label": "holes_pcb",
+  "unit": "",
+  "before": [
+   [
+    -5.3,
+    -6.0
+   ],
+   [
+    92.7,
+    -8.7
+   ],
+   [
+    177.0,
+    -8.7
+   ],
+   [
+    290.3,
+    -6.0
+   ],
+   [
+    -5.3,
+    100.6
+   ],
+   [
+    92.7,
+    103.3
+   ],
+   [
+    177.0,
+    103.3
+   ],
+   [
+    290.3,
+    100.6
+   ]
+  ],
+  "after": [
+   [
+    -4.55,
+    -8.7
+   ],
+   [
+    92.7,
+    -8.7
+   ],
+   [
+    177.0,
+    -8.7
+   ],
+   [
+    289.55,
+    -8.7
+   ],
+   [
+    -5.3,
+    100.6
+   ],
+   [
+    92.7,
+    103.3
+   ],
+   [
+    177.0,
+    103.3
+   ],
+   [
+    290.3,
+    100.6
+   ]
+  ],
+  "kind": "changed"
+ },
+ {
+  "key": "tilt_deg",
+  "label": "tilt_deg",
+  "unit": "",
+  "before": 5.0,
+  "after": 4.09,
+  "kind": "changed",
+  "delta": -0.91
+ },
+ {
+  "key": "rear_foot",
+  "label": "rear_foot",
+  "unit": "",
+  "before": null,
+  "after": "brass_rod",
+  "kind": "added"
+ },
+ {
+  "key": "rod.y",
+  "label": "rod.y",
+  "unit": "",
+  "before": null,
+  "after": -8.700000000000003,
+  "kind": "added"
+ },
+ {
+  "key": "rod.d",
+  "label": "rod.d",
+  "unit": "",
+  "before": null,
+  "after": 12.0,
+  "kind": "added"
+ },
+ {
+  "key": "rod.x0",
+  "label": "rod.x0",
+  "unit": "",
+  "before": null,
+  "after": -12.76,
+  "kind": "added"
+ },
+ {
+  "key": "rod.x1",
+  "label": "rod.x1",
+  "unit": "",
+  "before": null,
+  "after": 297.76,
+  "kind": "added"
+ },
+ {
+  "key": "rod.length",
+  "label": "rod.length",
+  "unit": "",
+  "before": null,
+  "after": 310.5,
+  "kind": "added"
+ },
+ {
+  "key": "rod.end_mode",
+  "label": "rod.end_mode",
+  "unit": "",
+  "before": null,
+  "after": "side",
+  "kind": "added"
+ },
+ {
+  "key": "rod.holes_x",
+  "label": "rod.holes_x",
+  "unit": "",
+  "before": null,
+  "after": [
+   -4.55,
+   92.7,
+   177.0,
+   289.55
+  ],
+  "kind": "added"
+ },
+ {
+  "key": "rod.holes_from_left_end",
+  "label": "rod.holes_from_left_end",
+  "unit": "",
+  "before": null,
+  "after": [
+   8.21,
+   105.46,
+   189.76,
+   302.31
+  ],
+  "kind": "added"
+ },
+ {
+  "key": "rod.plan_overhang_at_rear_corner",
+  "label": "rod.plan_overhang_at_rear_corner",
+  "unit": "",
+  "before": null,
+  "after": 6.5,
+  "kind": "added"
+ },
+ {
+  "key": "rod_bolt",
+  "label": "rod_bolt",
+  "unit": "",
+  "before": null,
+  "after": "M3x20",
+  "kind": "added"
+ },
+ {
+  "key": "rod_thread_engagement",
+  "label": "rod_thread_engagement",
+  "unit": "",
+  "before": null,
+  "after": 5.4,
+  "kind": "added"
+ },
+ {
+  "key": "feet",
+  "label": "feet",
+  "unit": "",
+  "before": [
+   {
+    "x": -5.3,
+    "y": -6.0,
+    "h": 13.66,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 92.7,
+    "y": -8.7,
+    "h": 13.9,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 177.0,
+    "y": -8.7,
+    "h": 13.9,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 290.3,
+    "y": -6.0,
+    "h": 13.66,
+    "pocket_top": 1.0
+   },
+   {
+    "x": -5.3,
+    "y": 100.6,
+    "h": 4.34,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 92.7,
+    "y": 103.3,
+    "h": 4.1,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 177.0,
+    "y": 103.3,
+    "h": 4.1,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 290.3,
+    "y": 100.6,
+    "h": 4.34,
+    "pocket_top": 1.0
+   }
+  ],
+  "after": [
+   {
+    "x": -5.3,
+    "y": 100.6,
+    "h": 4.19,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 92.7,
+    "y": 103.3,
+    "h": 4.0,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 177.0,
+    "y": 103.3,
+    "h": 4.0,
+    "pocket_top": 1.0
+   },
+   {
+    "x": 290.3,
+    "y": 100.6,
+    "h": 4.19,
+    "pocket_top": 1.0
+   }
+  ],
+  "kind": "changed"
+ },
+ {
+  "key": "front_height_no_keycap",
+  "label": "front_height_no_keycap",
+  "unit": "",
+  "before": 18.7,
+  "after": 18.6,
+  "kind": "changed",
+  "delta": -0.1
+ }
+]

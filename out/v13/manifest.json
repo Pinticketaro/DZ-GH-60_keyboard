@@ -1,0 +1,21 @@
+{
+ "version": "v13",
+ "prev": "v11",
+ "date": "2026-10-15",
+ "stage": "モック",
+ "summary": "丸棒の加工がネックなので、奥の足も一旦PLAのバーに。穴位置と傾きは丸棒φ8版と同じで、あとで差し替えられる。",
+ "changes": [
+  "v12：角R8・丸棒φ8（めねじは貫通）",
+  "奥の足もPLAのバー×2（高さ8.1）。ボルトは8本ともM3×18＋ナット",
+  "傾き約2.2°"
+ ],
+ "questions": [],
+ "images": [
+  {
+   "src": "docs/img/preview_v13.png",
+   "caption": "外観",
+   "group": "外観"
+  }
+ ],
+ "params_diff": "out/v13/params_diff.json"
+}

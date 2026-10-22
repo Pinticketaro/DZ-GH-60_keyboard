@@ -1,0 +1,26 @@
+{
+ "version": "v05",
+ "prev": null,
+ "date": "2026-10-15",
+ "stage": "モック",
+ "summary": "足をナット受けの丸台8個（傾き5°仮）にし、PCBの下と補強板の下にフォームを入れた版。打鍵感は板厚より留め方とフォームで決まる、という調査結果を反映。",
+ "changes": [
+  "外観・打鍵感の改善を調査して反映（docs/改善案.md）",
+  "足兼ナット受け：φ12×8、傾き5°（仮）",
+  "ケースフォーム（PCBの台座）とプレートフォームの型紙を追加"
+ ],
+ "questions": [],
+ "images": [
+  {
+   "src": "docs/img/preview_v05.png",
+   "caption": "外観",
+   "group": "外観"
+  },
+  {
+   "src": "docs/img/section_v05.png",
+   "caption": "断面",
+   "group": "断面"
+  }
+ ],
+ "project": "DZ60キーボード（DZ-GH-60）"
+}
