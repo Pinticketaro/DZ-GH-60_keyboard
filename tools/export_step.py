@@ -97,7 +97,11 @@ def build():
                                z["st1"], g.TOP_T)
     parts["stiffener"] = plate(wire_from_pts(D["outer"]), [circle_wire(c, d) for c, d in D["holes"]] +
                                [wire_from_pts(p, seg_long=0.05) for p in D["stiff"]], z["fr1"], g.STIFF_T)
-    parts["bottom_plate"] = plate(wire_from_pts(D["outer"]), [circle_wire(c, d) for c, d in D["holes"]], z["bot0"], g.BOTTOM_T)
+    if g.SKIRT:
+        bp = g.bottom_poly()
+        parts["bottom_plate"] = plate(wire_from_pts([fd.T(p) for p in list(bp.exterior.coords)[:-1]], seg_long=0.6), [], z["bot0"], g.BOTTOM_T)
+    else:
+        parts["bottom_plate"] = plate(wire_from_pts(D["outer"]), [circle_wire(c, d) for c, d in D["holes"]], z["bot0"], g.BOTTOM_T)
 
     # 枠
     fo = wire_from_pts(D["frame_outer"])
@@ -105,6 +109,11 @@ def build():
     frame = plate(fo, [fi] + [circle_wire(c, d) for c, d in D["holes"]], z["bot1"], g.FRAME_H)
     ux = g.USB_X - fd.OX0
     frame = frame.cut(box(ux - g.USB_W / 2, ux + g.USB_W / 2, g.OUTER_H - g.WALL - 1, g.OUTER_H + 1, z["bot1"] - 1, z["fr1"] + 1))
+    if g.SKIRT:
+        ring = g.skirt_ring()
+        sk = plate(wire_from_pts([fd.T(p) for p in list(ring.exterior.coords)[:-1]]),
+                   [wire_from_pts([fd.T(p) for p in list(ring.interiors[0].coords)[:-1]])], z["bot1"] - g.SKIRT_H, g.SKIRT_H)
+        frame = frame.fuse(sk).clean()
     xs = g.SPLIT_X - fd.OX0
     big = 1000
     left = frame.intersect(box(-big, xs, -big, big, -big, big))
@@ -115,13 +124,13 @@ def build():
         for ycp in g.joint_wall_y():
             yc = fd.T((0, ycp))[1]
             bxp = (xs + g.JB_X, yc)
-            tongue = box(xs - 0.5, xs + g.TONGUE_L, yc - g.TONGUE_W / 2, yc + g.TONGUE_W / 2, zb, zb + g.TONGUE_T)
-            mortise = box(xs - 0.01, xs + g.TONGUE_L + c, yc - g.TONGUE_W / 2 - c, yc + g.TONGUE_W / 2 + c, zb - 1, zb + g.TONGUE_T + c)
+            tongue = box(xs - 0.5, xs + g.TONGUE_L, yc - g.TONGUE_W / 2, yc + g.TONGUE_W / 2, top - g.TONGUE_T, top)
+            mortise = box(xs - 0.01, xs + g.TONGUE_L + c, yc - g.TONGUE_W / 2 - c, yc + g.TONGUE_W / 2 + c, top - g.TONGUE_T - c, top + 1)
             hole = cyl(bxp, g.HOLE_D, zb - 1, top + 1)
             cb = cyl(bxp, g.JB_CB_D, top - g.JB_CB_DEPTH, top + 1)
             nut = hex_prism(bxp, g.NUT_POCKET_AF, zb - 1, zb + g.JB_NUT_DEPTH)
-            left = left.fuse(tongue).clean().cut(hole).cut(nut)
-            right = right.cut(mortise).cut(hole).cut(cb)
+            left = left.fuse(tongue).clean().cut(hole).cut(cb)
+            right = right.cut(mortise).cut(hole).cut(nut)
     parts["frame_left"] = left
     parts["frame_right"] = right
 

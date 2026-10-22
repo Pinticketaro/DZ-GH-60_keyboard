@@ -238,10 +238,22 @@ def page_assembly(D, pdf, total):
         ax.add_patch(Rectangle((x0 + y0_ * s, z0 + za * s), (y1_ - y0_) * s, (zb - za) * s, fc=fc, ec="k", lw=lw, hatch=hatch))
     hole_y = D["holes"][4][0][1]                      # 手前の穴のY（7.0）
     hd = g.HOLE_D
-    # ボトムプレート・補強板・トップ（穴の所は切れている）
-    for za, zb, fc in ((z["bot0"], z["bot1"], "#e8f1f6"), (z["fr1"], z["st1"], "#e8f1f6"), (z["st1"], z["top1"], "#dfeaf2")):
+    # 補強板・トップ（穴の所は切れている）
+    for za, zb, fc in ((z["fr1"], z["st1"], "#e8f1f6"), (z["st1"], z["top1"], "#dfeaf2")):
         R(0, hole_y - hd / 2, za, zb, fc, "///")
         R(hole_y + hd / 2, Ymax, za, zb, fc, "///")
+    # ボトムプレート：v16はスカートの内側。この断面（穴の中心）では、切り欠きのため穴の奥側の縁から
+    if g.SKIRT:
+        bp_edge = g.FRAME_INSET + g.SKIRT_T + g.SKIRT_CLEAR
+        R(hole_y + hd / 2, Ymax, z["bot0"], z["bot1"], "#e8f1f6", "///")
+        ax.plot([x0 + bp_edge * s, x0 + (hole_y - hd / 2) * s], [z0 + z["bot1"] * s] * 2, color="k", lw=THIN, ls=(0, (3, 1.5)))
+        ax.plot([x0 + bp_edge * s] * 2, [z0, z0 + z["bot1"] * s], color="k", lw=THIN, ls=(0, (3, 1.5)))
+        ax.plot([x0 + bp_edge * s, x0 + (hole_y - hd / 2) * s], [z0] * 2, color="k", lw=THIN, ls=(0, (3, 1.5)))
+        # スカート
+        R(g.FRAME_INSET, g.FRAME_INSET + g.SKIRT_T, z["bot1"] - g.SKIRT_H, z["bot1"], "#f6e3d6", "\\\\\\")
+    else:
+        R(0, hole_y - hd / 2, z["bot0"], z["bot1"], "#e8f1f6", "///")
+        R(hole_y + hd / 2, Ymax, z["bot0"], z["bot1"], "#e8f1f6", "///")
     # 枠（前の壁）：Y=0.3〜14、穴あり
     wall_in = g.WALL
     R(g.FRAME_INSET, hole_y - hd / 2, z["bot1"], z["fr1"], "#f6e3d6", "\\\\\\")
@@ -281,6 +293,9 @@ def page_assembly(D, pdf, total):
     hdim(ax, x0 + wall_in * s, x0 + pcb_front * s, z0 + (z["top1"] + 6) * s, z0 + z["fr1"] * s, z0 + z["pcb1"] * s, f"{fmt(pcb_front - wall_in)}")
     ax.text(x0, z0 + (z["top1"] + 9) * s, "断面 A-A（X=107.7のネジの列で切り、左から見る。手前が左）　尺度 4:1", fontsize=9)
     ax.text(x0 + 2, z0 - (foot_h + 3.5) * s, "足（ナットは下から）", fontsize=7)
+    if g.SKIRT:
+        bp_edge = g.FRAME_INSET + g.SKIRT_T + g.SKIRT_CLEAR
+        hdim(ax, x0 + g.FRAME_INSET * s, x0 + (g.FRAME_INSET + g.SKIRT_T) * s, z0 - (foot_h + 4.5) * s, z0 + 0.1 * s, z0 + 0.1 * s, f"{g.SKIRT_T:g}（スカート）", above=False)
     ax.text(x0 + (wall_in + 3) * s, z0 + (z["pcb0"] + 0.35) * s, "PCB（ネジ止めなし）", fontsize=7, va="bottom")
     # 部品表
     tx, ty = 282, 280
@@ -289,7 +304,7 @@ def page_assembly(D, pdf, total):
     rows = [["1", "トッププレート", "アクリル 1.5（キャスト）", "1", "2・3・4枚目"],
             ["2", "補強板", "アクリル 2", "1", "2・5枚目"],
             ["3", "枠（左右2分割）", "PLA 高さ8.1", "2", "6枚目"],
-            ["4", "ボトムプレート", "アクリル 3", "1", "2枚目"],
+            ["4", "ボトムプレート", "アクリル 3（スカートの内側）" if g.SKIRT else "アクリル 3", "1", "8枚目" if g.SKIRT else "2枚目"],
             ["5", "足（同じ形）", "PLA 高さ3.7", "4", "7枚目"],
             ["6", "ボルト", "M3×18 ボタンヘッド", "8", "—"],
             ["7", "ナット", "M3（二面幅5.5・厚さ2.4）", "8", "—"],
@@ -313,7 +328,9 @@ def page_assembly(D, pdf, total):
         "5. PCBはネジ止めしない。スイッチの爪でトッププレートに吊られ、下のケースフォームで支える",
         "6. 指示のない寸法の許容差：±0.2（レーザー・3Dプリントの精度に合わせる）",
         f"7. 枠は外形より全周{g.FRAME_INSET:g}内側（印刷の誤差で枠がはみ出さず、層の間に細い影の線が出る）",
-    ])
+    ] + ([f"8. 枠の下はスカート（厚さ{g.SKIRT_T:g}・高さ{g.SKIRT_H:g}）。ボトムプレートはその内側にはめ込み、横からは見えない",
+          f"   スカートはボトムプレートより{g.BOTTOM_T - g.SKIRT_H:.1f}低く、足がボトムプレートを直接押さえる",
+          "   断面の点線＝この断面（穴の中心）ではボトムプレートの切り欠きにあたる部分"] if g.SKIRT else []))
     pdf.savefig(fig)
     return fig
 
@@ -341,7 +358,8 @@ def corner_points(D, n=9):
 
 def page_outline(D, pdf, total):
     fig, ax = setup()
-    frame_and_title(ax, "外形・ネジ穴（共通）／ボトムプレート", "OUT", "アクリル 3（ボトムプレート）", "1:1", 2, total)
+    frame_and_title(ax, "外形・ネジ穴（トッププレート・補強板 共通）" if g.SKIRT else "外形・ネジ穴（共通）／ボトムプレート", "OUT",
+                    "—" if g.SKIRT else "アクリル 3（ボトムプレート）", "1:1", 2, total)
     x0, y0 = 62, 128
     poly(ax, D["outer"], x0, y0)
     for c, d in D["holes"]:
@@ -355,7 +373,7 @@ def page_outline(D, pdf, total):
     leader(ax, (x0 + xs[1] + 1.4, y0 + ys[1] - 1.4), (x0 + 128, y0 + 100), f"4-φ{g.REAR_HOLE_D:.1f} 貫通（奥の列）")
     centerline(ax, (x0 - 3, y0 + ys[0]), (x0 + g.OUTER_W + 3, y0 + ys[0]))
     centerline(ax, (x0 - 3, y0 + ys[1]), (x0 + g.OUTER_W + 3, y0 + ys[1]))
-    ax.text(x0, y0 - 6, f"外形 {g.OUTER_W:g} × {g.OUTER_H:g}、角R{g.CORNER_R:g}（曲率連続、詳細は右下）。トッププレート・補強板・ボトムプレートで共通", fontsize=8, va="top")
+    ax.text(x0, y0 - 6, f"外形 {g.OUTER_W:g} × {g.OUTER_H:g}、角R{g.CORNER_R:g}（曲率連続、詳細は右下）。{"トッププレート・補強板で共通" if g.SKIRT else "トッププレート・補強板・ボトムプレートで共通"}", fontsize=8, va="top")
     # 角の詳細 5:1
     pts, ext = corner_points(D)
     s = 4.0
@@ -380,7 +398,7 @@ def page_outline(D, pdf, total):
         "   長方形を押し出し → 縦の4辺にフィレットR8の",
         "   「曲率（G2）連続」でも近い形になる",
         "2. 正確な形はDXF（dxf/plate_*.dxf の外形）",
-        "3. ボトムプレートはこの図のまま、厚さ3",
+        ("3. ボトムプレートは8枚目（スカートの内側に入る小さい形）" if g.SKIRT else "3. ボトムプレートはこの図のまま、厚さ3"),
         "4. 奥の列φ4.0は丸棒（保留）に戻すときの",
         "   位置のずれ吸収用。PLAの足ならφ3.4でも可",
     ])
@@ -538,6 +556,11 @@ def page_frame(D, pdf, total):
     for yc in [T((0, y))[1] for y in g.joint_wall_y()]:
         ax.add_patch(Rectangle((x0 + split, y0 + yc - g.TONGUE_W / 2), g.TONGUE_L, g.TONGUE_W, fill=False, lw=THIN, ls=(0, (2, 1))))
         ax.add_patch(Circle((x0 + split + g.JB_X, y0 + yc), g.JB_CB_D / 2, fill=False, lw=THIN))
+    if g.SKIRT:      # スカートの内側の線（上からは壁に隠れる）
+        ring = g.skirt_ring()
+        inner = [T(p) for p in list(ring.interiors[0].coords)]
+        line(ax, [(x0 + x, y0 + y) for x, y in inner], lw=THIN, ls=(0, (3, 1.5)))
+        wall_section(ax, 196, 34)
     yj = T((0, g.joint_wall_y()[1]))[1]
     leader(ax, (x0 + split + g.JB_X - 2, y0 + yj + 2), (x0 + split - 50, y0 + 30), "継ぎ目：ほぞ＋縦のM3ボルト（前後の壁、詳細は左下）", ha="right")
     origin_mark(ax, x0, y0)
@@ -552,13 +575,13 @@ def page_frame(D, pdf, total):
     ax.text(x0, y0 + g.OUTER_H + 16, "平面図（上から）。外形は2枚目の外形を全周0.3内側へオフセット。内側の角はR4.5・曲率連続（Apple風）", fontsize=8, va="bottom")
     joint_detail(ax, split)
     notes(ax, 175, 118, [
-        f"1. 高さ {g.FRAME_H:g}（下面＝ボトムプレートの上面、Z=3）",
+        (f"1. 高さ {g.FRAME_H:g}＋スカート{g.SKIRT_H:g}（壁の下面＝ボトムプレートの上面、Z=3）" if g.SKIRT else f"1. 高さ {g.FRAME_H:g}（下面＝ボトムプレートの上面、Z=3）"),
         f"2. ネジ穴：手前 φ{g.HOLE_D:g}、奥 φ{g.REAR_HOLE_D:.1f}（全高を貫通）。位置は2枚目",
         f"3. 分割はX={split:g}。左右とも Ender-3 Pro（220角）に収まる",
-        f"4. 継ぎ目：左半分の下側のほぞ（幅{g.TONGUE_W:g}×厚さ{g.TONGUE_T:g}×長さ{g.TONGUE_L:g}）を右半分のほぞ穴に下から入れ、",
-        f"   縦のM3×{g.JB_L:g}ボタンヘッドで締める。頭は上面のざぐり、ナットはほぞの下面（上下ともプレートで隠れる）",
-        "   ほぞ穴は下が開いた溝で、天井は幅9.4の橋渡し。左右ともいつもの向きでサポート不要",
-        "5. 印刷の向き：左右とも下面（ボトムプレート側）をベッドに",
+        f"4. 継ぎ目：左半分の上側のほぞ（幅{g.TONGUE_W:g}×厚さ{g.TONGUE_T:g}×長さ{g.TONGUE_L:g}）を右半分のほぞ穴に上から入れ、",
+        f"   縦のM3×{g.JB_L:g}ボタンヘッドで締める。頭はほぞの上面のざぐり、ナットは右半分の下面（上下ともプレートで隠れる）",
+        f"   下はスカート（厚さ{g.SKIRT_T:g}・高さ{g.SKIRT_H:g}）。ボトムプレートは内側に入る（点線）",
+        "5. 印刷の向き：左右とも上面（補強板側）をベッドに。ほぞ・ほぞ穴・スカートの段差がサポートなしで刷れる",
         "6. 内側の角の正確な形はDXF（dxf/frame_*.dxf）",
     ])
     pdf.savefig(fig)
@@ -579,6 +602,22 @@ def draw_geom(ax, geom, x0, y0, s, hatch=None, lw=THICK, ls="-"):
         ax.add_patch(PathPatch(Path(verts, codes), fc="none", ec="k", lw=lw, ls=ls, hatch=hatch))
 
 
+def wall_section(ax, x0, y0):
+    """壁の断面（手前の壁、横から）：スカートとボトムプレート。尺度 2:1。"""
+    from shapely.geometry import box as B
+    S = 2.0
+    H, sh = g.FRAME_H, g.SKIRT_H
+    ins, st, cl = g.FRAME_INSET, g.SKIRT_T, g.SKIRT_CLEAR
+    wall = B(ins, 0, g.WALL, H).union(B(ins, -sh, ins + st, 0))
+    draw_geom(ax, wall, x0 - ins * S, y0 + sh * S, S, hatch="\\\\\\")
+    ax.add_patch(Rectangle((x0 + (st + cl) * S, y0 + (sh - g.BOTTOM_T) * S), (g.WALL + 4 - ins - st - cl) * S, g.BOTTOM_T * S,
+                           fill=False, lw=THIN, ls=(0, (3, 1.5))))
+    vdim(ax, y0, y0 + sh * S, x0 - 4, x0, f"{sh:g}", right=False)
+    vdim(ax, y0 + sh * S, y0 + (sh + H) * S, x0 - 4, x0, f"{H:g}", right=False)
+    hdim(ax, x0, x0 + st * S, y0 - 4, y0, y0, f"{st:g}", above=False)
+    ax.text(x0, y0 + (sh + H) * S + 3, "壁の断面（手前）2:1。点線＝ボトムプレート", fontsize=6.5, va="bottom")
+
+
 def joint_detail(ax, split):
     """継ぎ目の詳細（壁の中心で切った断面と、上から見た図）。尺度 2:1。u＝継ぎ目からのX、v＝壁の中心からのY。"""
     from shapely.geometry import box as B
@@ -592,11 +631,12 @@ def joint_detail(ax, split):
     rr = g.NUT_POCKET_AF / math.sqrt(3)
     # ---- 断面（壁の中心、横から）
     zy0 = 30
-    leftG = B(u0, 0, 0, H).union(B(-0.01, 0, g.TONGUE_L, g.TONGUE_T)).difference(
-        B(bxu - g.NUT_POCKET_AF / 2, -1, bxu + g.NUT_POCKET_AF / 2, g.JB_NUT_DEPTH)).difference(
+    T_ = g.TONGUE_T
+    leftG = B(u0, 0, 0, H).union(B(-0.01, H - T_, g.TONGUE_L, H)).difference(
+        B(bxu - g.JB_CB_D / 2, H - g.JB_CB_DEPTH, bxu + g.JB_CB_D / 2, H + 1)).difference(
         B(bxu - g.HOLE_D / 2, -1, bxu + g.HOLE_D / 2, H + 1))
-    rightG = B(0, 0, u1, H).difference(B(-0.01, -1, g.TONGUE_L + c, g.TONGUE_T + c)).difference(
-        B(bxu - g.HOLE_D / 2, -1, bxu + g.HOLE_D / 2, H + 1)).difference(B(bxu - g.JB_CB_D / 2, H - g.JB_CB_DEPTH, bxu + g.JB_CB_D / 2, H + 1))
+    rightG = B(0, 0, u1, H).difference(B(-0.01, H - T_ - c, g.TONGUE_L + c, H + 1)).difference(
+        B(bxu - g.HOLE_D / 2, -1, bxu + g.HOLE_D / 2, H + 1)).difference(B(bxu - g.NUT_POCKET_AF / 2, -1, bxu + g.NUT_POCKET_AF / 2, g.JB_NUT_DEPTH))
     draw_geom(ax, leftG, ux0, zy0, S, hatch="////")
     draw_geom(ax, rightG, ux0, zy0, S, hatch="\\\\")
     seat = H - g.JB_CB_DEPTH
@@ -606,11 +646,12 @@ def joint_detail(ax, split):
     centerline(ax, (ux0 + bxu * S, zy0 - 4), (ux0 + bxu * S, zy0 + H * S + 4))
     line(ax, [(ux0, zy0 - 3), (ux0, zy0 + H * S + 3)], lw=THIN, ls=(0, (10, 2, 2, 2)))
     vdim(ax, zy0, zy0 + H * S, ux0 + u0 * S - 4, ux0 + u0 * S, f"{H:g}", right=False)
-    vdim(ax, zy0, zy0 + g.TONGUE_T * S, ux0 + u1 * S + 5, ux0 + (g.TONGUE_L + c) * S, f"{g.TONGUE_T:g}（ほぞ）／穴{g.TONGUE_T + c:.1f}")
-    vdim(ax, zy0 + (H - g.JB_CB_DEPTH) * S, zy0 + H * S, ux0 + u1 * S + 5, ux0 + (bxu + g.JB_CB_D / 2) * S, f"{g.JB_CB_DEPTH:g}（ざぐり）")
+    vdim(ax, zy0 + (H - g.TONGUE_T) * S, zy0 + H * S, ux0 + u1 * S + 5, ux0 + (g.TONGUE_L + c) * S, f"{g.TONGUE_T:g}（ほぞ）／穴{g.TONGUE_T + c:.1f}")
+    vdim(ax, zy0 + (H - g.JB_CB_DEPTH) * S, zy0 + H * S, ux0 + u0 * S - 16, ux0 + (bxu - g.JB_CB_D / 2) * S, f"{g.JB_CB_DEPTH:g}（ざぐり）", right=False)
+    vdim(ax, zy0, zy0 + g.JB_NUT_DEPTH * S, ux0 + u1 * S + 5, ux0 + (bxu + g.NUT_POCKET_AF / 2) * S, f"{g.JB_NUT_DEPTH:g}（ナット溝）")
     hdim(ax, ux0, ux0 + bxu * S, zy0 - 6, zy0, zy0, f"{bxu:g}", above=False)
-    hdim(ax, ux0, ux0 + g.TONGUE_L * S, zy0 + H * S + 6, zy0 + g.TONGUE_T * S, zy0 + H * S, f"{g.TONGUE_L:g}（ほぞ）／穴{g.TONGUE_L + c:.1f}")
-    ax.text(ux0 + u0 * S, zy0 - 13, f"断面（壁の中心）。左＝左半分（ほぞ・ナット溝 深さ{g.JB_NUT_DEPTH:g}）、右＝右半分（ほぞ穴・ざぐり）。M3×{g.JB_L:g}ボタンヘッド、先はナットの下面", fontsize=6.6, va="top")
+    hdim(ax, ux0, ux0 + g.TONGUE_L * S, zy0 + H * S + 6, zy0 + H * S, zy0 + H * S, f"{g.TONGUE_L:g}（ほぞ）／穴{g.TONGUE_L + c:.1f}")
+    ax.text(ux0 + u0 * S, zy0 - 13, f"断面（壁の中心、上が補強板側）。左＝左半分（上側のほぞ・ざぐり）、右＝右半分（ほぞ穴・下面のナット溝）。M3×{g.JB_L:g}ボタンヘッド", fontsize=6.6, va="top")
     # ---- 上から見た図
     py0 = 74
     pv0 = py0 + wall / 2 * S
@@ -626,7 +667,40 @@ def joint_detail(ax, split):
     vdim(ax, pv0 - (g.TONGUE_W / 2) * S, pv0 + (g.TONGUE_W / 2) * S, ux0 + u1 * S + 5, ux0 + (g.TONGUE_L + c) * S, f"{g.TONGUE_W:g}（ほぞ）／穴{g.TONGUE_W + 2 * c:.1f}")
     vdim(ax, pv0 - wall / 2 * S, pv0 + wall / 2 * S, ux0 + u0 * S - 4, ux0 + u0 * S, f"{wall:g}", right=False)
     ax.text(ux0 + u0 * S, py0 + wall * S + 4, "継ぎ目の詳細（上から。前後の壁とも同じ）　尺度 2:1", fontsize=7.5, va="bottom")
-    ax.text(ux0 + u0 * S, py0 - 3, f"ざぐり φ{g.JB_CB_D:g}（実線）、ボルト穴 φ{g.HOLE_D:g}、ナット溝 二面幅{g.NUT_POCKET_AF:g}（下から）、ほぞ穴（点線）は片側{c:g}大きい", fontsize=6.6, va="top")
+    ax.text(ux0 + u0 * S, py0 - 3, f"ざぐり φ{g.JB_CB_D:g}（実線、ほぞの上面）、ボルト穴 φ{g.HOLE_D:g}、ナット溝 二面幅{g.NUT_POCKET_AF:g}（右半分の下面から）、ほぞ穴（点線）は片側{c:g}大きい", fontsize=6.6, va="top")
+
+
+def page_bottom(D, pdf, total):
+    fig, ax = setup()
+    frame_and_title(ax, "ボトムプレート（スカートの内側）", "BTM", f"アクリル {g.BOTTOM_T:g}（押し出し材で可）", "1:1", 8, total)
+    x0, y0 = 62, 128
+    poly(ax, D["outer"], x0, y0, lw=THIN, ls=(0, (6, 2)))
+    bp = g.bottom_poly()
+    poly(ax, [T(p) for p in list(bp.exterior.coords)[:-1]], x0, y0)
+    origin_mark(ax, x0, y0)
+    xs = sorted({c[0] for c, _ in D["holes"]})
+    ys = sorted({c[1] for c, _ in D["holes"]})
+    ordinate_x(ax, xs, x0, y0, y0 + g.OUTER_H + 8, y0 + g.OUTER_H + 1)
+    ordinate_y(ax, ys, x0, y0, x0 - 6, x0 - 1)
+    for yy in ys:
+        centerline(ax, (x0 - 3, y0 + yy), (x0 + g.OUTER_W + 3, y0 + yy))
+    bb = bp.bounds
+    e = g.FRAME_INSET + g.SKIRT_T + g.SKIRT_CLEAR
+    hdim(ax, x0 + e, x0 + g.OUTER_W - e, y0 - 9, y0 + e, y0 + e, f"{bb[2] - bb[0]:.1f}", above=False)
+    vdim(ax, y0 + e, y0 + g.OUTER_H - e, x0 + g.OUTER_W + 8, x0 + g.OUTER_W - e, f"{bb[3] - bb[1]:.1f}")
+    leader(ax, (x0 + xs[0] + 1.7, y0 + ys[0] - 3), (x0 + 30, y0 + 28), f"4-切り欠き 幅{g.HOLE_D:g}（先端R{g.HOLE_D / 2:g}）、手前の縁へ開く")
+    leader(ax, (x0 + xs[1] + 2.0, y0 + ys[1] + 3), (x0 + 128, y0 + 100), f"4-切り欠き 幅{g.REAR_HOLE_D:.1f}（先端R{g.REAR_HOLE_D / 2:g}）、奥の縁へ開く")
+    ax.text(x0, y0 - 18, f"細い点線＝ケースの外形（参考）。ボトムプレートは外形より片側{e:g}小さく、角は外形を内側へずらした曲線", fontsize=8, va="top")
+    notes(ax, 14, 100, [
+        f"1. 枠のスカート（厚さ{g.SKIRT_T:g}）の内側にはめ込む。すき間は片側{g.SKIRT_CLEAR:g}",
+        "2. ネジ穴は縁から切り込んだU字の切り欠き。位置はスカートで決まり、",
+        "   足と一緒に共締めするので、閉じた穴でなくてよい（縁が細くならず割れにくい）",
+        "3. 外形の正確な形はDXF（dxf/bottom_*.dxf）",
+        f"4. スカートはこの板より{g.BOTTOM_T - g.SKIRT_H:.1f}低いので、板の厚さが{g.SKIRT_H:g}より薄いと足が浮く。",
+        "   板の実際の厚さを測って、違えばスカートの高さを合わせる",
+    ])
+    pdf.savefig(fig)
+    return fig
 
 
 def page_foot(D, pdf, total):
@@ -728,11 +802,16 @@ def exports(D):
     holes = [("circle", c, d) for c, d in D["holes"]]
     write_dxf(os.path.join(dd, f"plate_{g.VER}.dxf"), [("OUTLINE", 7, out), ("HOLES", 1, holes), ("SWITCH", 3, [("poly", p) for p in D["cuts"]])])
     write_dxf(os.path.join(dd, f"stiffener_{g.VER}.dxf"), [("OUTLINE", 7, out), ("HOLES", 1, holes), ("OPENINGS", 3, [("poly", p) for p in D["stiff"]])])
-    write_dxf(os.path.join(dd, f"bottom_{g.VER}.dxf"), [("OUTLINE", 7, out), ("HOLES", 1, holes)])
+    if g.SKIRT:
+        bp = g.bottom_poly()
+        write_dxf(os.path.join(dd, f"bottom_{g.VER}.dxf"), [("OUTLINE", 7, [("poly", [T(p) for p in list(bp.exterior.coords)[:-1]])])])
+    else:
+        write_dxf(os.path.join(dd, f"bottom_{g.VER}.dxf"), [("OUTLINE", 7, out), ("HOLES", 1, holes)])
     split = g.SPLIT_X - OX0
     ux = g.USB_X - OX0
     usb = [(ux - g.USB_W / 2, g.OUTER_H - g.WALL), (ux + g.USB_W / 2, g.OUTER_H - g.WALL), (ux + g.USB_W / 2, g.OUTER_H), (ux - g.USB_W / 2, g.OUTER_H)]
-    write_dxf(os.path.join(dd, f"frame_{g.VER}.dxf"), [("OUTLINE", 7, [("poly", D["frame_outer"]), ("poly", D["frame_inner"])]),
+    skirt_l = ([("SKIRT_INNER", 4, [("poly", [T(p) for p in list(g.skirt_ring().interiors[0].coords)[:-1]])])] if g.SKIRT else [])
+    write_dxf(os.path.join(dd, f"frame_{g.VER}.dxf"), skirt_l + [("OUTLINE", 7, [("poly", D["frame_outer"]), ("poly", D["frame_inner"])]),
                                                        ("HOLES", 1, holes), ("USB", 5, [("poly", usb)]),
                                                        ("SPLIT", 2, [("line", (split, -5), (split, g.OUTER_H + 5))])])
     b = D["bars"][0]
@@ -762,7 +841,7 @@ def main():
     os.makedirs(OUTDIR, exist_ok=True)
     D = data()
     assert len(D["sw"]) == 65
-    pages = [page_assembly, page_outline, page_top, page_table, page_stiff, page_frame, page_foot]
+    pages = [page_assembly, page_outline, page_top, page_table, page_stiff, page_frame, page_foot] + ([page_bottom] if g.SKIRT else [])
     pdfp = os.path.join(OUTDIR, f"DZ60_drawings_{g.VER}.pdf")
     with PdfPages(pdfp) as pdf:
         for i, fn in enumerate(pages, 1):

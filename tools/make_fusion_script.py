@@ -46,6 +46,9 @@ def main():
         ("wall", f"{g.WALL:g} mm", "枠の幅（外形から枠の内側まで）"),
         ("inner_r", f"{g.INNER_R:g} mm", "枠の内側の角"),
         ("bottom_t", f"{g.BOTTOM_T:g} mm", "ボトムプレートの厚さ"),
+        ("skirt_t", f"{g.SKIRT_T:g} mm", "枠のスカートの厚さ（ボトムプレートを囲む）"),
+        ("skirt_c", f"{g.SKIRT_CLEAR:g} mm", "スカートとボトムプレートのすき間"),
+        ("skirt_h", "bottom_t - 0.1 mm", "スカートの高さ（ボトムプレートより少し低く）"),
         ("under_pcb", f"{g.UNDER_PCB:g} mm", "PCBの下（ケースフォーム）"),
         ("pcb_t", f"{g.PCB_T:g} mm", "PCBの厚さ"),
         ("gap_stiff_pcb", f"{g.GAP_STIFF_PCB:g} mm", "補強板とPCBの間（プレートフォーム）"),
@@ -66,7 +69,7 @@ def main():
         ("usb_w", f"{g.USB_W:g} mm", "USB切り欠きの幅（要実測）"),
         ("split_x", "outer_w / 2", "枠の分割位置"),
         ("tongue_w", f"{g.TONGUE_W:g} mm", "つなぎ目のほぞの幅"),
-        ("tongue_t", f"{g.TONGUE_T:g} mm", "ほぞの厚さ（下面から）"),
+        ("tongue_t", f"{g.TONGUE_T:g} mm", "ほぞの厚さ（枠の上面から下へ）"),
         ("tongue_l", f"{g.TONGUE_L:g} mm", "ほぞの長さ（分割位置から右へ）"),
         ("tongue_c", f"{g.TONGUE_CLEAR:g} mm", "ほぞ穴のすき間"),
         ("jb_x", f"{g.JB_X:g} mm", "分割位置からつなぎ目のボルトまで"),
@@ -311,13 +314,27 @@ def run(context):
         z_stiff = "bottom_t + frame_h"
         z_top = "bottom_t + frame_h + stiff_t"
 
-        # ---- ボトムプレート
+        # ---- ボトムプレート（スカートの内側。ネジ穴はU字の切り欠き）
         stage = "ボトムプレート"
         comp = new_comp("Bottom plate")
-        sk = outline_sketch(comp, "外形とネジ穴")
-        f = extrude(comp, main_profile(sk), "0 mm", "bottom_t", name="ボトムプレート")
-        g2_fillet(comp, vertical_edges_at(f.bodies.item(0), outer_corners), "corner_r", "外形の角")
+        e = "(inset + skirt_t + skirt_c)"
+        sk = comp.sketches.add(comp.xYConstructionPlane)
+        sk.name = "ボトムプレートの外形（スカートの内側）"
+        dim_rect(sk, e, e, f"outer_w - 2 * {e}", f"outer_h - 2 * {e}")
+        f = extrude(comp, sk.profiles.item(0), "0 mm", "bottom_t", name="ボトムプレート")
+        ev_e = ev(e)
+        g2_fillet(comp, vertical_edges_at(f.bodies.item(0), [(ev_e, ev_e), (W - ev_e, ev_e), (W - ev_e, H - ev_e), (ev_e, H - ev_e)]),
+                  f"corner_r - {e}", "外形の角")
         f.bodies.item(0).name = "bottom_plate"
+        stage = "ボトムプレートの切り欠き"
+        sk = comp.sketches.add(comp.xYConstructionPlane)
+        sk.name = "ネジの切り欠き（U字、縁へ開く）"
+        for xe in ("hx1", "hx2", "hx3", "hx4"):
+            dim_circle(sk, xe, "hy_f", "hole_d")
+            dim_rect(sk, f"{xe} - hole_d / 2", "0.5 mm", "hole_d", "hy_f - 0.5 mm")
+            dim_circle(sk, xe, "hy_r", "rear_hole_d")
+            dim_rect(sk, f"{xe} - rear_hole_d / 2", "hy_r", "rear_hole_d", "outer_h - hy_r - 0.5 mm")
+        extrude(comp, all_profiles(sk), "-1 mm", "bottom_t + 2 mm", adsk.fusion.FeatureOperations.CutFeatureOperation, name="ネジの切り欠き")
 
         # ---- 枠
         stage = "枠"
@@ -326,12 +343,24 @@ def run(context):
         dim_rect(sk, "wall", "wall", "outer_w - 2 * wall", "outer_h - 2 * wall")
         f = extrude(comp, main_profile(sk), z_frame, "frame_h", name="枠")
         frame = f.bodies.item(0)
+        stage = "スカート"
+        sk = comp.sketches.add(comp.xYConstructionPlane)
+        sk.name = "スカート（ボトムプレートを囲む輪）"
+        dim_rect(sk, "inset", "inset", "outer_w - 2 * inset", "outer_h - 2 * inset")
+        dim_rect(sk, "inset + skirt_t", "inset + skirt_t", "outer_w - 2 * (inset + skirt_t)", "outer_h - 2 * (inset + skirt_t)")
+        extrude(comp, main_profile(sk), "bottom_t - skirt_h", "skirt_h", adsk.fusion.FeatureOperations.JoinFeatureOperation,
+                bodies=[frame], name="スカート")
+        frame = comp.bRepBodies.item(0)
         ins = ev("inset")
         g2_fillet(comp, vertical_edges_at(frame, [(ins, ins), (W - ins, ins), (W - ins, H - ins), (ins, H - ins)]),
                   "corner_r - inset", "枠の外の角")
+        sti = ev("inset + skirt_t")
+        g2_fillet(comp, vertical_edges_at(comp.bRepBodies.item(0), [(sti, sti), (W - sti, sti), (W - sti, H - sti), (sti, H - sti)]),
+                  "corner_r - inset - skirt_t", "スカートの内の角")
         wl = ev("wall")
-        g2_fillet(comp, vertical_edges_at(frame, [(wl, wl), (W - wl, wl), (W - wl, H - wl), (wl, H - wl)]),
+        g2_fillet(comp, vertical_edges_at(comp.bRepBodies.item(0), [(wl, wl), (W - wl, wl), (W - wl, H - wl), (wl, H - wl)]),
                   "inner_r", "枠の内の角")
+        frame = comp.bRepBodies.item(0)
         stage = "USBの切り欠き"
         sk = comp.sketches.add(comp.xYConstructionPlane)
         sk.name = "USB切り欠き"
@@ -358,15 +387,15 @@ def run(context):
         sk.name = "ほぞ穴"
         for jy in ("jy_f", "jy_r"):
             dim_rect(sk, "split_x - 0.01 mm", f"{jy} - tongue_w / 2 - tongue_c", "tongue_l + tongue_c + 0.01 mm", "tongue_w + 2 * tongue_c")
-        extrude(comp, all_profiles(sk), z_frame, "tongue_t + tongue_c", adsk.fusion.FeatureOperations.CutFeatureOperation,
-                bodies=[B("frame_right")], name="ほぞ穴")
+        extrude(comp, all_profiles(sk), "bottom_t + frame_h - tongue_t - tongue_c", "tongue_t + tongue_c + 1 mm",
+                adsk.fusion.FeatureOperations.CutFeatureOperation, bodies=[B("frame_right")], name="ほぞ穴（右半分の上側）")
         stage = "つなぎ目（ほぞ）"
         sk = comp.sketches.add(comp.xYConstructionPlane)
         sk.name = "ほぞ"
         for jy in ("jy_f", "jy_r"):
             dim_rect(sk, "split_x - 0.5 mm", f"{jy} - tongue_w / 2", "tongue_l + 0.5 mm", "tongue_w")
-        extrude(comp, all_profiles(sk), z_frame, "tongue_t", adsk.fusion.FeatureOperations.JoinFeatureOperation,
-                bodies=[B("frame_left")], name="ほぞ")
+        extrude(comp, all_profiles(sk), "bottom_t + frame_h - tongue_t", "tongue_t", adsk.fusion.FeatureOperations.JoinFeatureOperation,
+                bodies=[B("frame_left")], name="ほぞ（左半分の上側）")
         stage = "つなぎ目（ボルト穴・ざぐり・ナット溝）"
         sk = comp.sketches.add(comp.xYConstructionPlane)
         sk.name = "つなぎ目のボルト穴"
@@ -379,13 +408,13 @@ def run(context):
         for jy in ("jy_f", "jy_r"):
             dim_circle(sk, "split_x + jb_x", jy, "cb_d")
         extrude(comp, all_profiles(sk), "bottom_t + frame_h", "cb_depth", adsk.fusion.FeatureOperations.CutFeatureOperation,
-                bodies=[B("frame_right")], negative=True, name="ざぐり")
+                bodies=[B("frame_left")], negative=True, name="ざぐり（ほぞの上面）")
         sk = comp.sketches.add(comp.xYConstructionPlane)
         sk.name = "つなぎ目のナット溝（二面幅は固定）"
         for jy in ("jy_f", "jy_r"):
             hexagon(sk, ev("split_x + jb_x"), ev(jy), DATA["nut_af"])
         extrude(comp, all_profiles(sk), z_frame, "nut_depth", adsk.fusion.FeatureOperations.CutFeatureOperation,
-                bodies=[B("frame_left")], name="つなぎ目のナット溝")
+                bodies=[B("frame_right")], name="つなぎ目のナット溝（右半分の下面）")
 
         # ---- 補強板
         stage = "補強板"
