@@ -1,0 +1,254 @@
+{
+  "version": "v16",
+  "pcb": [
+    285.0,
+    94.6
+  ],
+  "outer": [
+    315.0,
+    126.0
+  ],
+  "outer_origin": [
+    -15.0,
+    -15.700000000000003
+  ],
+  "wall": 14.0,
+  "frame_inner": [
+    287.0,
+    98.0
+  ],
+  "corner_r": 8.0,
+  "corner_smoothing": 0.6,
+  "corner_extent": 12.04,
+  "inner_r": 4.5,
+  "inner_smoothing": 0.6,
+  "inner_corner_extent": 6.77,
+  "pcb_min_clearance": 0.58,
+  "hole_d": 3.4,
+  "holes_pcb": [
+    [
+      -5.85,
+      -8.7
+    ],
+    [
+      92.7,
+      -8.7
+    ],
+    [
+      192.3,
+      -8.7
+    ],
+    [
+      290.85,
+      -8.7
+    ],
+    [
+      -5.85,
+      103.3
+    ],
+    [
+      92.7,
+      103.3
+    ],
+    [
+      192.3,
+      103.3
+    ],
+    [
+      290.85,
+      103.3
+    ]
+  ],
+  "kerf": 0.0,
+  "split_x": 142.5,
+  "usb_x": 18.2,
+  "usb_w": 13.0,
+  "frame_h": 8.1,
+  "top_t": 1.5,
+  "stiff_t": 2.0,
+  "stiff_offset": 0.8,
+  "stiff_openings": 65,
+  "stiff_min_web": 2.7,
+  "gap_stiff_pcb": 1.5,
+  "pcb_t": 1.6,
+  "under_pcb": 5.0,
+  "bottom_t": 3.0,
+  "total_height": 14.6,
+  "switch_cutouts": 65,
+  "frame_inset": 0.3,
+  "bolt": "M3x18",
+  "foot_skin": 1.0,
+  "tilt_deg": 0.0,
+  "foot_d": 12.0,
+  "rear_foot": "pla_bars",
+  "rod": null,
+  "rod_bolt": null,
+  "skirt": {
+    "t": 2.0,
+    "clear": 0.2,
+    "h": 2.9,
+    "bottom_plate_size": [
+      310.0,
+      121.0
+    ],
+    "notch": true
+  },
+  "joint": {
+    "kind": "tongue_vbolt",
+    "tongue": [
+      9.0,
+      3.8,
+      16.0
+    ],
+    "clear": 0.2,
+    "bolt": "M3x6 button",
+    "bolt_x_from_split": 8.0,
+    "counterbore": [
+      6.2,
+      1.9
+    ],
+    "nut_depth": 2.6,
+    "wall_centers_y": [
+      -8.55,
+      103.15
+    ],
+    "check": {
+      "under": 4.1,
+      "seat": 6.2,
+      "tip": 0.2
+    }
+  },
+  "rear_bolt": "M3x18+nut",
+  "rear_bar_heights": [
+    3.7,
+    3.7,
+    3.7,
+    3.7
+  ],
+  "rod_thread_engagement": null,
+  "rod_hole_through": true,
+  "rod_hole_len": null,
+  "rod_tape": null,
+  "saddle": null,
+  "rear_hole_d": 4.0,
+  "rod_flat_w": 0.0,
+  "rod_flat_depth": 0.0,
+  "rod_center_z": -4.0,
+  "rod_tap_depth": 6.0,
+  "rod_hole_depth": 7.5,
+  "pairs": [
+    {
+      "side": "left",
+      "x0": -11.85,
+      "x1": 98.7,
+      "front_holes": [
+        [
+          -5.85,
+          103.3,
+          3.7
+        ],
+        [
+          92.7,
+          103.3,
+          3.7
+        ]
+      ],
+      "rear_holes": [
+        [
+          -5.85,
+          -8.700000000000003
+        ],
+        [
+          92.7,
+          -8.700000000000003
+        ]
+      ],
+      "rear_bar_holes": [
+        [
+          -5.85,
+          -8.700000000000003,
+          3.7
+        ],
+        [
+          92.7,
+          -8.700000000000003,
+          3.7
+        ]
+      ],
+      "front_len": 110.6,
+      "rear_len": 110.6,
+      "bar_len": 110.6
+    },
+    {
+      "side": "right",
+      "x0": 186.3,
+      "x1": 296.85,
+      "front_holes": [
+        [
+          192.3,
+          103.3,
+          3.7
+        ],
+        [
+          290.85,
+          103.3,
+          3.7
+        ]
+      ],
+      "rear_holes": [
+        [
+          192.3,
+          -8.700000000000003
+        ],
+        [
+          290.85,
+          -8.700000000000003
+        ]
+      ],
+      "rear_bar_holes": [
+        [
+          192.3,
+          -8.700000000000003,
+          3.7
+        ],
+        [
+          290.85,
+          -8.700000000000003,
+          3.7
+        ]
+      ],
+      "front_len": 110.6,
+      "rear_len": 110.6,
+      "bar_len": 110.6
+    }
+  ],
+  "foot_style": "pairs",
+  "ribs": null,
+  "feet": [
+    {
+      "x": -5.85,
+      "y": 103.3,
+      "h": 3.7,
+      "pocket_top": 1.0
+    },
+    {
+      "x": 92.7,
+      "y": 103.3,
+      "h": 3.7,
+      "pocket_top": 1.0
+    },
+    {
+      "x": 192.3,
+      "y": 103.3,
+      "h": 3.7,
+      "pocket_top": 1.0
+    },
+    {
+      "x": 290.85,
+      "y": 103.3,
+      "h": 3.7,
+      "pocket_top": 1.0
+    }
+  ],
+  "front_height_no_keycap": 18.3
+}

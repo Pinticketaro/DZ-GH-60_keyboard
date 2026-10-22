@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v15"
+VER = "v16"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -43,15 +43,15 @@ HOLES_FROM_OUTER = [(7, 7), (107.7, 7), (207.3, 7), (308, 7),
                     (7, 119), (107.7, 119), (207.3, 119), (308, 119)]
 KERF = 0.0                          # レーザーのカーフ（M1で決める）
 SPLIT_X = PCB_W / 2                 # 枠の分割位置（中央）
-# 枠の継ぎ目（v15）：ほぞ（左半分の下側から出る舌）＋縦向きのM3ボルト。前後の壁に1組ずつ。
-# ボルトは他の8本と同じ縦向き。頭は枠の上面のざぐり（補強板で隠れる）、ナットは舌の下面に埋め込む（ボトムプレートで隠れる）。プレートは貫通しない
+# 枠の継ぎ目：ほぞ（左半分の上側から出る舌）＋縦向きのM3ボルト。前後の壁に1組ずつ（v16で上下を逆に：枠は上面を下にして印刷するため）。
+# ボルトは他の8本と同じ縦向き。頭はほぞの上面のざぐり（補強板で隠れる）、ナットは右半分の下面（段差の面）に埋め込む（ボトムプレートで隠れる）
 JOINT = "tongue_vbolt"              # "tongue_vbolt"＝ほぞ＋縦ボルト／"pin"＝φ1.75フィラメントの位置決めピン（v14まで）
-TONGUE_W, TONGUE_T, TONGUE_L = 9.0, 4.5, 16.0   # ほぞ（舌）：幅（Y）・厚さ（Z、下面から）・長さ（継ぎ目から右へ）
+TONGUE_W, TONGUE_T, TONGUE_L = 9.0, 3.8, 16.0   # ほぞ（舌）：幅（Y）・厚さ（Z、枠の上面から下へ）・長さ（継ぎ目から右へ）
 TONGUE_CLEAR = 0.2                  # ほぞ穴のすき間（幅は片側、高さと長さも同じだけ）
 JB_L = 6.0                          # 継ぎ目のボルト M3×6 ボタンヘッド（他の8本と同じ種類）
 JB_X = 8.0                          # 継ぎ目からボルトの中心まで（右半分の側）
 JB_CB_D, JB_CB_DEPTH = 6.2, 1.9     # 頭のざぐり（ボタンヘッドφ5.7×1.65）
-JB_NUT_DEPTH = 2.6                  # ナット溝（二面幅 NUT_POCKET_AF、舌の下面から）
+JB_NUT_DEPTH = 2.6                  # ナット溝（二面幅 NUT_POCKET_AF、右半分の枠の下面＝段差の面から）
 USB_X = 142.5 - 124.3               # USB中心X：GH60標準（swillkb −124.3）。要実測
 USB_W = 13.0                        # USB切り欠き幅（ケーブルの太い部分が通る幅。旧10mm）
 # ---- 高さ方向（PCBはネジ止めしない）
@@ -66,6 +66,12 @@ PLATE_TOP_TO_PCB_TOP = 5.0          # MXスイッチの規格寸法（プレー�
 PCB_T = 1.6                         # 要実測
 UNDER_PCB = 5.0                     # PCB下面〜ボトムプレート上面（台座の高さ＝裏面部品・USB-Cより高く）。要実測
 BOTTOM_T = 3.0                      # ボトムプレート（アクリル）厚さ（仮）
+# v16：枠を下へスカート状に延ばし、ボトムプレートをその内側にはめ込む（横からボトムプレートが見えない＝塊に見せる）
+SKIRT = True
+SKIRT_T = 2.0                       # スカートの厚さ（枠の外面から）
+SKIRT_CLEAR = 0.2                   # スカートの内面とボトムプレートの縁のすき間
+SKIRT_H = BOTTOM_T - 0.1            # スカートの高さ。ボトムプレートより0.1低く、足がボトムプレートを確実に押さえる
+BP_NOTCH = True                     # ボトムプレートのネジ穴を、縁から切り込んだU字の切り欠きにする（位置はスカートで決まる）
 GAP_STIFF_PCB = round(PLATE_TOP_TO_PCB_TOP - TOP_T - STIFF_T, 2)      # 補強板の下面〜PCB上面
 FRAME_H = round(GAP_STIFF_PCB + PCB_T + UNDER_PCB, 2)                   # 枠の厚さ（自動計算）
 assert TOP_T <= 1.6, "トッププレートが1.6mmを超えるとMXの爪がかからない"
@@ -143,17 +149,50 @@ def joint_wall_y():
 
 
 def check_joint():
-    """継ぎ目の寸法の確認：ほぞ穴の上の肉、ざぐりの下の肉、ナットの上の肉、ボルトの先がナットの下面と合うか。"""
+    """継ぎ目の寸法の確認：ほぞ穴の下の肉とナット、ほぞのざぐりの下の肉、ボルトの先がナットの下面と合うか。"""
     if JOINT != "tongue_vbolt":
         return
-    roof = FRAME_H - (TONGUE_T + TONGUE_CLEAR)
-    seat = FRAME_H - JB_CB_DEPTH
+    under = FRAME_H - (TONGUE_T + TONGUE_CLEAR)        # 右半分：ほぞ穴の下に残る厚さ
+    seat = FRAME_H - JB_CB_DEPTH                        # 頭の座面（枠の下面から）
     tip = seat - JB_L
-    assert roof - JB_CB_DEPTH >= 1.2, "ざぐりの下の肉が薄い"
-    assert TONGUE_T - JB_NUT_DEPTH >= 1.5, "ナットの上の肉が薄い"
+    assert under - JB_NUT_DEPTH >= 1.2, "ナット溝とほぞ穴の間の肉が薄い"
+    assert TONGUE_T - JB_CB_DEPTH >= 1.5, "ほぞのざぐりの下の肉が薄い"
     assert 0 <= tip <= JB_NUT_DEPTH - NUT_T + 0.1, f"ボルトの先がナットの下面に合わない（{tip:.2f}）"
-    assert (TONGUE_W - NUT_POCKET_AF * 2 / 3 ** 0.5) / 2 >= 0.9, "ナットの角の外の肉が薄い"
-    return dict(roof=round(roof, 2), seat=round(seat, 2), tip=round(tip, 2))
+    assert (TONGUE_W - JB_CB_D) / 2 >= 1.2, "ほぞのざぐりの横の肉が薄い"
+    return dict(under=round(under, 2), seat=round(seat, 2), tip=round(tip, 2))
+
+
+def bottom_outline():
+    """ボトムプレートの外形：スカートの内側（外形から FRAME_INSET＋SKIRT_T＋SKIRT_CLEAR 内側）。"""
+    if not SKIRT:
+        return Polygon(outer_pts())
+    return Polygon(outer_pts()).buffer(-(FRAME_INSET + SKIRT_T + SKIRT_CLEAR), join_style=1, quad_segs=24)
+
+
+def bottom_poly():
+    """ボトムプレート：外形からネジ穴の切り欠き（U字、近い方の縁＝前後へ開く）を除いた形。"""
+    from shapely.geometry import Point, box as _b
+    from shapely.ops import unary_union
+    P = bottom_outline()
+    if not BP_NOTCH:
+        return P
+    cuts = []
+    ymid = OY + OUTER_H / 2
+    for c in holes():
+        d = hole_d(c)
+        r = d / 2
+        if c[1] < ymid:      # 奥の列（PCB座標でYが小さい）→ 奥の縁へ
+            slot = _b(c[0] - r, OY - 5, c[0] + r, c[1])
+        else:
+            slot = _b(c[0] - r, c[1], c[0] + r, OY + OUTER_H + 5)
+        cuts.append(unary_union([Point(c).buffer(r, quad_segs=24), slot]))
+    return P.difference(unary_union(cuts))
+
+
+def skirt_ring():
+    """スカート：枠の外形から SKIRT_T 内側までの輪。"""
+    fo = Polygon(frame_outer_pts())
+    return fo.difference(fo.buffer(-SKIRT_T, join_style=1, quad_segs=24))
 
 
 def rod_layout():
@@ -583,10 +622,17 @@ def main():
         f"補強板（アクリル{STIFF_T}mm・トッププレートの下に重ねて共締め）", note)
     web = stiffener_min_web(st_open)
 
-    svg(os.path.join(ROOT, f"case/bottom_{VER}_kerf{KERF:g}.svg"),
-        [("holes", "#ff0000", hole_ds, "M3穴"),
-         ("outline", "#ff0000", [outer_d], "外形（最後に切る）")],
-        "底板", note)
+    if SKIRT:
+        bp = bottom_poly()
+        bp_d = sq.to_svg_path(kerf_out(list(bp.exterior.coords)[:-1]))
+        svg(os.path.join(ROOT, f"case/bottom_{VER}_kerf{KERF:g}.svg"),
+            [("outline", "#ff0000", [bp_d], "外形とネジの切り欠き（スカートの内側にはめ込む）")],
+            f"底板（スカートの内側。外形より片側{FRAME_INSET + SKIRT_T + SKIRT_CLEAR:g}小さい）", note)
+    else:
+        svg(os.path.join(ROOT, f"case/bottom_{VER}_kerf{KERF:g}.svg"),
+            [("holes", "#ff0000", hole_ds, "M3穴"),
+             ("outline", "#ff0000", [outer_d], "外形（最後に切る）")],
+            "底板", note)
 
     # 枠（3Dプリント用の2D形状。Fusion 360で押し出す元）
     split_d = f"M {SPLIT_X:.4f},{OY - 3:.4f} L {SPLIT_X:.4f},{OY + OUTER_H + 3:.4f}"
@@ -691,6 +737,9 @@ def main():
                   bolt=f"M3x{BOLT_L:g}", foot_skin=FOOT_SKIN, tilt_deg=tilt_deg(), foot_d=FOOT_D,
                   rear_foot=REAR_FOOT, rod=rod_info,
                   rod_bolt=(f"M3x{ROD_BOLT_L:g}" if rod_info else None),
+                  skirt=(dict(t=SKIRT_T, clear=SKIRT_CLEAR, h=SKIRT_H, bottom_plate_size=[round(v, 2) for v in
+                              (bottom_outline().bounds[2] - bottom_outline().bounds[0], bottom_outline().bounds[3] - bottom_outline().bounds[1])],
+                              notch=BP_NOTCH) if SKIRT else None),
                   joint=(dict(kind=JOINT, tongue=[TONGUE_W, TONGUE_T, TONGUE_L], clear=TONGUE_CLEAR, bolt=f"M3x{JB_L:g} button",
                               bolt_x_from_split=JB_X, counterbore=[JB_CB_D, JB_CB_DEPTH], nut_depth=JB_NUT_DEPTH,
                               wall_centers_y=joint_wall_y(), check=check_joint()) if JOINT == "tongue_vbolt" else dict(kind=JOINT)),

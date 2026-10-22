@@ -56,12 +56,13 @@ def main():
     bx_ = sx + g.JB_X
     top = z["bot1"] + g.FRAME_H
     lift = 12.0                                  # ボルトを持ち上げて見せる
-    bolt = (m3.Manifold.cylinder(1.65, 2.85, 2.6, 40).translate([bx_ + gap, -yc, top - g.JB_CB_DEPTH + lift])
-            + m3.Manifold.cylinder(g.JB_L, 1.5, 1.5, 32).translate([bx_ + gap, -yc, top - g.JB_CB_DEPTH - g.JB_L + lift]))
+    # v16：ほぞは左半分の上側。ボルトはほぞの上から、ナットは右半分の下面（ボトムプレートが当たる段差の面）へ
+    bolt = (m3.Manifold.cylinder(1.65, 2.85, 2.6, 40).translate([bx_, -yc, top - g.JB_CB_DEPTH + lift])
+            + m3.Manifold.cylinder(g.JB_L, 1.5, 1.5, 32).translate([bx_, -yc, top - g.JB_CB_DEPTH - g.JB_L + lift]))
     rr = 5.5 / math.sqrt(3)
     hexa = m3.CrossSection([[(rr * math.cos(math.radians(60 * k)), rr * math.sin(math.radians(60 * k))) for k in range(6)]])
     nut = (m3.Manifold.extrude(hexa, 2.4) - m3.Manifold.cylinder(3, 1.5, 1.5, 24).translate([0, 0, -0.2])).translate(
-        [bx_, -yc, z["bot1"] - 6])
+        [bx_ + gap, -yc, z["bot1"] - 9])
     frame_c = "#d9d4cb"
     meshes = [mesh_of(L, hex2rgba(frame_c), 0.85), mesh_of(R, hex2rgba("#c9c2b6"), 0.85),
               mesh_of(bolt, hex2rgba("#8a8d91"), 0.35, 0.9), mesh_of(nut, hex2rgba("#6f7276"), 0.35, 0.9)]
@@ -75,8 +76,8 @@ def main():
     shutil.copytree(os.path.join(three, "node_modules/three"), os.path.join(work, "three"))
     scene.export(os.path.join(work, "model.glb"))
     title = f"枠の継ぎ目 {g.VER}：ほぞ＋縦のM3×{g.JB_L:g}ボタンヘッド（手前の壁。右半分を{gap:g}mm離して表示）"
-    sub = (f"左半分の下側のほぞ（{g.TONGUE_W:g}×{g.TONGUE_T:g}×{g.TONGUE_L:g}）が右半分の下の溝に入る。ボルトは上から（頭はざぐりに沈む）、"
-           f"ナットはほぞの下面に埋め込む。上は補強板、下はボトムプレートで隠れる")
+    sub = (f"左半分の上側のほぞ（{g.TONGUE_W:g}×{g.TONGUE_T:g}×{g.TONGUE_L:g}）が右半分の上の溝に入る。ボルトはほぞの上から（頭はざぐりに沈む）、"
+           f"ナットは右半分の下面に埋め込む。下のスカートの内側にボトムプレートが入る")
     open(os.path.join(work, "index.html"), "w", encoding="utf-8").write(HTML.replace("__TITLE__", title).replace("__SUB__", sub))
 
     class Q(http.server.SimpleHTTPRequestHandler):

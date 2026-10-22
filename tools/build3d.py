@@ -1,7 +1,7 @@
 """3Dモデル（STL）と外観プレビューを作る。
 
 出力
-  case/stl/frame_left_<ver>.stl, frame_right_<ver>.stl … 枠（PLA）左右。継ぎ目はほぞ＋縦向きのM3×6ボタンヘッド（前後の壁に1組ずつ、v15）
+  case/stl/frame_left_<ver>.stl, frame_right_<ver>.stl … 枠（PLA）左右。継ぎ目はほぞ＋縦向きのM3×6ボタンヘッド（前後の壁に1組ずつ）。v16から下にスカート、STLは上面を下にした印刷向き
   case/stl/feet_<ver>.stl                            … 足（ナット受け）8個を並べたもの
   case/stl/assembly_<ver>.stl                        … 組み立て状態（確認用）
   docs/img/preview_<ver>.png                         … 外観プレビュー（斜め・横）
@@ -68,14 +68,22 @@ def build_parts():
     parts = {}
     parts["top"] = slab(g.outer_pts(), g.switch_cutouts() + hole_polys, z["st1"], g.TOP_T)
     parts["stiffener"] = slab(g.outer_pts(), g.stiffener_openings() + hole_polys, z["fr1"], g.STIFF_T)
-    parts["bottom"] = slab(g.outer_pts(), hole_polys, z["bot0"], g.BOTTOM_T)
+    if g.SKIRT:
+        bp = g.bottom_poly()
+        parts["bottom"] = slab(list(bp.exterior.coords)[:-1], [list(r.coords)[:-1] for r in bp.interiors], z["bot0"], g.BOTTOM_T)
+    else:
+        parts["bottom"] = slab(g.outer_pts(), hole_polys, z["bot0"], g.BOTTOM_T)
 
     # 枠：外周（少し内側）− 内側 − 穴 − USB切り欠き（全高）
     frame = slab(g.frame_outer_pts(), [g.frame_inner_pts()] + hole_polys, z["bot1"], g.FRAME_H)
     usb = m3.Manifold.cube([g.USB_W, g.WALL + 2, g.FRAME_H + 2]).translate(
         [g.USB_X - g.USB_W / 2, -(g.OY + g.WALL + 1), z["bot1"] - 1])
     frame = frame - usb
-    # 分割。継ぎ目は v15 からほぞ（左半分の下側の舌）＋縦向きのM3ボルト（前後の壁に1組ずつ）、v14まではφ1.9の位置決め穴
+    if g.SKIRT:      # スカート：ボトムプレートの周りを囲む輪（USBの下も残す＝窓の下枠になる）
+        ring = g.skirt_ring()
+        frame = frame + slab(list(ring.exterior.coords)[:-1], [list(r.coords)[:-1] for r in ring.interiors],
+                             z["bot1"] - g.SKIRT_H, g.SKIRT_H + 0.01)
+    # 分割。継ぎ目はほぞ（v16：左半分の上側の舌）＋縦向きのM3ボルト（前後の壁に1組ずつ）、v14まではφ1.9の位置決め穴
     big = 1000
     left = frame ^ m3.Manifold.cube([big, big, big]).translate([g.SPLIT_X - big, -big / 2, -big / 2])
     right = frame ^ m3.Manifold.cube([big, big, big]).translate([g.SPLIT_X, -big / 2, -big / 2])
@@ -89,13 +97,14 @@ def build_parts():
         for yc in g.joint_wall_y():
             c = g.TONGUE_CLEAR
             bxp = sx + g.JB_X
-            tongue = bx(sx - 0.5, sx + g.TONGUE_L, yc, g.TONGUE_W, zb, zb + g.TONGUE_T)
-            mortise = bx(sx - 0.01, sx + g.TONGUE_L + c, yc, g.TONGUE_W + 2 * c, zb - 1, zb + g.TONGUE_T + c)
+            # ほぞは左半分の上側（枠は上面を下にして印刷するので、ほぞはベッドから立ち上がる）
+            tongue = bx(sx - 0.5, sx + g.TONGUE_L, yc, g.TONGUE_W, top - g.TONGUE_T, top)
+            mortise = bx(sx - 0.01, sx + g.TONGUE_L + c, yc, g.TONGUE_W + 2 * c, top - g.TONGUE_T - c, top + 1)
             hole = m3.Manifold.cylinder(g.FRAME_H + 2, g.HOLE_D / 2, g.HOLE_D / 2, 32).translate([bxp, -yc, zb - 1])
             cb = m3.Manifold.cylinder(g.JB_CB_DEPTH + 1, g.JB_CB_D / 2, g.JB_CB_D / 2, 40).translate([bxp, -yc, top - g.JB_CB_DEPTH])
             nut = m3.Manifold.extrude(hexa, g.JB_NUT_DEPTH + 1).translate([bxp, -yc, zb - 1])
-            left = (left + tongue) - hole - nut
-            right = right - mortise - hole - cb
+            right = right - mortise - hole - nut
+            left = (left + tongue) - hole - cb
     else:
         for yw in (g.OY + g.WALL / 2, g.OY + g.OUTER_H - g.WALL / 2):
             pin = m3.Manifold.cylinder(12, 0.95, 0.95, 24).rotate([0, 90, 0]).translate([sx - 6, -yw, zb + g.FRAME_H / 2])
@@ -279,8 +288,13 @@ def keycaps(z_top):
 
 def export(parts, z):
     os.makedirs(OUT, exist_ok=True)
-    to_trimesh(parts["frame_left"]).export(os.path.join(OUT, f"frame_left_{g.VER}.stl"))
-    to_trimesh(parts["frame_right"]).export(os.path.join(OUT, f"frame_right_{g.VER}.stl"))
+    # 枠は印刷向きに：上面（補強板側）をベッドに（v16から。ほぞ・ほぞ穴・スカートの段差がサポートなしで印刷できる向き）
+    for k in ("frame_left", "frame_right"):
+        fr = parts[k]
+        if g.SKIRT:
+            bb = fr.bounding_box()
+            fr = fr.rotate([180, 0, 0]).translate([0, 0, bb[5]])
+        to_trimesh(fr).export(os.path.join(OUT, f"{k}_{g.VER}.stl"))
     # 足は印刷向きに：天地を反転（ボトムプレートに当たる平らな面を下に）して並べる
     feet = []
     step = {"ribs": 22, "pairs": 0}.get(g.FOOT_STYLE, 20)
