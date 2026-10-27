@@ -1,0 +1,34 @@
+[
+ {
+  "key": "meta.parent",
+  "label": "meta.parent",
+  "unit": "",
+  "before": null,
+  "after": "v17",
+  "kind": "added"
+ },
+ {
+  "key": "meta.lang",
+  "label": "meta.lang",
+  "unit": "",
+  "before": null,
+  "after": "ja",
+  "kind": "added"
+ },
+ {
+  "key": "meta.print_frame",
+  "label": "meta.print_frame",
+  "unit": "",
+  "before": null,
+  "after": "top_down_with_support",
+  "kind": "added"
+ },
+ {
+  "key": "version",
+  "label": "version",
+  "unit": "",
+  "before": "v17",
+  "after": "v18a",
+  "kind": "changed"
+ }
+]
