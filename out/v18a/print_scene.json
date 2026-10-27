@@ -1,0 +1,35 @@
+{
+ "title": "v18a 枠を上面を下にして刷る向き（赤＝サポート）",
+ "lang": "ja",
+ "up": "z",
+ "views": [
+  "iso",
+  "front"
+ ],
+ "parts": [
+  {
+   "file": "model/print_frame_left.stl",
+   "name": "枠（左）",
+   "color": "#d9d4cb",
+   "opacity": 0.3,
+   "roughness": 0.7,
+   "metalness": 0
+  },
+  {
+   "file": "model/print_frame_right.stl",
+   "name": "枠（右）",
+   "color": "#cfc9bf",
+   "opacity": 0.3,
+   "roughness": 0.7,
+   "metalness": 0
+  },
+  {
+   "file": "model/print_support.stl",
+   "name": "サポート",
+   "color": "#e05a4f",
+   "opacity": 0.95,
+   "roughness": 0.7,
+   "metalness": 0
+  }
+ ]
+}

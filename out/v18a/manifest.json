@@ -1,0 +1,116 @@
+{
+ "version": "v18a",
+ "prev": "v17",
+ "date": "2026-10-27",
+ "stage": "モック",
+ "summary": "v17 から分けた案 A：サンドイッチ型のまま、枠は上面を下にして刷り、補強板の掘り込みの床をサポートで受ける。形は v17 と同じで、サポートの範囲（赤）を部品として足した。",
+ "changes": [
+  "印刷の向きを決めた：上面を下のまま（v17 の問い「枠の印刷の向き」→ A）",
+  "印刷時のサポートの範囲を参考の部品として足した（幅11.7×高さ2mm・1周、約19cm³。剥がした跡は補強板で隠れる）",
+  "形・寸法は v17 と同じ"
+ ],
+ "questions": [
+  {
+   "q": "掘り込みのサポートの種類は？",
+   "options": [
+    {
+     "label": "ツリーサポート（おすすめ）",
+     "note": "接点が少なく、2mmの隙間でも剥がしやすい"
+    },
+    {
+     "label": "ふつうのサポート（格子）",
+     "note": "床の面はきれいだが、高さ2mmの隙間から剥がしにくい"
+    }
+   ]
+  },
+  {
+   "q": "サポートを減らすため、掘り込みの深さを補強板の厚さ2.0mmより浅く（1.0mm）して、補強板の側面を少し見せる？",
+   "type": "yesno"
+  }
+ ],
+ "notes": "案 B（v18b・トレー型）と比べるには、上の「別の案」か「版の流れを見る」から。どちらで進めるかは v18b の「決めてほしいこと」で選ぶ。",
+ "images": [
+  {
+   "src": "docs/img/preview_v18a.png",
+   "caption": "外観（キーキャップ付き）",
+   "group": "外観"
+  },
+  {
+   "src": "out/v18a/print_support.png",
+   "caption": "枠を上面を下にして刷る向き（赤＝サポート）",
+   "group": "印刷"
+  },
+  {
+   "src": "out/v18a/print_orient.png",
+   "caption": "壁の断面とサポート",
+   "group": "印刷"
+  },
+  {
+   "src": "out/v18a/preview.png",
+   "caption": "ケースだけ（斜め上・斜め後ろ・右横）",
+   "group": "外観"
+  },
+  {
+   "src": "out/v18a/section.png",
+   "caption": "断面（手前のネジの列）",
+   "group": "断面"
+  },
+  {
+   "src": "out/v18a/plan.png",
+   "caption": "平面図",
+   "group": "平面"
+  }
+ ],
+ "compare": [
+  {
+   "before": "docs/img/preview_v17.png",
+   "after": "docs/img/preview_v18a.png",
+   "caption": "外観 v17 → v18a（同じ形）"
+  }
+ ],
+ "params_diff": "out/v18a/params_diff.json",
+ "model": "out/v18a/model.glb",
+ "parts": "out/v18a/scene.json",
+ "step": [
+  {
+   "src": "case/step/assembly_v18a.step",
+   "name": "組み立て",
+   "file": "assembly_v18a.step"
+  },
+  {
+   "src": "case/step/top_plate_v18a.step",
+   "name": "トッププレート",
+   "file": "top_plate_v18a.step"
+  },
+  {
+   "src": "case/step/stiffener_v18a.step",
+   "name": "補強板",
+   "file": "stiffener_v18a.step"
+  },
+  {
+   "src": "case/step/bottom_plate_v18a.step",
+   "name": "ボトムプレート",
+   "file": "bottom_plate_v18a.step"
+  },
+  {
+   "src": "case/step/frame_left_v18a.step",
+   "name": "枠（左）",
+   "file": "frame_left_v18a.step"
+  },
+  {
+   "src": "case/step/frame_right_v18a.step",
+   "name": "枠（右）",
+   "file": "frame_right_v18a.step"
+  },
+  {
+   "src": "case/step/foot_v18a.step",
+   "name": "足（4個同じ）",
+   "file": "foot_v18a.step"
+  },
+  {
+   "src": "case/step/pcb_reference_v18a.step",
+   "name": "PCB（参考）",
+   "file": "pcb_reference_v18a.step"
+  }
+ ]
+}

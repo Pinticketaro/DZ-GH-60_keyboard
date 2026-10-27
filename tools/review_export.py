@@ -77,6 +77,19 @@ def main():
             if note:
                 scene["notes"].append(note)
         scene["parts"].append({"file": fn, "name": f"足{i + 1}", "color": "#d9d4cb", "opacity": 1, "roughness": 0.85, "metalness": 0})
+    # 印刷時のサポート（参考）：上面を下にして刷るとき、補強板の掘り込みの床の下に入るサポートの範囲（v18a）
+    if g.STIFF_RECESS and g.SKIRT:
+        import manifold3d as m3
+        from shapely.geometry import Polygon
+        z = b3.z_levels()
+        ring = g.stiff_pocket_poly().difference(Polygon(g.frame_inner_pts()))
+        sup = b3.slab(list(ring.exterior.coords)[:-1], [list(r.coords)[:-1] for r in ring.interiors], z["fr1"], g.STIFF_T)
+        tm = b3.to_trimesh(sup)
+        tm.export(os.path.join(out, "model/support.stl"))
+        scene["parts"].append({"file": "model/support.stl", "name": "印刷時のサポート（参考）", "color": "#e05a4f", "opacity": 0.45,
+                               "roughness": 0.6, "metalness": 0})
+        scene["notes"].append(f"枠を上面を下にして刷るとき、補強板の掘り込みの床（壁の内側、幅{g.WALL - g.FRAME_INSET - g.STIFF_LIP:.1f}×高さ{g.STIFF_T:g}mm、1周）にサポートが要る。"
+                              f"体積は約{tm.volume / 1000:.0f}cm³（サポートの密度で減る）。剥がした跡は補強板で隠れる")
     json.dump(scene, open(os.path.join(out, "scene.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(os.path.join(out, "scene.json"))
     for n in scene["notes"]:

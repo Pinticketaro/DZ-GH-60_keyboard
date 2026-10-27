@@ -25,7 +25,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v17"
+VER = "v18a"
+PARENT = "v17"                      # 分けた元の版（確認ボードの版の流れ）
+# v18a（v17 から分けた案 A）：サンドイッチ型のまま、枠は上面を下にして刷り、補強板の掘り込みの床をサポートで受ける（形は v17 と同じ）
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -737,7 +739,7 @@ def main():
                             f"前後一体の足×4（幅{RIB_W}、厚さ{RIB_T}、手前はナット受け・奥は丸棒受け）"))
     svg(os.path.join(ROOT, f"case/feet_{VER}.svg"), feet_layers, "足（ナット受け）と真鍮丸棒 平面図", note)
 
-    params = dict(version=VER, pcb=[PCB_W, PCB_H], outer=[OUTER_W, OUTER_H], outer_origin=[OX, OY],
+    params = dict(meta=dict(parent=PARENT, lang="ja", print_frame="top_down_with_support"), version=VER, pcb=[PCB_W, PCB_H], outer=[OUTER_W, OUTER_H], outer_origin=[OX, OY],
                   wall=WALL, frame_inner=[OUTER_W - 2 * WALL, OUTER_H - 2 * WALL],
                   corner_r=CORNER_R, corner_smoothing=CORNER_SMOOTH,
                   corner_extent=round(sq.corner_extent(CORNER_R, CORNER_SMOOTH), 2),
