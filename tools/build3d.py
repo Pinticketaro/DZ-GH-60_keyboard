@@ -67,7 +67,11 @@ def build_parts():
     hole_polys = [circle(c, g.hole_d(c)) for c in g.holes()]
     parts = {}
     parts["top"] = slab(g.outer_pts(), g.switch_cutouts() + hole_polys, z["st1"], g.TOP_T)
-    parts["stiffener"] = slab(g.stiff_outer_pts(), g.stiffener_openings() + hole_polys, z["fr1"], g.STIFF_T)
+    if getattr(g, "STIFF_NOTCH", False) or getattr(g, "USB_BOSS", 0):   # v19：U字の切り欠き・USBの上の切り欠き
+        sp = g.stiff_poly()
+        parts["stiffener"] = slab(list(sp.exterior.coords)[:-1], g.stiffener_openings() + ([] if g.STIFF_NOTCH else hole_polys), z["fr1"], g.STIFF_T)
+    else:
+        parts["stiffener"] = slab(g.stiff_outer_pts(), g.stiffener_openings() + hole_polys, z["fr1"], g.STIFF_T)
     if g.CASE == "tray":
         parts["bottom"] = None      # v18 トレー型：底はトレー（frame_left/right）と一体
     elif g.SKIRT:
@@ -80,12 +84,42 @@ def build_parts():
     frame = slab(g.frame_outer_pts(), [g.frame_inner_pts()] + hole_polys, z["bot1"], g.FRAME_H)
     usb = m3.Manifold.cube([g.USB_W, g.WALL + 2, g.FRAME_H + 2]).translate(
         [g.USB_X - g.USB_W / 2, -(g.OY + g.WALL + 1), z["bot1"] - 1])
+    if getattr(g, "USB_H", None) and g.CASE == "tray":   # v19：窓は角丸の長穴（USB_W×USB_H）。上下に肉を残す
+        frame = slab(g.frame_outer_pts(), [g.frame_inner_pts()] + hole_polys, z["bot1"], g.FRAME_H)
+        rr = g.USB_H / 2
+        zc = g.usb_zc()
+        cyls = [m3.Manifold.cylinder(g.WALL + 2, rr, rr, 48).rotate([90, 0, 0]).translate([x, -(g.OY - 1), zc])
+                for x in (g.USB_X - g.USB_W / 2 + rr, g.USB_X + g.USB_W / 2 - rr)]
+        usb = m3.Manifold.batch_hull(cyls)
     frame = frame - usb
     if g.CASE == "tray":     # 底：枠の外形いっぱいの板（ネジ穴だけ）。USBの窓の下枠にもなる
         frame = frame + slab(g.frame_outer_pts(), hole_polys, z["bot0"], g.FLOOR_T + 0.01)
+        if getattr(g, "USB_H", None):         # 底と壁をつないだ後に窓を抜き直す（底の上の肉は残る）
+            frame = frame - usb
+        bc = getattr(g, "BED_CHAMFER", 0)
+        if bc:                                # 下面の外周の面取り：0.2mmずつの段
+            fo = Polygon(g.frame_outer_pts())
+            n = max(1, round(bc / 0.2))
+            for i in range(n):
+                ins = bc - i * bc / n
+                ring = fo.difference(fo.buffer(-ins, join_style=1, quad_segs=24))
+                frame = frame - slab(list(ring.exterior.coords)[:-1], [list(r.coords)[:-1] for r in ring.interiors],
+                                     z["bot0"] - 0.01 + i * bc / n, bc / n + (0.02 if i == 0 else 0.01))
     if g.STIFF_RECESS:   # v17：補強板の高さまで縁を立て、内側を補強板の形に掘る（掘り込みの床＝v16までの枠の上面）
-        lip = slab(g.frame_outer_pts(), [list(g.stiff_pocket_poly().exterior.coords)[:-1]], z["fr1"] - 0.01, g.STIFF_T + 0.01)
+        pk = g.stiff_pocket_poly()
+        bb = g.usb_boss_box() if hasattr(g, "usb_boss_box") else None
+        if bb is not None:                    # v19：USBの窓の上は掘り込みを止めて壁を上まで残す
+            pk = pk.difference(bb)
+        lip = slab(g.frame_outer_pts(), [list(pk.exterior.coords)[:-1]], z["fr1"] - 0.01, g.STIFF_T + 0.01)
         frame = frame + lip     # USBの上も縁を残す（USBの窓が四角く閉じる）
+        rel = getattr(g, "RELIEF", 0)
+        if rel:                 # v19：掘り込みの床と縁のL字に逃げの溝（幅・深さ RELIEF）
+            full = g.stiff_pocket_poly()
+            ring = full.difference(full.buffer(-rel, join_style=1, quad_segs=24))
+            if bb is not None:
+                ring = ring.difference(bb)
+            for gq in getattr(ring, "geoms", [ring]):
+                frame = frame - slab(list(gq.exterior.coords)[:-1], [list(r.coords)[:-1] for r in gq.interiors], z["fr1"] - rel, rel + 0.02)
     if g.SKIRT:      # スカート：ボトムプレートの周りを囲む輪（USBの下も残す＝窓の下枠になる）
         ring = g.skirt_ring()
         frame = frame + slab(list(ring.exterior.coords)[:-1], [list(r.coords)[:-1] for r in ring.interiors],
@@ -107,6 +141,11 @@ def build_parts():
             bxp = sx + g.JB_X
             tongue = bx(sx - 0.5, sx + g.TONGUE_L, yc, g.TONGUE_W, 0, g.TONGUE_T)
             mortise = bx(sx - 0.01, sx + g.TONGUE_L + c, yc, g.TONGUE_W + 2 * c, -1, g.TONGUE_T + c)
+            rel = getattr(g, "RELIEF", 0)
+            if rel:             # v19：ほぞ穴の奥の2つの角に逃げ（舌の角が当たらない）
+                for dy in (-1, 1):
+                    mortise = mortise + m3.Manifold.cylinder(g.TONGUE_T + c + 1, rel, rel, 24).translate(
+                        [sx + g.TONGUE_L + c - rel * 0.3, -(yc + dy * (g.TONGUE_W / 2 + c - rel * 0.3)), -1])
             hole = m3.Manifold.cylinder(H + 2, g.HOLE_D / 2, g.HOLE_D / 2, 32).translate([bxp, -yc, -1])
             cb = m3.Manifold.cylinder(g.JB_CB_DEPTH + 1, g.JB_CB_D / 2, g.JB_CB_D / 2, 40).translate([bxp, -yc, H - g.JB_CB_DEPTH])
             nut = m3.Manifold.extrude(hexa, g.JB_NUT_DEPTH + 1).translate([bxp, -yc, -1])
@@ -133,6 +172,12 @@ def build_parts():
         for yw in (g.OY + g.WALL / 2, g.OY + g.OUTER_H - g.WALL / 2):
             pin = m3.Manifold.cylinder(12, 0.95, 0.95, 24).rotate([0, 90, 0]).translate([sx - 6, -yw, zb + g.FRAME_H / 2])
             left, right = left - pin, right - pin
+    v = getattr(g, "SEAM_V", 0)
+    if v:                       # v19：継ぎ目の外側の面（前後）に浅いV溝（90°、深さ v）。両方の半分の角を面取りする形
+        for yf in (g.OY + g.FRAME_INSET, g.OY + g.OUTER_H - g.FRAME_INSET):
+            dia = m3.CrossSection([[(sx - v, -yf), (sx, -yf - v), (sx + v, -yf), (sx, -yf + v)]])   # 反時計回り
+            cut = m3.Manifold.extrude(dia, 40).translate([0, 0, -10])
+            left, right = left - cut, right - cut
     parts["frame_left"], parts["frame_right"] = left, right
 
     # 足（ナット受け）：円柱を傾いた机の面で切り、下から六角のナット溝

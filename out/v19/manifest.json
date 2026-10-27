@@ -1,0 +1,160 @@
+{
+ "version": "v19",
+ "prev": "v18b",
+ "date": "2026-10-27",
+ "stage": "モック",
+ "summary": "トレー型（v18b）に確認ボードの答えとフィードバックを入れた版。底を2mmにして全体が1mm低く（足込み16.9mm）なり、補強板のネジ穴をU字の切り欠きにし、USBの窓の上下に肉を残した。色はPLAマットブラック・アクリルすりガラス。",
+ "changes": [
+  "底の厚さ 3.0→2.0mm、ボルト M3×18→M3×16、足 3.7→3.3mm（答え：底を薄くして全体を低く）。手前の高さ 18.3→16.9mm",
+  "補強板のネジ穴を縁へ開いたU字の切り欠きに。角の4本は、縁へまっすぐ抜くと細い耳が残るので角ごと抜いた（内側の角は穴の半径で丸い）（フィードバック：穴と縁の間が約2.8mmで強度が不安）",
+  "USBの窓を角丸の長穴 13×7 にし、窓の上は掘り込みを止めて壁を上まで残した。窓の上下のPLAは 2→2.55mm、上は2mm幅の縁だけ→窓の全幅＋左右3mm（フィードバック：窓の上下が薄くて折れそう）。補強板はそこを切り欠く",
+  "内角の逃げ RELIEF=0.3 を足した：ほぞ穴の奥の角と、掘り込みの床と縁のL字（フィードバック：直角にしたい所を内側へ逃がす変数）",
+  "下面の外周に0.6mmの面取り（0.2mmの段×3）。反り・剥がれの対策、ブリムはスライサーで（質問への答え：内側を0.2mm浮かせる代わりに）",
+  "継ぎ目の前後の外側の面に、深さ0.4のV溝（答え：継ぎ目をV溝で見せる）",
+  "色：PLA マットブラック、アクリル すりガラス。天面のボルトは頭の低いもの（答え）"
+ ],
+ "questions": [
+  {
+   "q": "DZ60 の USB-C はどこに付いている？（窓の高さが決まる。いまは PCB の下側と仮定）",
+   "options": [
+    "PCBの裏面（下側）",
+    "PCBの表面（上側）",
+    "PCBに埋め込み（ミッドマウント）",
+    "まだ分からない（PCBが届いたら測る）"
+   ]
+  },
+  {
+   "q": "底の中央の継ぎ目に小さいほぞを足す？（v18 で「足す」と答えたが、v19 では入れていない）",
+   "type": "yesno"
+  },
+  {
+   "q": "内角の逃げの大きさは？（試し片で決める）",
+   "options": [
+    "0.2mm",
+    "0.3mm（いま）",
+    "0.4mm"
+   ]
+  },
+  {
+   "q": "マットブラック＋すりガラスの配色でいい？",
+   "type": "yesno"
+  }
+ ],
+ "notes": "本番の前に試し片で測る値：カーフ（今は0）、ほぞのすき間0.2、補強板の掘り込みのすき間0.2、ナット溝の二面幅6.1、内角の逃げ0.3。USBの窓の高さと位置はDZ60の実測まで仮。足のナットへのボルトの掛かりは1.8mm（ねじ山3山）なので、締めすぎない。",
+ "images": [
+  {
+   "src": "docs/img/preview_v19.png",
+   "caption": "外観（キーキャップ付き・マットブラック＋すりガラス）",
+   "group": "外観"
+  },
+  {
+   "src": "out/v19/preview.png",
+   "caption": "ケースだけ（斜め上・斜め後ろ・右横）",
+   "group": "外観"
+  },
+  {
+   "src": "out/v19/stiffener_notch.png",
+   "caption": "補強板の奥の左の角：丸穴→切り欠き（角の穴は角ごと抜く）、USBの上の切り欠き（角R1.5）",
+   "group": "補強板"
+  },
+  {
+   "src": "out/v19/section_usb.png",
+   "caption": "USBの窓の断面（X=18.2）：上下に2.55mm、上は掘り込みを止めた",
+   "group": "断面"
+  },
+  {
+   "src": "out/v19/section.png",
+   "caption": "断面（手前のネジの列）：底2mm・下面の面取り",
+   "group": "断面"
+  },
+  {
+   "src": "out/v19/section_joint.png",
+   "caption": "継ぎ目の断面（X=150.5）",
+   "group": "断面"
+  },
+  {
+   "src": "out/v19/plan.png",
+   "caption": "平面図：補強板のU字の切り欠き",
+   "group": "平面"
+  }
+ ],
+ "compare": [
+  {
+   "before": "out/v19/section_usb_v18b.png",
+   "after": "out/v19/section_usb.png",
+   "caption": "USBの窓の断面 v18b → v19"
+  },
+  {
+   "before": "docs/img/preview_v18b.png",
+   "after": "docs/img/preview_v19.png",
+   "caption": "外観 v18b → v19"
+  },
+  {
+   "before": "out/v18b/section.png",
+   "after": "out/v19/section.png",
+   "caption": "断面 v18b → v19"
+  }
+ ],
+ "params_diff": "out/v19/params_diff.json",
+ "model": "out/v19/model.glb",
+ "parts": "out/v19/scene.json",
+ "refs": [
+  {
+   "src": "refs/資料.md",
+   "caption": "資料の一覧（何を何の根拠にしたか）"
+  },
+  {
+   "src": "refs/基準寸法.md",
+   "caption": "GH60互換の基準寸法"
+  },
+  {
+   "src": "refs/dz60_実測.md",
+   "caption": "DZ60の実測の記録（未記入）"
+  },
+  {
+   "src": "refs/決定事項.md",
+   "caption": "決定事項"
+  },
+  {
+   "src": "refs/swillkb_switch_layer.svg",
+   "caption": "スイッチ穴の形（旧swillkb）"
+  }
+ ],
+ "step": [
+  {
+   "src": "case/step/assembly_v19.step",
+   "name": "組み立て",
+   "file": "assembly_v19.step"
+  },
+  {
+   "src": "case/step/top_plate_v19.step",
+   "name": "トッププレート",
+   "file": "top_plate_v19.step"
+  },
+  {
+   "src": "case/step/stiffener_v19.step",
+   "name": "補強板",
+   "file": "stiffener_v19.step"
+  },
+  {
+   "src": "case/step/frame_left_v19.step",
+   "name": "トレー（左）",
+   "file": "frame_left_v19.step"
+  },
+  {
+   "src": "case/step/frame_right_v19.step",
+   "name": "トレー（右）",
+   "file": "frame_right_v19.step"
+  },
+  {
+   "src": "case/step/foot_v19.step",
+   "name": "足（4個同じ）",
+   "file": "foot_v19.step"
+  },
+  {
+   "src": "case/step/pcb_reference_v19.step",
+   "name": "PCB（参考）",
+   "file": "pcb_reference_v19.step"
+  }
+ ]
+}

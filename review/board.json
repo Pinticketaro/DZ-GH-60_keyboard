@@ -3920,6 +3920,805 @@
      "file": "pcb_reference_v18b.step"
     }
    ]
+  },
+  {
+   "version": "v19",
+   "prev": "v18b",
+   "date": "2026-10-27",
+   "stage": "モック",
+   "summary": "トレー型（v18b）に確認ボードの答えとフィードバックを入れた版。底を2mmにして全体が1mm低く（足込み16.9mm）なり、補強板のネジ穴をU字の切り欠きにし、USBの窓の上下に肉を残した。色はPLAマットブラック・アクリルすりガラス。",
+   "changes": [
+    "底の厚さ 3.0→2.0mm、ボルト M3×18→M3×16、足 3.7→3.3mm（答え：底を薄くして全体を低く）。手前の高さ 18.3→16.9mm",
+    "補強板のネジ穴を縁へ開いたU字の切り欠きに。角の4本は、縁へまっすぐ抜くと細い耳が残るので角ごと抜いた（内側の角は穴の半径で丸い）（フィードバック：穴と縁の間が約2.8mmで強度が不安）",
+    "USBの窓を角丸の長穴 13×7 にし、窓の上は掘り込みを止めて壁を上まで残した。窓の上下のPLAは 2→2.55mm、上は2mm幅の縁だけ→窓の全幅＋左右3mm（フィードバック：窓の上下が薄くて折れそう）。補強板はそこを切り欠く",
+    "内角の逃げ RELIEF=0.3 を足した：ほぞ穴の奥の角と、掘り込みの床と縁のL字（フィードバック：直角にしたい所を内側へ逃がす変数）",
+    "下面の外周に0.6mmの面取り（0.2mmの段×3）。反り・剥がれの対策、ブリムはスライサーで（質問への答え：内側を0.2mm浮かせる代わりに）",
+    "継ぎ目の前後の外側の面に、深さ0.4のV溝（答え：継ぎ目をV溝で見せる）",
+    "色：PLA マットブラック、アクリル すりガラス。天面のボルトは頭の低いもの（答え）"
+   ],
+   "notes": "本番の前に試し片で測る値：カーフ（今は0）、ほぞのすき間0.2、補強板の掘り込みのすき間0.2、ナット溝の二面幅6.1、内角の逃げ0.3。USBの窓の高さと位置はDZ60の実測まで仮。足のナットへのボルトの掛かりは1.8mm（ねじ山3山）なので、締めすぎない。\n\nモックが見つけた注意：\n・トレー（左）（底を下にして印刷）の下向きの面にサポートが要りそう：ベッドから9.4mm（X+18・Y+9付近）約157mm²、ベッドから3.4mm（X+150・Y+9付近）約23mm²、ベッドから3.4mm（X+150・Y-103付近）約23mm²（張り出し45°より浅い）\n・トレー（右）（底を下にして印刷）の下向きの面にサポートが要りそう：ベッドから5.7mm（X+151・Y-103付近）約144mm²、ベッドから5.7mm（X+151・Y+9付近）約144mm²（張り出し45°より浅い）\n・足（底を下にして印刷）の下向きの面にサポートが要りそう：ベッドから2.7mm（X+93・Y-103付近）約23mm²、ベッドから2.7mm（X-6・Y-103付近）約23mm²（張り出し45°より浅い）",
+   "questions": [
+    {
+     "q": "DZ60 の USB-C はどこに付いている？（窓の高さが決まる。いまは PCB の下側と仮定）",
+     "type": "choice",
+     "options": [
+      {
+       "id": "a",
+       "label": "PCBの裏面（下側）",
+       "note": ""
+      },
+      {
+       "id": "b",
+       "label": "PCBの表面（上側）",
+       "note": ""
+      },
+      {
+       "id": "c",
+       "label": "PCBに埋め込み（ミッドマウント）",
+       "note": ""
+      },
+      {
+       "id": "d",
+       "label": "まだ分からない（PCBが届いたら測る）",
+       "note": ""
+      }
+     ]
+    },
+    {
+     "q": "底の中央の継ぎ目に小さいほぞを足す？（v18 で「足す」と答えたが、v19 では入れていない）",
+     "type": "yesno",
+     "options": [
+      {
+       "id": "yes",
+       "label": "はい"
+      },
+      {
+       "id": "no",
+       "label": "いいえ"
+      }
+     ]
+    },
+    {
+     "q": "内角の逃げの大きさは？（試し片で決める）",
+     "type": "choice",
+     "options": [
+      {
+       "id": "a",
+       "label": "0.2mm",
+       "note": ""
+      },
+      {
+       "id": "b",
+       "label": "0.3mm（いま）",
+       "note": ""
+      },
+      {
+       "id": "c",
+       "label": "0.4mm",
+       "note": ""
+      }
+     ]
+    },
+    {
+     "q": "マットブラック＋すりガラスの配色でいい？",
+     "type": "yesno",
+     "options": [
+      {
+       "id": "yes",
+       "label": "はい"
+      },
+      {
+       "id": "no",
+       "label": "いいえ"
+      }
+     ]
+    }
+   ],
+   "images": [
+    {
+     "src": "img/v19/img01.webp",
+     "caption": "外観（キーキャップ付き・マットブラック＋すりガラス）",
+     "group": "外観"
+    },
+    {
+     "src": "img/v19/img02.webp",
+     "caption": "ケースだけ（斜め上・斜め後ろ・右横）",
+     "group": "外観"
+    },
+    {
+     "src": "img/v19/img03.webp",
+     "caption": "補強板の奥の左の角：丸穴→切り欠き（角の穴は角ごと抜く）、USBの上の切り欠き（角R1.5）",
+     "group": "補強板"
+    },
+    {
+     "src": "img/v19/img04.webp",
+     "caption": "USBの窓の断面（X=18.2）：上下に2.55mm、上は掘り込みを止めた",
+     "group": "断面"
+    },
+    {
+     "src": "img/v19/img05.webp",
+     "caption": "断面（手前のネジの列）：底2mm・下面の面取り",
+     "group": "断面"
+    },
+    {
+     "src": "img/v19/img06.webp",
+     "caption": "継ぎ目の断面（X=150.5）",
+     "group": "断面"
+    },
+    {
+     "src": "img/v19/img07.webp",
+     "caption": "平面図：補強板のU字の切り欠き",
+     "group": "平面"
+    }
+   ],
+   "compare": [
+    {
+     "before": "img/v19/cmp01a.webp",
+     "after": "img/v19/cmp01b.webp",
+     "caption": "USBの窓の断面 v18b → v19"
+    },
+    {
+     "before": "img/v19/cmp02a.webp",
+     "after": "img/v19/cmp02b.webp",
+     "caption": "外観 v18b → v19"
+    },
+    {
+     "before": "img/v19/cmp03a.webp",
+     "after": "img/v19/cmp03b.webp",
+     "caption": "断面 v18b → v19"
+    }
+   ],
+   "params_diff": [
+    {
+     "key": "floor_t",
+     "label": "トレーの底の厚さ（PLA）",
+     "unit": "mm",
+     "before": 3.0,
+     "after": 2.0,
+     "kind": "changed",
+     "delta": -1.0
+    },
+    {
+     "key": "total_h",
+     "label": "全体の高さ（足・キーキャップ別）",
+     "unit": "mm",
+     "before": 14.6,
+     "after": 13.6,
+     "kind": "changed",
+     "delta": -1.0
+    },
+    {
+     "key": "bolt_l",
+     "label": "M3ボルトの長さ（8本）",
+     "unit": "mm",
+     "before": 18.0,
+     "after": 16.0,
+     "kind": "changed",
+     "delta": -2.0
+    },
+    {
+     "key": "usb_h",
+     "label": "USBの窓の高さ（角丸の長穴）",
+     "unit": "mm",
+     "before": null,
+     "after": 7.0,
+     "kind": "added"
+    },
+    {
+     "key": "usb_zc",
+     "label": "USBの窓の中心の高さ（トレーの下面から）",
+     "unit": "mm",
+     "before": null,
+     "after": 6.05,
+     "kind": "added"
+    },
+    {
+     "key": "usb_boss",
+     "label": "USBの窓の上で掘り込みを止める範囲（窓の左右に足す幅）",
+     "unit": "mm",
+     "before": null,
+     "after": 3.0,
+     "kind": "added"
+    },
+    {
+     "key": "stiff_notch",
+     "label": "補強板のネジ穴の形",
+     "unit": "",
+     "before": null,
+     "after": "U字",
+     "kind": "added"
+    },
+    {
+     "key": "seam_v",
+     "label": "継ぎ目のV溝の深さ（90°）",
+     "unit": "mm",
+     "before": null,
+     "after": 0.4,
+     "kind": "added"
+    },
+    {
+     "key": "bed_chamfer",
+     "label": "トレーの下面の外周の面取り（45°、0.2mmの段）",
+     "unit": "mm",
+     "before": null,
+     "after": 0.6,
+     "kind": "added"
+    },
+    {
+     "key": "bolt_head",
+     "label": "天面のボルトの頭",
+     "unit": "",
+     "before": null,
+     "after": "低頭（極低頭）M3",
+     "kind": "added"
+    },
+    {
+     "key": "relief",
+     "label": "内角の逃げ（ほぞ穴の奥の角・掘り込みの床と縁のL字）",
+     "unit": "mm",
+     "before": null,
+     "after": 0.3,
+     "kind": "added"
+    },
+    {
+     "key": "nut_engage",
+     "label": "足のナットへのボルトの掛かり",
+     "unit": "mm",
+     "before": null,
+     "after": 1.8,
+     "kind": "added"
+    }
+   ],
+   "dims": [
+    {
+     "key": "outer_w",
+     "label": "外形の幅（X）",
+     "value": 315.0,
+     "unit": "mm",
+     "basis": "旧デザイン（swillkb で作ったケース）の外形を踏襲",
+     "ref": "決定事項.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "outer_d",
+     "label": "外形の奥行き（Y）",
+     "value": 126.0,
+     "unit": "mm",
+     "basis": "同上",
+     "ref": "決定事項.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "corner_r",
+     "label": "外形の角の丸み（Apple風）",
+     "value": 8.0,
+     "unit": "mm",
+     "basis": "v12 で R8・スムージング0.6 に（v11 までは R12）。角とネジ穴の距離から",
+     "ref": "決定事項.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "wall",
+     "label": "枠の壁の幅",
+     "value": 14.0,
+     "unit": "mm",
+     "basis": "旧デザイン。枠の内側 287×98 で PCB とのすき間 約1.0",
+     "ref": "基準寸法.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "pcb_w",
+     "label": "PCBの幅",
+     "value": 285.0,
+     "unit": "mm",
+     "basis": "GH60 オープンソースPCB の外形。DZ60 は GH60 互換（要実測）",
+     "ref": "基準寸法.md",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "pcb_d",
+     "label": "PCBの奥行き",
+     "value": 94.6,
+     "unit": "mm",
+     "basis": "同上",
+     "ref": "基準寸法.md",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "pcb_t",
+     "label": "PCBの厚さ",
+     "value": 1.6,
+     "unit": "mm",
+     "basis": "一般的なFR4の1.6。DZ60 の実測で置き換える",
+     "ref": "dz60_実測.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "key_pitch",
+     "label": "キーの間隔（1U）",
+     "value": 19.05,
+     "unit": "mm",
+     "basis": "MX 系キーボードの標準",
+     "ref": "基準寸法.md",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "plate_top_to_pcb",
+     "label": "プレート上面〜PCB上面",
+     "value": 5.0,
+     "unit": "mm",
+     "basis": "MX スイッチの規格寸法",
+     "ref": "基準寸法.md",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "top_t",
+     "label": "トッププレートの厚さ（アクリル）",
+     "value": 1.5,
+     "unit": "mm",
+     "basis": "MX の爪が掛かるのは1.6mm以下",
+     "ref": "基準寸法.md",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "switch_cut",
+     "label": "スイッチ穴（カーフ補正前）",
+     "value": 14.0,
+     "unit": "mm",
+     "basis": "MX 標準。穴形状は旧 swillkb の出力（65キーと全数一致を確認）",
+     "ref": "swillkb_switch_layer.svg",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "stiff_t",
+     "label": "補強板の厚さ（アクリル）",
+     "value": 2.0,
+     "unit": "mm",
+     "basis": "2026-10-15 決定（3mm1枚案は爪が掛からず不可）。2mm/3mm はテストカットで決める",
+     "ref": "決定事項.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "stiff_offset",
+     "label": "補強板の穴の逃げ（片側）",
+     "value": 0.8,
+     "unit": "mm",
+     "basis": "スイッチの爪が開く空間。テストカットで確かめる",
+     "ref": "基準寸法.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "gap_stiff_pcb",
+     "label": "補強板の下面〜PCB上面",
+     "value": 1.5,
+     "unit": "mm",
+     "basis": "plate_top_to_pcb − top_t − stiff_t",
+     "ref": "",
+     "status": "計算",
+     "fab": false
+    },
+    {
+     "key": "under_pcb",
+     "label": "PCB下面〜底の上面（台座の高さ）",
+     "value": 5.0,
+     "unit": "mm",
+     "basis": "PCB裏の部品・USB-C より高く。DZ60 の実測で決める",
+     "ref": "dz60_実測.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "frame_h",
+     "label": "枠の高さ（掘り込みの床まで、底を除く）",
+     "value": 8.1,
+     "unit": "mm",
+     "basis": "gap_stiff_pcb ＋ pcb_t ＋ under_pcb",
+     "ref": "",
+     "status": "計算",
+     "fab": false
+    },
+    {
+     "key": "floor_t",
+     "label": "トレーの底の厚さ（PLA）",
+     "value": 2.0,
+     "unit": "mm",
+     "basis": "v17 のボトムプレート3.0と同じにして全体の高さを変えない",
+     "ref": "決定事項.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "stiff_lip",
+     "label": "補強板の掘り込みの外側の縁",
+     "value": 2.0,
+     "unit": "mm",
+     "basis": "v17：側面に見えるアクリルをトッププレートだけにする。スカートと同じ2mm",
+     "ref": "決定事項.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "total_h",
+     "label": "全体の高さ（足・キーキャップ別）",
+     "value": 13.6,
+     "unit": "mm",
+     "basis": "各層の合計",
+     "ref": "",
+     "status": "計算",
+     "fab": false
+    },
+    {
+     "key": "usb_x",
+     "label": "USB切り欠きの中心（PCB左端から）",
+     "value": 18.2,
+     "unit": "mm",
+     "basis": "GH60 標準の位置。DZ60 の実測で置き換える",
+     "ref": "dz60_実測.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "usb_w",
+     "label": "USB切り欠きの幅",
+     "value": 13.0,
+     "unit": "mm",
+     "basis": "ケーブルの太い部分（USB-C のオーバーモールド 約12.35）＋余裕。手持ちのいちばん太いケーブルで試す",
+     "ref": "",
+     "status": "経験則",
+     "fab": false
+    },
+    {
+     "key": "split_x",
+     "label": "枠の分割位置（X）",
+     "value": 142.5,
+     "unit": "mm",
+     "basis": "中央。半分がプリンタの造形範囲に載る",
+     "ref": "",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "bed",
+     "label": "プリンタの造形範囲（Ender-3 Pro）",
+     "value": 220,
+     "unit": "mm",
+     "basis": "メーカー仕様 220×220×250",
+     "ref": "",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "hole_d",
+     "label": "M3ボルト穴",
+     "value": 3.4,
+     "unit": "mm",
+     "basis": "JIS B 1001 2級（1級3.2／2級3.4／3級3.6）",
+     "ref": "",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "bolt_l",
+     "label": "M3ボルトの長さ（8本）",
+     "value": 16.0,
+     "unit": "mm",
+     "basis": "全層＋足のナットまで。ナットの上に残る厚さ 0.6",
+     "ref": "",
+     "status": "計算",
+     "fab": false
+    },
+    {
+     "key": "nut_af",
+     "label": "M3ナットの二面幅",
+     "value": 5.5,
+     "unit": "mm",
+     "basis": "ISO 4032／JIS B 1181",
+     "ref": "",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "nut_t",
+     "label": "M3ナットの厚さ",
+     "value": 2.4,
+     "unit": "mm",
+     "basis": "同上（最大2.4）",
+     "ref": "",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "tilt",
+     "label": "傾き",
+     "value": 0.0,
+     "unit": "°",
+     "basis": "v14 で 0°（平ら）。3〜5° にするかは未決",
+     "ref": "決定事項.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "tongue_t",
+     "label": "継ぎ目のほぞ（舌）の厚さ",
+     "value": 5.5,
+     "unit": "mm",
+     "basis": "トレーは底を下に刷るので下側に。ナット溝3.4の上に2.1残る",
+     "ref": "",
+     "status": "計算",
+     "fab": false
+    },
+    {
+     "key": "joint_bolt",
+     "label": "継ぎ目のボルト M3（ボタンヘッド）の長さ",
+     "value": 8.0,
+     "unit": "mm",
+     "basis": "頭のざぐりからナットまで。ナットに約2.4mm掛かる",
+     "ref": "",
+     "status": "計算",
+     "fab": false
+    },
+    {
+     "key": "usb_h",
+     "label": "USBの窓の高さ（角丸の長穴）",
+     "value": 7.0,
+     "unit": "mm",
+     "basis": "USB-C のオーバーモールド 約6.5＋余裕。窓の上下にPLAを残す（フィードバック：上下が薄くて折れそう）",
+     "ref": "dz60_実測.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "usb_zc",
+     "label": "USBの窓の中心の高さ（トレーの下面から）",
+     "value": 6.05,
+     "unit": "mm",
+     "basis": "底の上面と掘り込みの床の中間（仮）。DZ60 の USB-C の高さを実測して決める",
+     "ref": "dz60_実測.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "usb_boss",
+     "label": "USBの窓の上で掘り込みを止める範囲（窓の左右に足す幅）",
+     "value": 3.0,
+     "unit": "mm",
+     "basis": "窓の上の壁を上まで残す（補強板はそこを切り欠く）",
+     "ref": "",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "stiff_notch",
+     "label": "補強板のネジ穴の形",
+     "value": "U字",
+     "unit": "",
+     "basis": "縁へ開いたU字の切り欠き（フィードバック：穴と縁の間が約2.8mmで割れが不安）",
+     "ref": "",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "seam_v",
+     "label": "継ぎ目のV溝の深さ（90°）",
+     "value": 0.4,
+     "unit": "mm",
+     "basis": "継ぎ目の線を意図した線に見せる（確認ボードの答え）",
+     "ref": "決定事項.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "bed_chamfer",
+     "label": "トレーの下面の外周の面取り（45°、0.2mmの段）",
+     "value": 0.6,
+     "unit": "mm",
+     "basis": "反り・エレファントフットの対策。ベッドに接する縁は面取りにする（Hubs）。ブリムはスライサーで",
+     "ref": "",
+     "status": "経験則",
+     "fab": false
+    },
+    {
+     "key": "bolt_head",
+     "label": "天面のボルトの頭",
+     "value": "低頭（極低頭）M3",
+     "unit": "",
+     "basis": "確認ボードの答え：頭の低いもの",
+     "ref": "",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "kerf",
+     "label": "レーザーのカーフ（切断溝の全幅）",
+     "value": 0.0,
+     "unit": "mm",
+     "basis": "まだ補正していない（0）。3mmアクリル・CO2 の公開値は0.125〜0.18。試し片で測る",
+     "ref": "",
+     "status": "初期値",
+     "fab": true
+    },
+    {
+     "key": "clr_tongue",
+     "label": "ほぞ穴のすき間（片側）",
+     "value": 0.2,
+     "unit": "mm",
+     "basis": "FDM の一般クリアランス0.2。±0.1 の3段の試し片で決める",
+     "ref": "",
+     "status": "初期値",
+     "fab": true
+    },
+    {
+     "key": "clr_stiff",
+     "label": "補強板の掘り込みのすき間（片側）",
+     "value": 0.2,
+     "unit": "mm",
+     "basis": "同上。アクリルの外形のばらつきも見る",
+     "ref": "",
+     "status": "初期値",
+     "fab": true
+    },
+    {
+     "key": "nut_pocket",
+     "label": "ナット溝の二面幅",
+     "value": 6.1,
+     "unit": "mm",
+     "basis": "ナット5.5＋0.6（少しきつめ）。印刷して調整",
+     "ref": "",
+     "status": "初期値",
+     "fab": true
+    },
+    {
+     "key": "relief",
+     "label": "内角の逃げ（ほぞ穴の奥の角・掘り込みの床と縁のL字）",
+     "value": 0.3,
+     "unit": "mm",
+     "basis": "3Dプリントの内角はノズル径ほど丸くなり、相手の角が当たる。試し片で要否と大きさを決める",
+     "ref": "",
+     "status": "初期値",
+     "fab": true
+    },
+    {
+     "key": "nut_engage",
+     "label": "足のナットへのボルトの掛かり",
+     "value": 1.8,
+     "unit": "mm",
+     "basis": "M3×16 で全層13.6＋ナットの上の肉0.6。ねじ山3山（ピッチ0.5）",
+     "ref": "",
+     "status": "計算",
+     "fab": true
+    },
+    {
+     "key": "overhang_deg",
+     "label": "サポートなしで刷れる張り出し角",
+     "value": 45,
+     "unit": "°",
+     "basis": "FDM の一般的な目安（45°ルール）",
+     "ref": "",
+     "status": "経験則",
+     "fab": true
+    }
+   ],
+   "refs": [
+    {
+     "src": "refs/dz60_実測.md",
+     "name": "dz60_実測.md",
+     "caption": "DZ60の実測の記録（未記入）",
+     "img": false
+    },
+    {
+     "src": "refs/swillkb_switch_layer.svg",
+     "name": "swillkb_switch_layer.svg",
+     "caption": "スイッチ穴の形（旧swillkb）",
+     "img": true
+    },
+    {
+     "src": "refs/基準寸法.md",
+     "name": "基準寸法.md",
+     "caption": "GH60互換の基準寸法",
+     "img": false
+    },
+    {
+     "src": "refs/決定事項.md",
+     "name": "決定事項.md",
+     "caption": "決定事項",
+     "img": false
+    },
+    {
+     "src": "refs/資料.md",
+     "name": "資料.md",
+     "caption": "資料の一覧（何を何の根拠にしたか）",
+     "img": false
+    }
+   ],
+   "model": "img/v19/model.glb.txt",
+   "parts": [
+    {
+     "name": "トッププレート",
+     "key": "top"
+    },
+    {
+     "name": "補強板",
+     "key": "stiffener"
+    },
+    {
+     "name": "トレー（左）",
+     "key": "frame_left"
+    },
+    {
+     "name": "トレー（右）",
+     "key": "frame_right"
+    },
+    {
+     "name": "PCB",
+     "key": "pcb"
+    },
+    {
+     "name": "足1",
+     "key": "foot_1"
+    },
+    {
+     "name": "足2",
+     "key": "foot_2"
+    },
+    {
+     "name": "足3",
+     "key": "foot_3"
+    },
+    {
+     "name": "足4",
+     "key": "foot_4"
+    }
+   ],
+   "step": [
+    {
+     "src": "img/v19/step/01.step.txt",
+     "name": "組み立て",
+     "file": "assembly_v19.step"
+    },
+    {
+     "src": "img/v19/step/02.step.txt",
+     "name": "トッププレート",
+     "file": "top_plate_v19.step"
+    },
+    {
+     "src": "img/v19/step/03.step.txt",
+     "name": "補強板",
+     "file": "stiffener_v19.step"
+    },
+    {
+     "src": "img/v19/step/04.step.txt",
+     "name": "トレー（左）",
+     "file": "frame_left_v19.step"
+    },
+    {
+     "src": "img/v19/step/05.step.txt",
+     "name": "トレー（右）",
+     "file": "frame_right_v19.step"
+    },
+    {
+     "src": "img/v19/step/06.step.txt",
+     "name": "足（4個同じ）",
+     "file": "foot_v19.step"
+    },
+    {
+     "src": "img/v19/step/07.step.txt",
+     "name": "PCB（参考）",
+     "file": "pcb_reference_v19.step"
+    }
+   ]
   }
  ],
  "lang": "ja"

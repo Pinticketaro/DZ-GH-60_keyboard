@@ -59,6 +59,18 @@ def build():
     P["tongue_t"] = it(g.TONGUE_T, "継ぎ目のほぞ（舌）の厚さ", ("トレーは底を下に刷るので下側に。ナット溝3.4の上に2.1残る" if TRAY
                                                           else "枠は上面を下に刷るので上側に。ざぐりの下に1.9残る"), "計算")
     P["joint_bolt"] = it(g.JB_L, "継ぎ目のボルト M3（ボタンヘッド）の長さ", "頭のざぐりからナットまで。ナットに約" + (f"{g.check_joint().get('engagement', '')}" if TRAY else "2.4") + "mm掛かる", "計算")
+    if getattr(g, "USB_H", None) and TRAY:     # v19
+        P["usb_h"] = it(g.USB_H, "USBの窓の高さ（角丸の長穴）", "USB-C のオーバーモールド 約6.5＋余裕。窓の上下にPLAを残す（フィードバック：上下が薄くて折れそう）", "仮", JISSOKU)
+        P["usb_zc"] = it(round(g.usb_zc(), 2), "USBの窓の中心の高さ（トレーの下面から）", "底の上面と掘り込みの床の中間（仮）。DZ60 の USB-C の高さを実測して決める", "仮", JISSOKU)
+        P["usb_boss"] = it(g.USB_BOSS, "USBの窓の上で掘り込みを止める範囲（窓の左右に足す幅）", "窓の上の壁を上まで残す（補強板はそこを切り欠く）", "決定")
+    if getattr(g, "STIFF_NOTCH", False):
+        P["stiff_notch"] = it("U字", "補強板のネジ穴の形", "縁へ開いたU字の切り欠き（フィードバック：穴と縁の間が約2.8mmで割れが不安）", "決定", unit="")
+    if getattr(g, "SEAM_V", 0):
+        P["seam_v"] = it(g.SEAM_V, "継ぎ目のV溝の深さ（90°）", "継ぎ目の線を意図した線に見せる（確認ボードの答え）", "決定", KETTEI)
+    if getattr(g, "BED_CHAMFER", 0) and TRAY:
+        P["bed_chamfer"] = it(g.BED_CHAMFER, "トレーの下面の外周の面取り（45°、0.2mmの段）", "反り・エレファントフットの対策。ベッドに接する縁は面取りにする（Hubs）。ブリムはスライサーで", "経験則")
+    if getattr(g, "BOLT_HEAD", None):
+        P["bolt_head"] = it(g.BOLT_HEAD, "天面のボルトの頭", "確認ボードの答え：頭の低いもの", "決定", unit="")
     F = {}
     F["kerf"] = it(g.KERF, "レーザーのカーフ（切断溝の全幅）", "まだ補正していない（0）。3mmアクリル・CO2 の公開値は0.125〜0.18。試し片で測る", "初期値")
     F["clr_tongue"] = it(g.TONGUE_CLEAR, "ほぞ穴のすき間（片側）", "FDM の一般クリアランス0.2。±0.1 の3段の試し片で決める", "初期値")
@@ -67,6 +79,10 @@ def build():
     if not TRAY:
         F["clr_skirt"] = it(g.SKIRT_CLEAR, "スカートとボトムプレートのすき間（片側）", "同上", "初期値")
     F["nut_pocket"] = it(g.NUT_POCKET_AF, "ナット溝の二面幅", "ナット5.5＋0.6（少しきつめ）。印刷して調整", "初期値")
+    if getattr(g, "RELIEF", 0):
+        F["relief"] = it(g.RELIEF, "内角の逃げ（ほぞ穴の奥の角・掘り込みの床と縁のL字）", "3Dプリントの内角はノズル径ほど丸くなり、相手の角が当たる。試し片で要否と大きさを決める", "初期値")
+    if TRAY and getattr(g, "NUT_ENGAGE", None):
+        F["nut_engage"] = it(g.NUT_ENGAGE, "足のナットへのボルトの掛かり", "M3×16 で全層13.6＋ナットの上の肉0.6。ねじ山3山（ピッチ0.5）", "計算")
     F["overhang_deg"] = it(45, "サポートなしで刷れる張り出し角", "FDM の一般的な目安（45°ルール）", "経験則", unit="°")
     for v in list(P.values()) + list(F.values()):
         if not v["ref"]:

@@ -87,6 +87,17 @@ def hex_prism(c, af, z0, z1, rot=0.0):
     return cq.Solid.extrudeLinear(face, Vector(0, 0, z1 - z0)).translate(Vector(0, 0, z0))
 
 
+def poly_plate(poly, z0, t, seg=0.6):
+    """shapely の多角形（PCB座標、穴あり可）から板。複数に分かれていればまとめる。"""
+    out = None
+    for pg in getattr(poly, "geoms", [poly]):
+        w = wire_from_pts([fd.T(p) for p in list(pg.exterior.coords)[:-1]], seg_long=seg)
+        hs = [wire_from_pts([fd.T(p) for p in list(r.coords)[:-1]], seg_long=seg) for r in pg.interiors]
+        sol = plate(w, hs, z0, t)
+        out = sol if out is None else out.fuse(sol)
+    return out
+
+
 def build():
     D = fd.data()
     z = b3.z_levels()
@@ -95,7 +106,13 @@ def build():
     parts = {}
     parts["top_plate"] = plate(outer, hole_w + [cq.Wire.makePolygon([Vector(x, y, 0) for x, y in p], close=True) for p in D["cuts"]],
                                z["st1"], g.TOP_T)
-    parts["stiffener"] = plate(wire_from_pts([fd.T(p) for p in g.stiff_outer_pts()], seg_long=0.6) if g.STIFF_RECESS else wire_from_pts(D["outer"]), [circle_wire(c, d) for c, d in D["holes"]] +
+    if getattr(g, "STIFF_NOTCH", False) or getattr(g, "USB_BOSS", 0):   # v19：U字の切り欠き・USBの上の切り欠き
+        sp = g.stiff_poly()
+        parts["stiffener"] = plate(wire_from_pts([fd.T(p) for p in list(sp.exterior.coords)[:-1]], seg_long=0.6),
+                                   ([] if g.STIFF_NOTCH else [circle_wire(c, d) for c, d in D["holes"]]) +
+                                   [wire_from_pts(p, seg_long=0.05) for p in D["stiff"]], z["fr1"], g.STIFF_T)
+    else:
+        parts["stiffener"] = plate(wire_from_pts([fd.T(p) for p in g.stiff_outer_pts()], seg_long=0.6) if g.STIFF_RECESS else wire_from_pts(D["outer"]), [circle_wire(c, d) for c, d in D["holes"]] +
                                [wire_from_pts(p, seg_long=0.05) for p in D["stiff"]], z["fr1"], g.STIFF_T)
     if g.CASE == "tray":
         pass                        # v18 トレー型：底はトレーと一体
@@ -110,12 +127,41 @@ def build():
     fi = wire_from_pts(D["frame_inner"])
     frame = plate(fo, [fi] + [circle_wire(c, d) for c, d in D["holes"]], z["bot1"], g.FRAME_H)
     ux = g.USB_X - fd.OX0
-    frame = frame.cut(box(ux - g.USB_W / 2, ux + g.USB_W / 2, g.OUTER_H - g.WALL - 1, g.OUTER_H + 1, z["bot1"] - 1, z["fr1"] + 1))
+    stadium = getattr(g, "USB_H", None) and g.CASE == "tray"
+    if stadium:                # v19：角丸の長穴（USB_W×USB_H）
+        rr, zc = g.USB_H / 2, g.usb_zc()
+        y0, y1 = g.OUTER_H - g.WALL - 1, g.OUTER_H + 1
+        usb = box(ux - g.USB_W / 2 + rr, ux + g.USB_W / 2 - rr, y0, y1, zc - rr, zc + rr)
+        for xx in (ux - g.USB_W / 2 + rr, ux + g.USB_W / 2 - rr):
+            usb = usb.fuse(cq.Solid.makeCylinder(rr, y1 - y0, Vector(xx, y0, zc), Vector(0, 1, 0)))
+    else:
+        usb = box(ux - g.USB_W / 2, ux + g.USB_W / 2, g.OUTER_H - g.WALL - 1, g.OUTER_H + 1, z["bot1"] - 1, z["fr1"] + 1)
+    frame = frame.cut(usb)
     if g.CASE == "tray":     # 底（枠の外形いっぱい、ネジ穴だけ）
         frame = frame.fuse(plate(fo, [circle_wire(c, d) for c, d in D["holes"]], z["bot0"], g.FLOOR_T)).clean()
-    if g.STIFF_RECESS:   # v17：補強板の高さまで縁を立て、内側を補強板の形に掘る
-        pk = wire_from_pts([fd.T(p) for p in list(g.stiff_pocket_poly().exterior.coords)[:-1]], seg_long=0.6)
+    bb = g.usb_boss_box() if hasattr(g, "usb_boss_box") else None
+    if g.STIFF_RECESS:   # v17：補強板の高さまで縁を立て、内側を補強板の形に掘る（v19：USBの上は掘らない）
+        pkp = g.stiff_pocket_poly()
+        if bb is not None:
+            pkp = pkp.difference(bb)
+        pk = wire_from_pts([fd.T(p) for p in list(pkp.exterior.coords)[:-1]], seg_long=0.6)
         frame = frame.fuse(plate(fo, [pk], z["fr1"], g.STIFF_T)).clean()
+        rel = getattr(g, "RELIEF", 0)
+        if rel:          # v19：掘り込みの床と縁のL字に逃げの溝
+            full = g.stiff_pocket_poly()
+            ring = full.difference(full.buffer(-rel, join_style=1, quad_segs=24))
+            if bb is not None:
+                ring = ring.difference(bb)
+            frame = frame.cut(poly_plate(ring, z["fr1"] - rel, rel + 0.02))
+    bc = getattr(g, "BED_CHAMFER", 0) if g.CASE == "tray" else 0
+    if bc:               # v19：下面の外周の面取り（0.2mmずつの段。メッシュと同じ）
+        from shapely.geometry import Polygon as _P
+        fop = _P(g.frame_outer_pts())
+        n = max(1, round(bc / 0.2))
+        for i in range(n):
+            ins = bc - i * bc / n
+            ring = fop.difference(fop.buffer(-ins, join_style=1, quad_segs=24))
+            frame = frame.cut(poly_plate(ring, z["bot0"] - 0.01 + i * bc / n, bc / n + (0.02 if i == 0 else 0.01)))
     if g.SKIRT:
         ring = g.skirt_ring()
         sk = plate(wire_from_pts([fd.T(p) for p in list(ring.exterior.coords)[:-1]]),
@@ -134,6 +180,10 @@ def build():
             bxp = (xs + g.JB_X, yc)
             tongue = box(xs - 0.5, xs + g.TONGUE_L, yc - g.TONGUE_W / 2, yc + g.TONGUE_W / 2, 0, g.TONGUE_T)
             mortise = box(xs - 0.01, xs + g.TONGUE_L + c, yc - g.TONGUE_W / 2 - c, yc + g.TONGUE_W / 2 + c, -1, g.TONGUE_T + c)
+            rel = getattr(g, "RELIEF", 0)
+            if rel:      # v19：ほぞ穴の奥の角に逃げ
+                for dy in (-1, 1):
+                    mortise = mortise.fuse(cyl((xs + g.TONGUE_L + c - rel * 0.3, yc + dy * (g.TONGUE_W / 2 + c - rel * 0.3)), 2 * rel, -1, g.TONGUE_T + c))
             hole = cyl(bxp, g.HOLE_D, -1, H + 1)
             cb = cyl(bxp, g.JB_CB_D, H - g.JB_CB_DEPTH, H + 1)
             nut = hex_prism(bxp, g.NUT_POCKET_AF, -1, g.JB_NUT_DEPTH)
@@ -151,6 +201,12 @@ def build():
             nut = hex_prism(bxp, g.NUT_POCKET_AF, zb - 1, zb + g.JB_NUT_DEPTH)
             left = left.fuse(tongue).clean().cut(hole).cut(cb)
             right = right.cut(mortise).cut(hole).cut(nut)
+    v = getattr(g, "SEAM_V", 0)
+    if v:                # v19：継ぎ目の外側の面に浅いV溝
+        for yf in (fd.T((0, g.OY + g.FRAME_INSET))[1], fd.T((0, g.OY + g.OUTER_H - g.FRAME_INSET))[1]):
+            pts = [Vector(xs - v, yf, 0), Vector(xs, yf - v, 0), Vector(xs + v, yf, 0), Vector(xs, yf + v, 0)]
+            dia = cq.Solid.extrudeLinear(cq.Face.makeFromWires(cq.Wire.makePolygon(pts, close=True)), Vector(0, 0, 40)).translate(Vector(0, 0, -10))
+            left, right = left.cut(dia), right.cut(dia)
     parts["frame_left"] = left
     parts["frame_right"] = right
 

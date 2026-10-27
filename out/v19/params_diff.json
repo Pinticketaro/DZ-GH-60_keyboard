@@ -1,0 +1,101 @@
+[
+ {
+  "key": "floor_t",
+  "label": "トレーの底の厚さ（PLA）",
+  "unit": "mm",
+  "before": 3.0,
+  "after": 2.0,
+  "kind": "changed",
+  "delta": -1.0
+ },
+ {
+  "key": "total_h",
+  "label": "全体の高さ（足・キーキャップ別）",
+  "unit": "mm",
+  "before": 14.6,
+  "after": 13.6,
+  "kind": "changed",
+  "delta": -1.0
+ },
+ {
+  "key": "bolt_l",
+  "label": "M3ボルトの長さ（8本）",
+  "unit": "mm",
+  "before": 18.0,
+  "after": 16.0,
+  "kind": "changed",
+  "delta": -2.0
+ },
+ {
+  "key": "usb_h",
+  "label": "USBの窓の高さ（角丸の長穴）",
+  "unit": "mm",
+  "before": null,
+  "after": 7.0,
+  "kind": "added"
+ },
+ {
+  "key": "usb_zc",
+  "label": "USBの窓の中心の高さ（トレーの下面から）",
+  "unit": "mm",
+  "before": null,
+  "after": 6.05,
+  "kind": "added"
+ },
+ {
+  "key": "usb_boss",
+  "label": "USBの窓の上で掘り込みを止める範囲（窓の左右に足す幅）",
+  "unit": "mm",
+  "before": null,
+  "after": 3.0,
+  "kind": "added"
+ },
+ {
+  "key": "stiff_notch",
+  "label": "補強板のネジ穴の形",
+  "unit": "",
+  "before": null,
+  "after": "U字",
+  "kind": "added"
+ },
+ {
+  "key": "seam_v",
+  "label": "継ぎ目のV溝の深さ（90°）",
+  "unit": "mm",
+  "before": null,
+  "after": 0.4,
+  "kind": "added"
+ },
+ {
+  "key": "bed_chamfer",
+  "label": "トレーの下面の外周の面取り（45°、0.2mmの段）",
+  "unit": "mm",
+  "before": null,
+  "after": 0.6,
+  "kind": "added"
+ },
+ {
+  "key": "bolt_head",
+  "label": "天面のボルトの頭",
+  "unit": "",
+  "before": null,
+  "after": "低頭（極低頭）M3",
+  "kind": "added"
+ },
+ {
+  "key": "relief",
+  "label": "内角の逃げ（ほぞ穴の奥の角・掘り込みの床と縁のL字）",
+  "unit": "mm",
+  "before": null,
+  "after": 0.3,
+  "kind": "added"
+ },
+ {
+  "key": "nut_engage",
+  "label": "足のナットへのボルトの掛かり",
+  "unit": "mm",
+  "before": null,
+  "after": 1.8,
+  "kind": "added"
+ }
+]

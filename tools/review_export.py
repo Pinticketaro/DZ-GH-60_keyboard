@@ -42,6 +42,9 @@ def overhangs(mesh, deg=45.0, up="z", min_area=1.0):
 
 def overhang_note(name, mesh, up):
     regs = overhangs(mesh, 45.0, up)
+    bc = getattr(g, "BED_CHAMFER", 0) if up == "z" else 0
+    if bc:      # 下面の面取りの段（0.2mmずつ＝積層と同じ。実質45°なので刷れる）は除く
+        regs = [r for r in regs if r["h"] > bc + 0.05]
     if not regs:
         return None
     where = "、".join(f"ベッドから{r['h']:.1f}mm（X{r['x']:+.0f}・Y{r['y']:+.0f}付近）約{r['area']:.0f}mm²" for r in regs[:3])
@@ -55,6 +58,14 @@ PARTS = [("top", "トッププレート", "#e6eef2", 0.7, 0.55), ("stiffener", "
 
 
 def main():
+    C = getattr(g, "COLORS", None)
+    if C:       # v19：PLA マットブラック・アクリル すりガラス
+        pla = C["pla"]
+        for i, (key, name, col, op, rough) in enumerate(PARTS):
+            if key.startswith("frame_"):
+                PARTS[i] = (key, name, pla if key == "frame_left" else "#262628", 1, 0.95)
+            elif key in ("top", "stiffener"):
+                PARTS[i] = (key, name, "#eef2f3", 0.82, 0.85)
     parts, z = b3.build_parts()
     out = os.path.join(g.ROOT, "out", g.VER)
     os.makedirs(os.path.join(out, "model"), exist_ok=True)
@@ -80,7 +91,7 @@ def main():
             note = overhang_note("足", tm, PRINT_UP["foot"])
             if note:
                 scene["notes"].append(note)
-        scene["parts"].append({"file": fn, "name": f"足{i + 1}", "color": "#d9d4cb", "opacity": 1, "roughness": 0.85, "metalness": 0})
+        scene["parts"].append({"file": fn, "name": f"足{i + 1}", "color": (C["pla"] if C else "#d9d4cb"), "opacity": 1, "roughness": 0.85, "metalness": 0})
     json.dump(scene, open(os.path.join(out, "scene.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(os.path.join(out, "scene.json"))
     for n in scene["notes"]:

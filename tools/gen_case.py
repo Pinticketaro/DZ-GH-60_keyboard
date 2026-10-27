@@ -25,13 +25,23 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v18b"
-PARENT = "v17"                      # 分けた元の版（確認ボードの版の流れ）
+VER = "v19"
+PARENT = "v18b"                     # 分けた元の版（確認ボードの版の流れ）
 
 # v18b（v17 から分けた案・ブランチ claude/tray-v18）：トレー型。枠とボトムプレートを1つのPLAのトレー（上だけ開いた箱）にする。
 # トレーは底を下にして印刷（補強板の掘り込みは上向き、スカートは無し）→ サポートの要る面がほぼ無い
 CASE = "tray"                       # "tray"＝トレー型（v18）／"sandwich"＝枠＋アクリルのボトムプレート（v17まで）
-FLOOR_T = 3.0                       # トレーの底の厚さ（v17のボトムプレートと同じ。全体の高さを変えない）
+FLOOR_T = 2.0                       # トレーの底の厚さ。v19で3.0→2.0（確認ボードの答え：全体を1mm低く）
+# ---- v19（v18b から。確認ボードのフィードバックと答え）
+STIFF_NOTCH = True                  # 補強板のネジ穴を、縁へ開いたU字の切り欠きに（フィードバック：穴と縁の間が約2.8mmで割れが不安）
+USB_H = 7.0                         # USBの窓の高さ（角丸の長穴 USB_W×USB_H）。USB-Cのオーバーモールド 約6.5＋余裕（仮・要実測）
+USB_ZC = None                       # 窓の中心の高さ（トレーの下面から）。None＝底の上面と掘り込みの床の中間（仮。DZ60のUSB-Cの高さを実測して決める）
+USB_BOSS = 3.0                      # USBの窓の上は補強板の掘り込みを止めて壁を上まで残す。窓の左右にこの幅だけ足した範囲（補強板はそこを切り欠く）
+RELIEF = 0.3                        # 内角の逃げ（3Dプリントの内角の丸みで、相手の角が当たらないように掘る）：ほぞ穴の奥の角と、掘り込みの床と縁のL字
+SEAM_V = 0.4                        # 継ぎ目のV溝の深さ（外側の面。90°なので幅0.8）。0＝なし
+BED_CHAMFER = 0.6                   # トレーの下面の外周の面取り（45°。0.2mmずつの段で作る＝積層と同じ）。反り・エレファントフットの対策（ブリムはスライサーで）
+COLORS = dict(pla="#1f1f21", acrylic="frosted")   # PLA マットブラック、アクリル すりガラス（確認ボードの答え）
+BOLT_HEAD = "低頭（極低頭）M3"        # 天面のボルト（確認ボードの答え：頭の低いもの）
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -75,7 +85,7 @@ STIFF_MIN_WEB = 2.0                 # 補強板の穴と穴の間の最小幅（
 PLATE_TOP_TO_PCB_TOP = 5.0          # MXスイッチの規格寸法（プレート上面〜PCB上面）
 PCB_T = 1.6                         # 要実測
 UNDER_PCB = 5.0                     # PCB下面〜ボトムプレート上面（台座の高さ＝裏面部品・USB-Cより高く）。要実測
-BOTTOM_T = 3.0                      # ボトムプレート（アクリル）厚さ（仮）
+BOTTOM_T = 3.0 if CASE != "tray" else FLOOR_T   # ボトムプレート（アクリル）厚さ（仮）。トレーでは底の厚さ（高さの計算に使う）
 # v16：枠を下へスカート状に延ばし、ボトムプレートをその内側にはめ込む（横からボトムプレートが見えない＝塊に見せる）
 SKIRT = CASE != "tray"
 SKIRT_T = 2.0                       # スカートの厚さ（枠の外面から）
@@ -93,12 +103,13 @@ assert GAP_STIFF_PCB >= 0.3, "補強板が厚すぎてPCBに当たる"
 # ---- 外観
 FRAME_INSET = 0.3                   # 枠の外周をアクリルより内側へ下げる量。印刷の誤差で枠がはみ出さず、細い影の線になる
 # ---- ボルト・足（ボトムプレートの下にナット受けを兼ねた足。M3ボルトを上から通して全層を共締め）
-BOLT_L = 18.0                       # M3ボルトの長さ（8本共通）
+BOLT_L = 18.0 if CASE != "tray" else 16.0   # M3ボルトの長さ（8本共通）。v19：底2mmで全層が1mm薄くなり、M3×16に
 NUT_AF, NUT_T = 5.5, 2.4            # M3ナット（二面幅・厚さ）
 NUT_POCKET_AF = 6.1                 # 足のナット溝の二面幅（少しきつめ。印刷して調整）
 FOOT_D = 12.0                       # 足（丸い台）の直径。外形より1mm以上内側に収まり、浮いて見える
 TILT_DEG = 5.0                      # キーボードの傾き（仮）。0〜7°程度
-FOOT_SKIN = round(BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) - NUT_T, 2)  # ナットの上に残るPLAの厚さ
+NUT_ENGAGE = NUT_T if CASE != "tray" else 1.8   # ボルトがナットに掛かる長さ（v19：M3×16 で 1.8＝ねじ山3山）
+FOOT_SKIN = round(BOLT_L - (TOP_T + STIFF_T + FRAME_H + BOTTOM_T) - NUT_ENGAGE, 2)  # ナットの上に残るPLAの厚さ
 # ---- 奥側の足：真鍮の丸棒（ボトムプレートの奥側の下面に沿わせて左右方向に置く。横から見ると端の丸が見える）
 PLA_TILT_DEG = 0.0                  # 奥もPLAのとき（pla_bars）の傾き。None＝丸棒（ROD_D）と同じ傾き。v14で0°（平ら）
 REAR_FOOT = "pla_bars"              # "pla_bars"＝奥もPLAのバー（v13、丸棒の代わり。傾き・穴位置は丸棒φ8と同じ）／"brass_rod"／"pucks"（丸台8個）
@@ -229,6 +240,55 @@ def bottom_poly():
             slot = _b(c[0] - r, c[1], c[0] + r, OY + OUTER_H + 5)
         cuts.append(unary_union([Point(c).buffer(r, quad_segs=24), slot]))
     return P.difference(unary_union(cuts))
+
+
+def notch_cut(poly, corner_wedge=False):
+    """ネジ穴を近い方の縁（前後）へ開いたU字の切り欠きにする（ボトムプレート・補強板で共通）。"""
+    from shapely.geometry import Point, box as _b
+    from shapely.ops import unary_union
+    cuts = []
+    ymid = OY + OUTER_H / 2
+    for c in holes():
+        r = hole_d(c) / 2
+        circ = Point(c).buffer(r, quad_segs=24)
+        if corner_wedge and (c[0] < OX + 20 or c[0] > OX + OUTER_W - 20):
+            # 角の穴：角を穴の外側まで丸ごと抜く（縁へまっすぐ抜くと切り欠きと角丸の間に細い耳が、斜めに抜くと尖った先が残って割れやすい）
+            cx = OX - 5 if c[0] < OX + OUTER_W / 2 else OX + OUTER_W + 5
+            cy = OY - 5 if c[1] < ymid else OY + OUTER_H + 5
+            dx = r if cx < c[0] else -r                 # 中心へ向かう向きに半径分
+            dy = r if cy < c[1] else -r
+            b1 = _b(min(cx, c[0] + dx), min(cy, c[1]), max(cx, c[0] + dx), max(cy, c[1]))
+            b2 = _b(min(cx, c[0]), min(cy, c[1] + dy), max(cx, c[0]), max(cy, c[1] + dy))
+            cuts.append(unary_union([circ, b1, b2]))     # 角を丸ごと抜く：縁と直角に交わり、内側の角は穴の半径で丸い
+            continue
+        slot = _b(c[0] - r, OY - 5, c[0] + r, c[1]) if c[1] < ymid else _b(c[0] - r, c[1], c[0] + r, OY + OUTER_H + 5)
+        cuts.append(unary_union([circ, slot]))
+    return poly.difference(unary_union(cuts))
+
+
+def usb_boss_box():
+    """USBの窓の上で掘り込みを止める範囲（PCB座標の箱）。"""
+    from shapely.geometry import box as _b
+    if not (USB_BOSS and STIFF_RECESS):
+        return None
+    bx = _b(USB_X - USB_W / 2 - USB_BOSS, OY - 1, USB_X + USB_W / 2 + USB_BOSS, OY + WALL)
+    return bx.buffer(-1.5, join_style=2).buffer(1.5, quad_segs=12)      # 角はR1.5（補強板の内角が尖らないように）
+
+
+def stiff_poly():
+    """補強板の形（外形、v19：ネジ穴はU字の切り欠き、USBの上は切り欠き）。穴（ネジ・スイッチ）は含まない。"""
+    P = Polygon(stiff_outer_pts())
+    bb = usb_boss_box()
+    if bb is not None:
+        P = P.difference(bb.buffer(STIFF_CLEAR, quad_segs=12))
+    if STIFF_NOTCH:
+        P = notch_cut(P, corner_wedge=True)
+    return P
+
+
+def usb_zc():
+    zf = FLOOR_T if CASE == "tray" else BOTTOM_T
+    return USB_ZC if USB_ZC is not None else (zf + zf + FRAME_H) / 2
 
 
 def skirt_ring():
