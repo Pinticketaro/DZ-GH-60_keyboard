@@ -2235,6 +2235,296 @@
     }
    ],
    "model": "img/v16/model.glb.txt"
+  },
+  {
+   "version": "v17",
+   "prev": "v16",
+   "date": "2026-10-27",
+   "stage": "モック",
+   "summary": "補強板を枠の上面の掘り込みに入れた版。横から見えるアクリルはトッププレート1.5mmだけになり、高さは18.3mmのまま。その代わり、枠をどちら向きに刷っても壁の内側にぐるりとサポートが要る。",
+   "changes": [
+    "補強板を枠の上面の掘り込み（深さ2.0、外側の縁2.0、すき間0.2）に入れた（v16の問い「補強板も枠の掘り込みに入れるか」→ はい）",
+    "補強板の外形が310×121に（ボトムプレートと同じ大きさ）。枠は高さ10.1（縁込み）",
+    "USBの窓の上にも縁が残り、窓が四角く閉じた"
+   ],
+   "notes": "本番の前に試し片で測る値：レーザーのカーフ（今は0）、スイッチ穴14.0のはまり、ほぞのすき間0.2、スカートのすき間0.2、補強板の掘り込みのすき間0.2（新）、ナット溝の二面幅6.1。DZ60の実測（USBの位置）とボトムプレートの実際の厚さも必要。図面・Fusionスクリプトはv16のまま（印刷の向きが決まってから更新）。\n\nモックが見つけた注意：\n・枠（左）（上面を下にして印刷）の下向きの面にサポートが要りそう：ベッドから2.0mm（X+38・Y-74付近）約3322mm²、ベッドから2.0mm（X+89・Y+8付近）約1480mm²、ベッドから10.1mm（X+18・Y+14付近）約26mm² ほか2か所（張り出し45°より浅い）\n・枠（右）（上面を下にして印刷）の下向きの面にサポートが要りそう：ベッドから2.0mm（X+243・Y-47付近）約4421mm²、ベッドから6.0mm（X+151・Y-103付近）約143mm²、ベッドから6.0mm（X+151・Y+9付近）約143mm²（張り出し45°より浅い）\n・足（そのまま印刷）の下向きの面にサポートが要りそう：ベッドから2.7mm（X+93・Y-103付近）約23mm²、ベッドから2.7mm（X-6・Y-103付近）約23mm²（張り出し45°より浅い）",
+   "questions": [
+    {
+     "q": "枠の印刷の向きはどうする？（v17の掘り込みで、どちら向きでも壁の内側に幅11.7mmのサポートがぐるりと要る）",
+     "type": "choice",
+     "why": "いまの向き（上面を下）は天面の縁の質感がよいが、掘り込みの床にサポートが入る",
+     "options": [
+      {
+       "id": "a",
+       "label": "A：上面を下のまま。掘り込みの床にサポート",
+       "note": "サポート跡は補強板で隠れる。高さ2mmの隙間のサポートは剥がしにくい",
+       "img": "img/v17/q01a.webp"
+      },
+      {
+       "id": "b",
+       "label": "B：下面を下にして刷る",
+       "note": "掘り込みはきれい。スカートの内側の床にサポート（ボトムプレートで隠れる）。天面の縁は積層の上面になる"
+      },
+      {
+       "id": "c",
+       "label": "C：v16に戻す（補強板は枠の上に重ねる）",
+       "note": "サポートはほぼ不要。側面にアクリルが2枚見える"
+      }
+     ]
+    },
+    {
+     "q": "箱型（底一体のPLAトレイ）案と比べてみる？",
+     "type": "yesno",
+     "options": [
+      {
+       "id": "yes",
+       "label": "はい"
+      },
+      {
+       "id": "no",
+       "label": "いいえ"
+      }
+     ]
+    },
+    {
+     "q": "傾きは？（手前の高さはキーキャップ込みで約27mm）",
+     "type": "choice",
+     "options": [
+      {
+       "id": "a",
+       "label": "0°のまま",
+       "note": ""
+      },
+      {
+       "id": "b",
+       "label": "3°",
+       "note": ""
+      },
+      {
+       "id": "c",
+       "label": "5°",
+       "note": ""
+      }
+     ]
+    },
+    {
+     "q": "天面のボルトの頭は？",
+     "type": "choice",
+     "options": [
+      {
+       "id": "a",
+       "label": "いまのまま（ボタンヘッド・黒）",
+       "note": ""
+      },
+      {
+       "id": "b",
+       "label": "頭の低いもの",
+       "note": ""
+      },
+      {
+       "id": "c",
+       "label": "ケースと同じ色",
+       "note": ""
+      }
+     ]
+    },
+    {
+     "q": "手前の壁の中央に出る継ぎ目の線に、浅いV溝を入れて見せる？",
+     "type": "yesno",
+     "options": [
+      {
+       "id": "yes",
+       "label": "はい"
+      },
+      {
+       "id": "no",
+       "label": "いいえ"
+      }
+     ]
+    },
+    {
+     "q": "色の組み合わせ（3トーンまで）",
+     "type": "text"
+    }
+   ],
+   "images": [
+    {
+     "src": "img/v17/img01.webp",
+     "caption": "外観（キーキャップ付き）",
+     "group": "外観"
+    },
+    {
+     "src": "img/v17/img02.webp",
+     "caption": "ケースだけ（斜め上・斜め後ろ・右横）",
+     "group": "外観"
+    },
+    {
+     "src": "img/v17/img03.webp",
+     "caption": "断面（手前のネジの列）：補強板が枠の掘り込みに入る",
+     "group": "断面"
+    },
+    {
+     "src": "img/v17/img04.webp",
+     "caption": "印刷の向きとサポートが要る所",
+     "group": "断面"
+    },
+    {
+     "src": "img/v17/img05.webp",
+     "caption": "平面図",
+     "group": "平面"
+    }
+   ],
+   "compare": [
+    {
+     "before": "img/v17/cmp01a.webp",
+     "after": "img/v17/cmp01b.webp",
+     "caption": "外観 v16 → v17"
+    },
+    {
+     "before": "img/v17/cmp02a.webp",
+     "after": "img/v17/cmp02b.webp",
+     "caption": "断面 v16 → v17"
+    }
+   ],
+   "params_diff": [
+    {
+     "key": "version",
+     "label": "version",
+     "unit": "",
+     "before": "v16",
+     "after": "v17",
+     "kind": "changed"
+    },
+    {
+     "key": "stiff_recess.lip",
+     "label": "stiff_recess.lip",
+     "unit": "",
+     "before": null,
+     "after": 2.0,
+     "kind": "added"
+    },
+    {
+     "key": "stiff_recess.clear",
+     "label": "stiff_recess.clear",
+     "unit": "",
+     "before": null,
+     "after": 0.2,
+     "kind": "added"
+    },
+    {
+     "key": "stiff_recess.depth",
+     "label": "stiff_recess.depth",
+     "unit": "",
+     "before": null,
+     "after": 2.0,
+     "kind": "added"
+    },
+    {
+     "key": "stiff_recess.stiffener_size",
+     "label": "stiff_recess.stiffener_size",
+     "unit": "",
+     "before": null,
+     "after": [
+      310.0,
+      121.0
+     ],
+     "kind": "added"
+    },
+    {
+     "key": "frame_total_h",
+     "label": "frame_total_h",
+     "unit": "",
+     "before": null,
+     "after": 10.1,
+     "kind": "added"
+    }
+   ],
+   "model": "img/v17/model.glb.txt",
+   "parts": [
+    {
+     "name": "トッププレート",
+     "key": "top"
+    },
+    {
+     "name": "補強板",
+     "key": "stiffener"
+    },
+    {
+     "name": "枠（左）",
+     "key": "frame_left"
+    },
+    {
+     "name": "枠（右）",
+     "key": "frame_right"
+    },
+    {
+     "name": "ボトムプレート",
+     "key": "bottom"
+    },
+    {
+     "name": "PCB",
+     "key": "pcb"
+    },
+    {
+     "name": "足1",
+     "key": "foot_1"
+    },
+    {
+     "name": "足2",
+     "key": "foot_2"
+    },
+    {
+     "name": "足3",
+     "key": "foot_3"
+    },
+    {
+     "name": "足4",
+     "key": "foot_4"
+    }
+   ],
+   "step": [
+    {
+     "src": "img/v17/step/01.step.txt",
+     "name": "組み立て",
+     "file": "assembly_v17.step"
+    },
+    {
+     "src": "img/v17/step/02.step.txt",
+     "name": "トッププレート",
+     "file": "top_plate_v17.step"
+    },
+    {
+     "src": "img/v17/step/03.step.txt",
+     "name": "補強板",
+     "file": "stiffener_v17.step"
+    },
+    {
+     "src": "img/v17/step/04.step.txt",
+     "name": "ボトムプレート",
+     "file": "bottom_plate_v17.step"
+    },
+    {
+     "src": "img/v17/step/05.step.txt",
+     "name": "枠（左）",
+     "file": "frame_left_v17.step"
+    },
+    {
+     "src": "img/v17/step/06.step.txt",
+     "name": "枠（右）",
+     "file": "frame_right_v17.step"
+    },
+    {
+     "src": "img/v17/step/07.step.txt",
+     "name": "足（4個同じ）",
+     "file": "foot_v17.step"
+    },
+    {
+     "src": "img/v17/step/08.step.txt",
+     "name": "PCB（参考）",
+     "file": "pcb_reference_v17.step"
+    }
+   ]
   }
- ]
+ ],
+ "lang": "ja"
 }

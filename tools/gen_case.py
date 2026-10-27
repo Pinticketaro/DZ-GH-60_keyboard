@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v16"
+VER = "v17"
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -71,6 +71,10 @@ SKIRT = True
 SKIRT_T = 2.0                       # スカートの厚さ（枠の外面から）
 SKIRT_CLEAR = 0.2                   # スカートの内面とボトムプレートの縁のすき間
 SKIRT_H = BOTTOM_T - 0.1            # スカートの高さ。ボトムプレートより0.1低く、足がボトムプレートを確実に押さえる
+# v17：補強板を枠の上面の掘り込みに入れる（横から見えるアクリルはトッププレート1.5mmだけ）。全体の高さは変わらない
+STIFF_RECESS = True
+STIFF_LIP = 2.0                     # 掘り込みの外側に残す枠の縁の幅（スカートと同じ2mm）
+STIFF_CLEAR = 0.2                   # 掘り込みの内面と補強板の縁のすき間
 BP_NOTCH = True                     # ボトムプレートのネジ穴を、縁から切り込んだU字の切り欠きにする（位置はスカートで決まる）
 GAP_STIFF_PCB = round(PLATE_TOP_TO_PCB_TOP - TOP_T - STIFF_T, 2)      # 補強板の下面〜PCB上面
 FRAME_H = round(GAP_STIFF_PCB + PCB_T + UNDER_PCB, 2)                   # 枠の厚さ（自動計算）
@@ -134,6 +138,18 @@ def frame_outer_pts():
     if not FRAME_INSET:
         return outer_pts()
     return list(Polygon(outer_pts()).buffer(-FRAME_INSET, join_style=1).exterior.coords)[:-1]
+
+
+def stiff_pocket_poly():
+    """枠の上面の掘り込み（補強板が入る所）：枠の外形から STIFF_LIP 内側。"""
+    return Polygon(frame_outer_pts()).buffer(-STIFF_LIP, join_style=1, quad_segs=24)
+
+
+def stiff_outer_pts():
+    """補強板の外形。v17から掘り込みのすき間の分だけ小さい（v16までは外形と同じ）。"""
+    if not STIFF_RECESS:
+        return outer_pts()
+    return list(stiff_pocket_poly().buffer(-STIFF_CLEAR, join_style=1, quad_segs=24).exterior.coords)[:-1]
 
 
 def is_flat_pla():
@@ -618,7 +634,8 @@ def main():
     svg(os.path.join(ROOT, f"plate/stiffener_{VER}_t{STIFF_T:g}_kerf{KERF:g}.svg"),
         [("openings", "#ff0000", st_ds, f"スイッチ・スタビの逃げ（穴より片側{STIFF_OFFSET}mm大きい）"),
          ("holes", "#ff0000", hole_ds, "M3穴"),
-         ("outline", "#ff0000", [outer_d], "外形（最後に切る）")],
+         ("outline", "#ff0000", [sq.to_svg_path(kerf_out(stiff_outer_pts())) if STIFF_RECESS else outer_d],
+          f"外形（最後に切る。枠の掘り込みに入るので外形より片側{FRAME_INSET + STIFF_LIP + STIFF_CLEAR:g}小さい）" if STIFF_RECESS else "外形（最後に切る）")],
         f"補強板（アクリル{STIFF_T}mm・トッププレートの下に重ねて共締め）", note)
     web = stiffener_min_web(st_open)
 
@@ -740,6 +757,9 @@ def main():
                   skirt=(dict(t=SKIRT_T, clear=SKIRT_CLEAR, h=SKIRT_H, bottom_plate_size=[round(v, 2) for v in
                               (bottom_outline().bounds[2] - bottom_outline().bounds[0], bottom_outline().bounds[3] - bottom_outline().bounds[1])],
                               notch=BP_NOTCH) if SKIRT else None),
+                  stiff_recess=(dict(lip=STIFF_LIP, clear=STIFF_CLEAR, depth=STIFF_T, stiffener_size=[round(b[2] - b[0], 2), round(b[3] - b[1], 2)])
+                                if STIFF_RECESS and (b := Polygon(stiff_outer_pts()).bounds) else None),
+                  frame_total_h=round(FRAME_H + (STIFF_T if STIFF_RECESS else 0), 2),
                   joint=(dict(kind=JOINT, tongue=[TONGUE_W, TONGUE_T, TONGUE_L], clear=TONGUE_CLEAR, bolt=f"M3x{JB_L:g} button",
                               bolt_x_from_split=JB_X, counterbore=[JB_CB_D, JB_CB_DEPTH], nut_depth=JB_NUT_DEPTH,
                               wall_centers_y=joint_wall_y(), check=check_joint()) if JOINT == "tongue_vbolt" else dict(kind=JOINT)),

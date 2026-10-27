@@ -95,7 +95,7 @@ def build():
     parts = {}
     parts["top_plate"] = plate(outer, hole_w + [cq.Wire.makePolygon([Vector(x, y, 0) for x, y in p], close=True) for p in D["cuts"]],
                                z["st1"], g.TOP_T)
-    parts["stiffener"] = plate(wire_from_pts(D["outer"]), [circle_wire(c, d) for c, d in D["holes"]] +
+    parts["stiffener"] = plate(wire_from_pts([fd.T(p) for p in g.stiff_outer_pts()], seg_long=0.6) if g.STIFF_RECESS else wire_from_pts(D["outer"]), [circle_wire(c, d) for c, d in D["holes"]] +
                                [wire_from_pts(p, seg_long=0.05) for p in D["stiff"]], z["fr1"], g.STIFF_T)
     if g.SKIRT:
         bp = g.bottom_poly()
@@ -109,6 +109,9 @@ def build():
     frame = plate(fo, [fi] + [circle_wire(c, d) for c, d in D["holes"]], z["bot1"], g.FRAME_H)
     ux = g.USB_X - fd.OX0
     frame = frame.cut(box(ux - g.USB_W / 2, ux + g.USB_W / 2, g.OUTER_H - g.WALL - 1, g.OUTER_H + 1, z["bot1"] - 1, z["fr1"] + 1))
+    if g.STIFF_RECESS:   # v17：補強板の高さまで縁を立て、内側を補強板の形に掘る
+        pk = wire_from_pts([fd.T(p) for p in list(g.stiff_pocket_poly().exterior.coords)[:-1]], seg_long=0.6)
+        frame = frame.fuse(plate(fo, [pk], z["fr1"], g.STIFF_T)).clean()
     if g.SKIRT:
         ring = g.skirt_ring()
         sk = plate(wire_from_pts([fd.T(p) for p in list(ring.exterior.coords)[:-1]]),

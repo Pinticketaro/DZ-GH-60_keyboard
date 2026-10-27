@@ -1,0 +1,24 @@
+{
+ "file_path": "review/index.html",
+ "files": {
+  "img/v17/q01a.webp": "review/img/v17/q01a.webp",
+  "img/v17/img01.webp": "review/img/v17/img01.webp",
+  "img/v17/img02.webp": "review/img/v17/img02.webp",
+  "img/v17/img03.webp": "review/img/v17/img03.webp",
+  "img/v17/img04.webp": "review/img/v17/img04.webp",
+  "img/v17/img05.webp": "review/img/v17/img05.webp",
+  "img/v17/cmp01a.webp": "review/img/v17/cmp01a.webp",
+  "img/v17/cmp01b.webp": "review/img/v17/cmp01b.webp",
+  "img/v17/cmp02a.webp": "review/img/v17/cmp02a.webp",
+  "img/v17/cmp02b.webp": "review/img/v17/cmp02b.webp",
+  "img/v17/model.glb.txt": "review/img/v17/model.glb.txt",
+  "img/v17/step/01.step.txt": "review/img/v17/step/01.step.txt",
+  "img/v17/step/02.step.txt": "review/img/v17/step/02.step.txt",
+  "img/v17/step/03.step.txt": "review/img/v17/step/03.step.txt",
+  "img/v17/step/04.step.txt": "review/img/v17/step/04.step.txt",
+  "img/v17/step/05.step.txt": "review/img/v17/step/05.step.txt",
+  "img/v17/step/06.step.txt": "review/img/v17/step/06.step.txt",
+  "img/v17/step/07.step.txt": "review/img/v17/step/07.step.txt",
+  "img/v17/step/08.step.txt": "review/img/v17/step/08.step.txt"
+ }
+}

@@ -67,7 +67,7 @@ def build_parts():
     hole_polys = [circle(c, g.hole_d(c)) for c in g.holes()]
     parts = {}
     parts["top"] = slab(g.outer_pts(), g.switch_cutouts() + hole_polys, z["st1"], g.TOP_T)
-    parts["stiffener"] = slab(g.outer_pts(), g.stiffener_openings() + hole_polys, z["fr1"], g.STIFF_T)
+    parts["stiffener"] = slab(g.stiff_outer_pts(), g.stiffener_openings() + hole_polys, z["fr1"], g.STIFF_T)
     if g.SKIRT:
         bp = g.bottom_poly()
         parts["bottom"] = slab(list(bp.exterior.coords)[:-1], [list(r.coords)[:-1] for r in bp.interiors], z["bot0"], g.BOTTOM_T)
@@ -79,6 +79,9 @@ def build_parts():
     usb = m3.Manifold.cube([g.USB_W, g.WALL + 2, g.FRAME_H + 2]).translate(
         [g.USB_X - g.USB_W / 2, -(g.OY + g.WALL + 1), z["bot1"] - 1])
     frame = frame - usb
+    if g.STIFF_RECESS:   # v17：補強板の高さまで縁を立て、内側を補強板の形に掘る（掘り込みの床＝v16までの枠の上面）
+        lip = slab(g.frame_outer_pts(), [list(g.stiff_pocket_poly().exterior.coords)[:-1]], z["fr1"] - 0.01, g.STIFF_T + 0.01)
+        frame = frame + lip     # USBの上も縁を残す（USBの窓が四角く閉じる）
     if g.SKIRT:      # スカート：ボトムプレートの周りを囲む輪（USBの下も残す＝窓の下枠になる）
         ring = g.skirt_ring()
         frame = frame + slab(list(ring.exterior.coords)[:-1], [list(r.coords)[:-1] for r in ring.interiors],

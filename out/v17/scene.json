@@ -1,0 +1,97 @@
+{
+ "title": "DZ60ケース v17",
+ "lang": "ja",
+ "up": "z",
+ "notes": [
+  "枠（左）（上面を下にして印刷）の下向きの面にサポートが要りそう：ベッドから2.0mm（X+38・Y-74付近）約3322mm²、ベッドから2.0mm（X+89・Y+8付近）約1480mm²、ベッドから10.1mm（X+18・Y+14付近）約26mm² ほか2か所（張り出し45°より浅い）",
+  "枠（右）（上面を下にして印刷）の下向きの面にサポートが要りそう：ベッドから2.0mm（X+243・Y-47付近）約4421mm²、ベッドから6.0mm（X+151・Y-103付近）約143mm²、ベッドから6.0mm（X+151・Y+9付近）約143mm²（張り出し45°より浅い）",
+  "足（そのまま印刷）の下向きの面にサポートが要りそう：ベッドから2.7mm（X+93・Y-103付近）約23mm²、ベッドから2.7mm（X-6・Y-103付近）約23mm²（張り出し45°より浅い）"
+ ],
+ "views": [
+  "iso",
+  "back",
+  "side"
+ ],
+ "parts": [
+  {
+   "file": "model/top.stl",
+   "name": "トッププレート",
+   "color": "#e6eef2",
+   "opacity": 0.7,
+   "roughness": 0.55,
+   "metalness": 0
+  },
+  {
+   "file": "model/stiffener.stl",
+   "name": "補強板",
+   "color": "#e6eef2",
+   "opacity": 0.7,
+   "roughness": 0.55,
+   "metalness": 0
+  },
+  {
+   "file": "model/frame_left.stl",
+   "name": "枠（左）",
+   "color": "#d9d4cb",
+   "opacity": 1,
+   "roughness": 0.85,
+   "metalness": 0
+  },
+  {
+   "file": "model/frame_right.stl",
+   "name": "枠（右）",
+   "color": "#cfc9bf",
+   "opacity": 1,
+   "roughness": 0.85,
+   "metalness": 0
+  },
+  {
+   "file": "model/bottom.stl",
+   "name": "ボトムプレート",
+   "color": "#bcd6e4",
+   "opacity": 0.8,
+   "roughness": 0.3,
+   "metalness": 0
+  },
+  {
+   "file": "model/pcb.stl",
+   "name": "PCB",
+   "color": "#2d4a35",
+   "opacity": 1,
+   "roughness": 0.5,
+   "metalness": 0
+  },
+  {
+   "file": "model/foot_1.stl",
+   "name": "足1",
+   "color": "#d9d4cb",
+   "opacity": 1,
+   "roughness": 0.85,
+   "metalness": 0
+  },
+  {
+   "file": "model/foot_2.stl",
+   "name": "足2",
+   "color": "#d9d4cb",
+   "opacity": 1,
+   "roughness": 0.85,
+   "metalness": 0
+  },
+  {
+   "file": "model/foot_3.stl",
+   "name": "足3",
+   "color": "#d9d4cb",
+   "opacity": 1,
+   "roughness": 0.85,
+   "metalness": 0
+  },
+  {
+   "file": "model/foot_4.stl",
+   "name": "足4",
+   "color": "#d9d4cb",
+   "opacity": 1,
+   "roughness": 0.85,
+   "metalness": 0
+  }
+ ]
+}

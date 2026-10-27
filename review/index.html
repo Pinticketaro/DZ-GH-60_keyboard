@@ -3,6 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <style>
 /* 作業台のカッティングマット：緑がかった無彩色の地に10mm方眼。版ごとの「見る→書く」を1画面で回す縦長レイアウト（広い画面では右にフィードバック欄） */
@@ -53,7 +54,6 @@ main{display:grid;grid-template-columns:minmax(0,1fr);gap:30px;min-width:0}
 .box h3{font-size:13px;color:var(--muted);font-weight:500;letter-spacing:.06em;margin-bottom:6px}
 .box ul{margin:0;padding-left:1.2em}
 .box li{margin:2px 0}
-.q{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
 .linkbtn{background:none;border:0;color:var(--accent);cursor:pointer;font:inherit;font-size:13px;padding:0;white-space:nowrap;text-decoration:underline;text-underline-offset:3px}
 .hero{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 .hero img{display:block;width:100%;height:auto;cursor:zoom-in}
@@ -82,6 +82,50 @@ td.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-num
 tr:last-child td{border-bottom:0}
 .up{color:var(--fix)} .down{color:var(--ask)}
 .empty{color:var(--muted);font-size:14px;padding:10px 0}
+.exp{display:grid;gap:12px}
+.exp .fmt{display:flex;flex-wrap:wrap;gap:8px}
+.exp .fmt label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer;background:var(--bg)}
+.exp .fmt label:has(input:checked){border-color:var(--accent)}
+.exp .fmt label:has(input:disabled){opacity:.45;cursor:default}
+.exp .fmt small{color:var(--muted);font-size:12px}
+.exp .checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:4px 16px}
+.exp .checks label{display:flex;gap:6px;align-items:center;font-size:14px;min-width:0}
+.exp .checks label span{overflow-wrap:anywhere}
+.exp .checks .file{color:var(--muted);font-family:var(--f-mono);font-size:12px}
+.exp input{accent-color:var(--accent)}
+.exp .go{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+/* 決めてほしいこと：はい／いいえ は切り替え、案はカードのラジオ。選んだ答えは1人1件で db に入る */
+.qs{display:grid;gap:12px}
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;gap:10px;min-width:0}
+.qcard.decided{border-color:var(--accent)}
+.qhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.qwhy{margin:4px 0 0;color:var(--muted);font-size:13px}
+.qhead .qn{font:500 12px var(--f-mono);color:var(--muted)}
+.qhead .qt{font-weight:500;flex:1 1 16em;min-width:0;overflow-wrap:anywhere}
+.chip.dec{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.vis{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.seg{justify-self:start;display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--bg);max-width:100%}
+.seg label{position:relative;display:inline-flex;gap:8px;align-items:center;padding:6px 18px;cursor:pointer;font-size:14px;white-space:nowrap}
+.seg label+label{border-left:1px solid var(--line)}
+.seg label:has(input:checked){background:var(--accent);color:var(--accent-ink)}
+.seg label:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:-2px}
+.seg label:has(input:disabled){cursor:default}
+.seg .cnt{font:500 12px var(--f-mono);opacity:.8}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:10px}
+.opt{display:grid;gap:6px;align-content:start;border:1px solid var(--line);border-radius:6px;padding:10px 12px;cursor:pointer;background:var(--bg);min-width:0}
+.opt:has(input:checked){border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt:has(input:disabled){cursor:default}
+.opt.win{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--bg))}
+.opt img{display:block;width:100%;height:auto;max-height:240px;object-fit:contain;border-radius:4px;background:var(--sunken)}
+.opt .top{display:flex;gap:8px;align-items:flex-start}
+.opt .top input{accent-color:var(--accent);margin-top:5px;flex:none}
+.opt .lbl{font-size:14px;overflow-wrap:anywhere}
+.opt .on{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.tally{display:flex;gap:8px;align-items:center;font:500 12px var(--f-mono);color:var(--muted)}
+.tally .bar{flex:1;height:4px;border-radius:2px;background:var(--sunken);overflow:hidden}
+.tally .bar i{display:block;height:100%;background:var(--accent)}
+.qfoot{display:flex;gap:6px 14px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.qfoot .who{flex:1 1 14em;min-width:0;overflow-wrap:anywhere}
 /* フィードバック */
 .side{min-width:0}
 .side .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
@@ -110,39 +154,39 @@ dialog p{color:#e9efe9;margin:8px 0 0;font-size:14px}
 
 <div class="wrap">
   <header class="top">
-    <div class="eyebrow">確認ボード</div>
+    <div class="eyebrow" data-i18n="board"></div>
     <h1 id="project">DZ60キーボード（DZ-GH-60）</h1>
     <div class="meta" id="meta"></div>
-    <nav class="vers" id="vers" aria-label="版"></nav>
+    <nav class="vers" id="vers" data-i18n-aria="versions"></nav>
   </header>
   <div class="layout">
     <main id="main"></main>
-    <aside class="side" aria-label="フィードバック">
+    <aside class="side" data-i18n-aria="feedback">
       <div class="panel">
         <div>
-          <h2>フィードバック</h2>
-          <p class="note" id="fbnote">この版を見て気づいたことを書いてください。次の版の変更点として反映します。</p>
+          <h2 data-i18n="feedback"></h2>
+          <p class="note" id="fbnote" data-i18n="fbIntro"></p>
         </div>
         <form id="fbform" hidden>
           <div>
-            <label class="l" for="fbtarget">どこについて</label>
+            <label class="l" for="fbtarget" data-i18n="fbTarget"></label>
             <select id="fbtarget"></select>
           </div>
-          <div class="kinds" role="radiogroup" aria-label="種類">
-            <label><input type="radio" name="kind" id="kind-fix" value="fix" checked> 直したい</label>
-            <label><input type="radio" name="kind" id="kind-good" value="good"> 良い</label>
-            <label><input type="radio" name="kind" id="kind-ask" value="ask"> 質問</label>
+          <div class="kinds" role="radiogroup" data-i18n-aria="fbKind">
+            <label><input type="radio" name="kind" id="kind-fix" value="fix" checked> <span data-i18n="kind.fix"></span></label>
+            <label><input type="radio" name="kind" id="kind-good" value="good"> <span data-i18n="kind.good"></span></label>
+            <label><input type="radio" name="kind" id="kind-ask" value="ask"> <span data-i18n="kind.ask"></span></label>
           </div>
           <div>
-            <label class="l" for="fbtext">内容</label>
-            <textarea id="fbtext" placeholder="例：手前の高さがもう少し低いほうがいい／USBの穴の位置が気になる"></textarea>
+            <label class="l" for="fbtext" data-i18n="fbText"></label>
+            <textarea id="fbtext" data-i18n-ph="fbPlaceholder"></textarea>
           </div>
           <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
             <span class="status" id="fbstatus" role="status"></span>
-            <button class="btn" type="submit" id="fbsend">送る</button>
+            <button class="btn" type="submit" id="fbsend" data-i18n="send"></button>
           </div>
         </form>
-        <div id="fblist"><p class="empty">フィードバックを読み込んでいます…</p></div>
+        <div id="fblist"><p class="empty" data-i18n="fbLoading"></p></div>
       </div>
     </aside>
   </div>
@@ -150,9 +194,130 @@ dialog p{color:#e9efe9;margin:8px 0 0;font-size:14px}
 <dialog id="lb"><img id="lbimg" alt=""><p id="lbcap"></p></dialog>
 
 <script>
-const BOARD = {"project": "DZ60キーボード（DZ-GH-60）", "versions": [{"version": "v05", "prev": null, "date": "2026-10-15", "stage": "モック", "summary": "足をナット受けの丸台8個（傾き5°仮）にし、PCBの下と補強板の下にフォームを入れた版。打鍵感は板厚より留め方とフォームで決まる、という調査結果を反映。", "changes": ["外観・打鍵感の改善を調査して反映（docs/改善案.md）", "足兼ナット受け：φ12×8、傾き5°（仮）", "ケースフォーム（PCBの台座）とプレートフォームの型紙を追加"], "questions": [], "notes": null, "images": [{"src": "img/v05/img01.webp", "caption": "外観", "group": "外観"}, {"src": "img/v05/img02.webp", "caption": "断面", "group": "断面"}], "compare": [], "params_diff": [], "model": null}, {"version": "v06", "prev": "v05", "date": "2026-10-15", "stage": "モック", "summary": "奥側の足を真鍮丸棒φ12に。横から端の丸が見える「アイコニック」な案。", "changes": ["奥の足を真鍮丸棒φ12（仮）に。後ろの4穴を一直線に並べ、M3×20を丸棒のめねじへ", "傾きは丸棒の太さから自動計算"], "questions": [], "notes": null, "images": [{"src": "img/v06/img01.webp", "caption": "外観", "group": "外観"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v05", "after": "v06", "kind": "changed"}, {"key": "holes_pcb", "label": "holes_pcb", "unit": "", "before": [[-5.3, -6.0], [92.7, -8.7], [177.0, -8.7], [290.3, -6.0], [-5.3, 100.6], [92.7, 103.3], [177.0, 103.3], [290.3, 100.6]], "after": [[-4.55, -8.7], [92.7, -8.7], [177.0, -8.7], [289.55, -8.7], [-5.3, 100.6], [92.7, 103.3], [177.0, 103.3], [290.3, 100.6]], "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 5.0, "after": 4.09, "kind": "changed", "delta": -0.91}, {"key": "rear_foot", "label": "rear_foot", "unit": "", "before": null, "after": "brass_rod", "kind": "added"}, {"key": "rod.y", "label": "rod.y", "unit": "", "before": null, "after": -8.700000000000003, "kind": "added"}, {"key": "rod.d", "label": "rod.d", "unit": "", "before": null, "after": 12.0, "kind": "added"}, {"key": "rod.x0", "label": "rod.x0", "unit": "", "before": null, "after": -12.76, "kind": "added"}, {"key": "rod.x1", "label": "rod.x1", "unit": "", "before": null, "after": 297.76, "kind": "added"}, {"key": "rod.length", "label": "rod.length", "unit": "", "before": null, "after": 310.5, "kind": "added"}, {"key": "rod.end_mode", "label": "rod.end_mode", "unit": "", "before": null, "after": "side", "kind": "added"}, {"key": "rod.holes_x", "label": "rod.holes_x", "unit": "", "before": null, "after": [-4.55, 92.7, 177.0, 289.55], "kind": "added"}, {"key": "rod.holes_from_left_end", "label": "rod.holes_from_left_end", "unit": "", "before": null, "after": [8.21, 105.46, 189.76, 302.31], "kind": "added"}, {"key": "rod.plan_overhang_at_rear_corner", "label": "rod.plan_overhang_at_rear_corner", "unit": "", "before": null, "after": 6.5, "kind": "added"}, {"key": "rod_bolt", "label": "rod_bolt", "unit": "", "before": null, "after": "M3x20", "kind": "added"}, {"key": "rod_thread_engagement", "label": "rod_thread_engagement", "unit": "", "before": null, "after": 5.4, "kind": "added"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.3, "y": -6.0, "h": 13.66, "pocket_top": 1.0}, {"x": 92.7, "y": -8.7, "h": 13.9, "pocket_top": 1.0}, {"x": 177.0, "y": -8.7, "h": 13.9, "pocket_top": 1.0}, {"x": 290.3, "y": -6.0, "h": 13.66, "pocket_top": 1.0}, {"x": -5.3, "y": 100.6, "h": 4.34, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.1, "pocket_top": 1.0}, {"x": 177.0, "y": 103.3, "h": 4.1, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.34, "pocket_top": 1.0}], "after": [{"x": -5.3, "y": 100.6, "h": 4.19, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 177.0, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.19, "pocket_top": 1.0}], "kind": "changed"}, {"key": "front_height_no_keycap", "label": "front_height_no_keycap", "unit": "", "before": 18.7, "after": 18.6, "kind": "changed", "delta": -0.1}], "model": null}, {"version": "v09", "prev": "v06", "date": "2026-10-15", "stage": "モック", "summary": "足を左右ずつまとめた形（手前バー×2＋奥の丸棒受け×2）。中央2本のネジを左右対称にして、左右の部品を同じ形に。", "changes": ["v07：丸棒とボトムプレートの間にPLAの受け台（割れ防止）", "v08：前後一体の足（取り消し）", "足を左右ずつまとめる（手前バー×2＋奥の丸棒受け×2）", "中央2本のネジを左右対称（X=92.7／192.3）"], "questions": [], "notes": null, "images": [{"src": "img/v09/img01.webp", "caption": "外観", "group": "外観"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v06", "after": "v09", "kind": "changed"}, {"key": "holes_pcb", "label": "holes_pcb", "unit": "", "before": [[-4.55, -8.7], [92.7, -8.7], [177.0, -8.7], [289.55, -8.7], [-5.3, 100.6], [92.7, 103.3], [177.0, 103.3], [290.3, 100.6]], "after": [[-4.55, -8.7], [92.7, -8.7], [192.3, -8.7], [289.55, -8.7], [-5.3, 100.6], [92.7, 103.3], [192.3, 103.3], [290.3, 100.6]], "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 4.09, "after": 4.6, "kind": "changed", "delta": 0.51}, {"key": "rod.holes_x", "label": "rod.holes_x", "unit": "", "before": [-4.55, 92.7, 177.0, 289.55], "after": [-4.55, 92.7, 192.3, 289.55], "kind": "changed"}, {"key": "rod.holes_from_left_end", "label": "rod.holes_from_left_end", "unit": "", "before": [8.21, 105.46, 189.76, 302.31], "after": [8.21, 105.46, 205.06, 302.31], "kind": "changed"}, {"key": "rod_thread_engagement", "label": "rod_thread_engagement", "unit": "", "before": 5.4, "after": 4.4, "kind": "changed", "delta": -1.0}, {"key": "saddle", "label": "saddle", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "rear_hole_d", "label": "rear_hole_d", "unit": "", "before": null, "after": 4.0, "kind": "added"}, {"key": "pairs", "label": "pairs", "unit": "", "before": null, "after": [{"side": "left", "x0": -11.3, "x1": 98.7, "front_holes": [[-5.3, 100.6, 4.22], [92.7, 103.3, 4.0]], "rear_holes": [[-4.55, -8.700000000000003], [92.7, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}, {"side": "right", "x0": 186.3, "x1": 296.3, "front_holes": [[192.3, 103.3, 4.0], [290.3, 100.6, 4.22]], "rear_holes": [[192.3, -8.700000000000003], [289.55, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}], "kind": "added"}, {"key": "foot_style", "label": "foot_style", "unit": "", "before": null, "after": "pairs", "kind": "added"}, {"key": "ribs", "label": "ribs", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.3, "y": 100.6, "h": 4.19, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 177.0, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.19, "pocket_top": 1.0}], "after": [{"x": -5.3, "y": 100.6, "h": 4.22, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.22, "pocket_top": 1.0}], "kind": "changed"}], "model": null}, {"version": "v11", "prev": "v09", "date": "2026-10-15", "stage": "モック", "summary": "丸棒を旋盤の溝×4＋ゴムテープで固定する案。加工は旋盤とボール盤だけ、渡せる加工図つき。", "changes": ["v10：丸棒の上面を平面加工（フライス）する案", "丸棒に全周の溝×4（幅10.5・深さ0.8）、ゴムテープ（幅10・厚さ1）を巻く。締めると丸棒がほぼプレートに接する", "受け台をなくした"], "questions": [], "notes": null, "images": [{"src": "img/v11/img01.webp", "caption": "外観", "group": "外観"}, {"src": "img/v11/img02.webp", "caption": "丸棒の固定（断面）", "group": "断面"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v09", "after": "v11", "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 4.6, "after": 4.14, "kind": "changed", "delta": -0.46}, {"key": "rod_thread_engagement", "label": "rod_thread_engagement", "unit": "", "before": 4.4, "after": 4.6, "kind": "changed", "delta": 0.2}, {"key": "rod_tape.tape_w", "label": "rod_tape.tape_w", "unit": "", "before": null, "after": 10.0, "kind": "added"}, {"key": "rod_tape.groove_w", "label": "rod_tape.groove_w", "unit": "", "before": null, "after": 10.5, "kind": "added"}, {"key": "rod_tape.groove_depth", "label": "rod_tape.groove_depth", "unit": "", "before": null, "after": 0.8, "kind": "added"}, {"key": "rod_tape.groove_dia", "label": "rod_tape.groove_dia", "unit": "", "before": null, "after": 10.4, "kind": "added"}, {"key": "rod_tape.tape_t", "label": "rod_tape.tape_t", "unit": "", "before": null, "after": 1.0, "kind": "added"}, {"key": "rod_tape.squeeze_top", "label": "rod_tape.squeeze_top", "unit": "", "before": null, "after": 0.19999999999999996, "kind": "added"}, {"key": "rod_tape.gap_rod_to_plate", "label": "rod_tape.gap_rod_to_plate", "unit": "", "before": null, "after": 0.0, "kind": "added"}, {"key": "rod_flat_w", "label": "rod_flat_w", "unit": "", "before": null, "after": 0.0, "kind": "added"}, {"key": "rod_flat_depth", "label": "rod_flat_depth", "unit": "", "before": null, "after": 0.0, "kind": "added"}, {"key": "rod_center_z", "label": "rod_center_z", "unit": "", "before": null, "after": -6.0, "kind": "added"}, {"key": "rod_tap_depth", "label": "rod_tap_depth", "unit": "", "before": null, "after": 6.0, "kind": "added"}, {"key": "rod_hole_depth", "label": "rod_hole_depth", "unit": "", "before": null, "after": 7.5, "kind": "added"}, {"key": "pairs", "label": "pairs", "unit": "", "before": [{"side": "left", "x0": -11.3, "x1": 98.7, "front_holes": [[-5.3, 100.6, 4.22], [92.7, 103.3, 4.0]], "rear_holes": [[-4.55, -8.700000000000003], [92.7, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}, {"side": "right", "x0": 186.3, "x1": 296.3, "front_holes": [[192.3, 103.3, 4.0], [290.3, 100.6, 4.22]], "rear_holes": [[192.3, -8.700000000000003], [289.55, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}], "after": [{"side": "left", "x0": -11.3, "x1": 98.7, "front_holes": [[-5.3, 100.6, 4.2], [92.7, 103.3, 4.0]], "rear_holes": [[-4.55, -8.700000000000003], [92.7, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}, {"side": "right", "x0": 186.3, "x1": 296.3, "front_holes": [[192.3, 103.3, 4.0], [290.3, 100.6, 4.2]], "rear_holes": [[192.3, -8.700000000000003], [289.55, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}], "kind": "changed"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.3, "y": 100.6, "h": 4.22, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.22, "pocket_top": 1.0}], "after": [{"x": -5.3, "y": 100.6, "h": 4.2, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.2, "pocket_top": 1.0}], "kind": "changed"}], "model": null}, {"version": "v13", "prev": "v11", "date": "2026-10-15", "stage": "モック", "summary": "丸棒の加工がネックなので、奥の足も一旦PLAのバーに。穴位置と傾きは丸棒φ8版と同じで、あとで差し替えられる。", "changes": ["v12：角R8・丸棒φ8（めねじは貫通）", "奥の足もPLAのバー×2（高さ8.1）。ボルトは8本ともM3×18＋ナット", "傾き約2.2°"], "questions": [], "notes": null, "images": [{"src": "img/v13/img01.webp", "caption": "外観", "group": "外観"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v11", "after": "v13", "kind": "changed"}, {"key": "corner_r", "label": "corner_r", "unit": "", "before": 12.0, "after": 8.0, "kind": "changed", "delta": -4.0}, {"key": "corner_extent", "label": "corner_extent", "unit": "", "before": 18.05, "after": 12.04, "kind": "changed", "delta": -6.01}, {"key": "holes_pcb", "label": "holes_pcb", "unit": "", "before": [[-4.55, -8.7], [92.7, -8.7], [192.3, -8.7], [289.55, -8.7], [-5.3, 100.6], [92.7, 103.3], [192.3, 103.3], [290.3, 100.6]], "after": [[-5.85, -8.7], [92.7, -8.7], [192.3, -8.7], [290.85, -8.7], [-5.9, 101.2], [92.7, 103.3], [192.3, 103.3], [290.9, 101.2]], "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 4.14, "after": 2.15, "kind": "changed", "delta": -1.99}, {"key": "rear_foot", "label": "rear_foot", "unit": "", "before": "brass_rod", "after": "pla_bars", "kind": "changed"}, {"key": "rod", "label": "rod", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "rod_bolt", "label": "rod_bolt", "unit": "", "before": "M3x20", "after": null, "kind": "changed"}, {"key": "rear_bolt", "label": "rear_bolt", "unit": "", "before": null, "after": "M3x18+nut", "kind": "added"}, {"key": "rear_bar_heights", "label": "rear_bar_heights", "unit": "", "before": null, "after": [8.1, 8.1, 8.1, 8.1], "kind": "added"}, {"key": "rod_thread_engagement", "label": "rod_thread_engagement", "unit": "", "before": 4.6, "after": null, "kind": "changed"}, {"key": "rod_hole_through", "label": "rod_hole_through", "unit": "", "before": null, "after": true, "kind": "added"}, {"key": "rod_hole_len", "label": "rod_hole_len", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "rod_tape", "label": "rod_tape", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "rod_center_z", "label": "rod_center_z", "unit": "", "before": -6.0, "after": -4.0, "kind": "changed", "delta": 2.0}, {"key": "pairs", "label": "pairs", "unit": "", "before": [{"side": "left", "x0": -11.3, "x1": 98.7, "front_holes": [[-5.3, 100.6, 4.2], [92.7, 103.3, 4.0]], "rear_holes": [[-4.55, -8.700000000000003], [92.7, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}, {"side": "right", "x0": 186.3, "x1": 296.3, "front_holes": [[192.3, 103.3, 4.0], [290.3, 100.6, 4.2]], "rear_holes": [[192.3, -8.700000000000003], [289.55, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}], "after": [{"side": "left", "x0": -11.9, "x1": 98.7, "front_holes": [[-5.9, 101.2, 3.98], [92.7, 103.3, 3.9]], "rear_holes": [[-5.85, -8.700000000000003], [92.7, -8.700000000000003]], "rear_bar_holes": [[-5.85, -8.700000000000003, 8.1], [92.7, -8.700000000000003, 8.1]], "front_len": 110.6, "rear_len": 110.5}, {"side": "right", "x0": 186.3, "x1": 296.9, "front_holes": [[192.3, 103.3, 3.9], [290.9, 101.2, 3.98]], "rear_holes": [[192.3, -8.700000000000003], [290.85, -8.700000000000003]], "rear_bar_holes": [[192.3, -8.700000000000003, 8.1], [290.85, -8.700000000000003, 8.1]], "front_len": 110.6, "rear_len": 110.6}], "kind": "changed"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.3, "y": 100.6, "h": 4.2, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.2, "pocket_top": 1.0}], "after": [{"x": -5.9, "y": 101.2, "h": 3.98, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 3.9, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 3.9, "pocket_top": 1.0}, {"x": 290.9, "y": 101.2, "h": 3.98, "pocket_top": 1.0}], "kind": "changed"}, {"key": "front_height_no_keycap", "label": "front_height_no_keycap", "unit": "", "before": 18.6, "after": 18.5, "kind": "changed", "delta": -0.1}, {"key": "rod.d", "label": "rod.d", "unit": "", "before": 12.0, "after": null, "kind": "removed"}, {"key": "rod.end_mode", "label": "rod.end_mode", "unit": "", "before": "side", "after": null, "kind": "removed"}, {"key": "rod.holes_from_left_end", "label": "rod.holes_from_left_end", "unit": "", "before": [8.21, 105.46, 205.06, 302.31], "after": null, "kind": "removed"}, {"key": "rod.holes_x", "label": "rod.holes_x", "unit": "", "before": [-4.55, 92.7, 192.3, 289.55], "after": null, "kind": "removed"}, {"key": "rod.length", "label": "rod.length", "unit": "", "before": 310.5, "after": null, "kind": "removed"}, {"key": "rod.plan_overhang_at_rear_corner", "label": "rod.plan_overhang_at_rear_corner", "unit": "", "before": 6.5, "after": null, "kind": "removed"}, {"key": "rod.x0", "label": "rod.x0", "unit": "", "before": -12.76, "after": null, "kind": "removed"}, {"key": "rod.x1", "label": "rod.x1", "unit": "", "before": 297.76, "after": null, "kind": "removed"}, {"key": "rod.y", "label": "rod.y", "unit": "", "before": -8.700000000000003, "after": null, "kind": "removed"}, {"key": "rod_tape.gap_rod_to_plate", "label": "rod_tape.gap_rod_to_plate", "unit": "", "before": 0.0, "after": null, "kind": "removed"}, {"key": "rod_tape.groove_depth", "label": "rod_tape.groove_depth", "unit": "", "before": 0.8, "after": null, "kind": "removed"}, {"key": "rod_tape.groove_dia", "label": "rod_tape.groove_dia", "unit": "", "before": 10.4, "after": null, "kind": "removed"}, {"key": "rod_tape.groove_w", "label": "rod_tape.groove_w", "unit": "", "before": 10.5, "after": null, "kind": "removed"}, {"key": "rod_tape.squeeze_top", "label": "rod_tape.squeeze_top", "unit": "", "before": 0.19999999999999996, "after": null, "kind": "removed"}, {"key": "rod_tape.tape_t", "label": "rod_tape.tape_t", "unit": "", "before": 1.0, "after": null, "kind": "removed"}, {"key": "rod_tape.tape_w", "label": "rod_tape.tape_w", "unit": "", "before": 10.0, "after": null, "kind": "removed"}], "model": null}, {"version": "v14", "prev": "v13", "date": "2026-10-15", "stage": "モック", "summary": "傾きをなくし（0°）、足を同じ形のPLAのバー×4に。部品の種類が減って、手前の高さ18.3mm。", "changes": ["傾き0°（手首の反りを減らすため）", "手前の角の穴を奥と前後対称に移し、足4本を同じ形に（foot_bar_x4）", "Fusion用の図面セット（A3）・DXF・CSVを追加"], "questions": [], "notes": null, "images": [{"src": "img/v14/img01.webp", "caption": "外観", "group": "外観"}, {"src": "img/v14/img02.webp", "caption": "断面", "group": "断面"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v13", "after": "v14", "kind": "changed"}, {"key": "holes_pcb", "label": "holes_pcb", "unit": "", "before": [[-5.85, -8.7], [92.7, -8.7], [192.3, -8.7], [290.85, -8.7], [-5.9, 101.2], [92.7, 103.3], [192.3, 103.3], [290.9, 101.2]], "after": [[-5.85, -8.7], [92.7, -8.7], [192.3, -8.7], [290.85, -8.7], [-5.85, 103.3], [92.7, 103.3], [192.3, 103.3], [290.85, 103.3]], "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 2.15, "after": 0.0, "kind": "changed", "delta": -2.15}, {"key": "rear_bar_heights", "label": "rear_bar_heights", "unit": "", "before": [8.1, 8.1, 8.1, 8.1], "after": [3.7, 3.7, 3.7, 3.7], "kind": "changed"}, {"key": "pairs", "label": "pairs", "unit": "", "before": [{"side": "left", "x0": -11.9, "x1": 98.7, "front_holes": [[-5.9, 101.2, 3.98], [92.7, 103.3, 3.9]], "rear_holes": [[-5.85, -8.700000000000003], [92.7, -8.700000000000003]], "rear_bar_holes": [[-5.85, -8.700000000000003, 8.1], [92.7, -8.700000000000003, 8.1]], "front_len": 110.6, "rear_len": 110.5}, {"side": "right", "x0": 186.3, "x1": 296.9, "front_holes": [[192.3, 103.3, 3.9], [290.9, 101.2, 3.98]], "rear_holes": [[192.3, -8.700000000000003], [290.85, -8.700000000000003]], "rear_bar_holes": [[192.3, -8.700000000000003, 8.1], [290.85, -8.700000000000003, 8.1]], "front_len": 110.6, "rear_len": 110.6}], "after": [{"side": "left", "x0": -11.85, "x1": 98.7, "front_holes": [[-5.85, 103.3, 3.7], [92.7, 103.3, 3.7]], "rear_holes": [[-5.85, -8.700000000000003], [92.7, -8.700000000000003]], "rear_bar_holes": [[-5.85, -8.700000000000003, 3.7], [92.7, -8.700000000000003, 3.7]], "front_len": 110.6, "rear_len": 110.6, "bar_len": 110.6}, {"side": "right", "x0": 186.3, "x1": 296.85, "front_holes": [[192.3, 103.3, 3.7], [290.85, 103.3, 3.7]], "rear_holes": [[192.3, -8.700000000000003], [290.85, -8.700000000000003]], "rear_bar_holes": [[192.3, -8.700000000000003, 3.7], [290.85, -8.700000000000003, 3.7]], "front_len": 110.6, "rear_len": 110.6, "bar_len": 110.6}], "kind": "changed"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.9, "y": 101.2, "h": 3.98, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 3.9, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 3.9, "pocket_top": 1.0}, {"x": 290.9, "y": 101.2, "h": 3.98, "pocket_top": 1.0}], "after": [{"x": -5.85, "y": 103.3, "h": 3.7, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 3.7, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 3.7, "pocket_top": 1.0}, {"x": 290.85, "y": 103.3, "h": 3.7, "pocket_top": 1.0}], "kind": "changed"}, {"key": "front_height_no_keycap", "label": "front_height_no_keycap", "unit": "", "before": 18.5, "after": 18.3, "kind": "changed", "delta": -0.2}], "model": null}, {"version": "v15", "prev": "v14", "date": "2026-10-15", "stage": "モック", "summary": "枠の左右の継ぎ目を、ピンからほぞ＋縦向きのM3×6ボタンヘッドに。剛性のため。", "changes": ["継ぎ目：ほぞ（左半分の下側の舌 9×4.5×16）＋縦のM3×6（前後の壁に1組ずつ）", "最初の横向きボルト案は取り消し（他のボルトと同じ縦向きに）", "Fusion 360で寸法ベースに組み立てるスクリプトとSTEPを追加"], "questions": [], "notes": null, "images": [{"src": "img/v15/img01.webp", "caption": "外観", "group": "外観"}, {"src": "img/v15/img02.webp", "caption": "継ぎ目", "group": "継ぎ目"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v14", "after": "v15", "kind": "changed"}, {"key": "joint.kind", "label": "joint.kind", "unit": "", "before": null, "after": "tongue_vbolt", "kind": "added"}, {"key": "joint.tongue", "label": "joint.tongue", "unit": "", "before": null, "after": [9.0, 4.5, 16.0], "kind": "added"}, {"key": "joint.clear", "label": "joint.clear", "unit": "", "before": null, "after": 0.2, "kind": "added"}, {"key": "joint.bolt", "label": "joint.bolt", "unit": "", "before": null, "after": "M3x6 button", "kind": "added"}, {"key": "joint.bolt_x_from_split", "label": "joint.bolt_x_from_split", "unit": "", "before": null, "after": 8.0, "kind": "added"}, {"key": "joint.counterbore", "label": "joint.counterbore", "unit": "", "before": null, "after": [6.2, 1.9], "kind": "added"}, {"key": "joint.nut_depth", "label": "joint.nut_depth", "unit": "", "before": null, "after": 2.6, "kind": "added"}, {"key": "joint.wall_centers_y", "label": "joint.wall_centers_y", "unit": "", "before": null, "after": [-8.55, 103.15], "kind": "added"}, {"key": "joint.check.roof", "label": "joint.check.roof", "unit": "", "before": null, "after": 3.4, "kind": "added"}, {"key": "joint.check.seat", "label": "joint.check.seat", "unit": "", "before": null, "after": 6.2, "kind": "added"}, {"key": "joint.check.tip", "label": "joint.check.tip", "unit": "", "before": null, "after": 0.2, "kind": "added"}], "model": null}, {"version": "v16", "prev": "v15", "date": "2026-10-22", "stage": "モック", "summary": "ソリッド感を出すため、枠を下へスカート状に延ばしてボトムプレートを内側に収めた版。横から見えるのは枠と上のアクリル2枚だけ。高さは18.3mmのまま。", "changes": ["枠の下にスカート（厚さ2・高さ2.9）。ボトムプレートは内側にはめ込み、約310×121に（外部レビュー「塊か積層か」→ 塊を選択）", "ボトムプレートのネジ穴をU字の切り欠きに（位置はスカートで決まり、足と共締めのため）", "枠は上面を下にして印刷する前提に。継ぎ目のほぞを上側へ移し、ナットは右半分の下面（ボトムプレートで隠れる）", "図面8枚・DXF・STEP・Fusionスクリプトを更新"], "questions": ["補強板も枠の掘り込みに入れて、側面に見えるアクリルをトッププレート1.5mmだけにするか", "箱型（底一体のPLAトレイ）案と比べるか", "傾き：0°のままか、レビューの指摘どおり3〜5°にするか（手前の高さはキーキャップ込みで約27mm）", "天面のボルト：頭の低いもの／ケースと同じ色にするか", "手前の壁の中央に出る継ぎ目の線：浅いV溝で見せるか、そのままか", "色の組み合わせ（3トーンまで）"], "notes": "本番の前に試し片で測る値：レーザーのカーフ（今は0）、スイッチ穴14.0のはまり、ほぞのすき間0.2、スカートのすき間0.2、ナット溝の二面幅6.1。DZ60の実測（USBの位置）とボトムプレートの実際の厚さ（スカート2.9に対して）も必要。", "images": [{"src": "img/v16/img01.webp", "caption": "外観（キーキャップ付き）", "group": "外観"}, {"src": "img/v16/img02.webp", "caption": "ケースだけ（斜め上・斜め後ろ・右横）", "group": "外観"}, {"src": "img/v16/img03.webp", "caption": "継ぎ目（ほぞを上側へ）", "group": "継ぎ目"}, {"src": "img/v16/img04.webp", "caption": "断面（手前のネジの列）：スカートとボトムプレート", "group": "断面"}, {"src": "img/v16/img05.webp", "caption": "平面図（各部品の輪郭の重ね合わせ）", "group": "平面"}], "compare": [{"before": "img/v16/cmp01a.webp", "after": "img/v16/cmp01b.webp", "caption": "外観 v15 → v16"}, {"src": "img/v16/cmp02.webp", "caption": "横から：ボトムプレートの層が消えた"}], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v15", "after": "v16", "kind": "changed"}, {"key": "skirt.t", "label": "skirt.t", "unit": "", "before": null, "after": 2.0, "kind": "added"}, {"key": "skirt.clear", "label": "skirt.clear", "unit": "", "before": null, "after": 0.2, "kind": "added"}, {"key": "skirt.h", "label": "skirt.h", "unit": "", "before": null, "after": 2.9, "kind": "added"}, {"key": "skirt.bottom_plate_size", "label": "skirt.bottom_plate_size", "unit": "", "before": null, "after": [310.0, 121.0], "kind": "added"}, {"key": "skirt.notch", "label": "skirt.notch", "unit": "", "before": null, "after": true, "kind": "added"}, {"key": "joint.tongue", "label": "joint.tongue", "unit": "", "before": [9.0, 4.5, 16.0], "after": [9.0, 3.8, 16.0], "kind": "changed"}, {"key": "joint.check.under", "label": "joint.check.under", "unit": "", "before": null, "after": 4.1, "kind": "added"}, {"key": "joint.check.roof", "label": "joint.check.roof", "unit": "", "before": 3.4, "after": null, "kind": "removed"}], "model": "img/v16/model.glb.txt"}]};
-const KIND = {fix:"直したい", good:"良い", ask:"質問"};
-const STATUS = {open:"未対応", applied:"反映済み", answered:"回答済み", declined:"見送り"};
+const BOARD = {"project": "DZ60キーボード（DZ-GH-60）", "versions": [{"version": "v05", "prev": null, "date": "2026-10-15", "stage": "モック", "summary": "足をナット受けの丸台8個（傾き5°仮）にし、PCBの下と補強板の下にフォームを入れた版。打鍵感は板厚より留め方とフォームで決まる、という調査結果を反映。", "changes": ["外観・打鍵感の改善を調査して反映（docs/改善案.md）", "足兼ナット受け：φ12×8、傾き5°（仮）", "ケースフォーム（PCBの台座）とプレートフォームの型紙を追加"], "questions": [], "notes": null, "images": [{"src": "img/v05/img01.webp", "caption": "外観", "group": "外観"}, {"src": "img/v05/img02.webp", "caption": "断面", "group": "断面"}], "compare": [], "params_diff": [], "model": null}, {"version": "v06", "prev": "v05", "date": "2026-10-15", "stage": "モック", "summary": "奥側の足を真鍮丸棒φ12に。横から端の丸が見える「アイコニック」な案。", "changes": ["奥の足を真鍮丸棒φ12（仮）に。後ろの4穴を一直線に並べ、M3×20を丸棒のめねじへ", "傾きは丸棒の太さから自動計算"], "questions": [], "notes": null, "images": [{"src": "img/v06/img01.webp", "caption": "外観", "group": "外観"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v05", "after": "v06", "kind": "changed"}, {"key": "holes_pcb", "label": "holes_pcb", "unit": "", "before": [[-5.3, -6.0], [92.7, -8.7], [177.0, -8.7], [290.3, -6.0], [-5.3, 100.6], [92.7, 103.3], [177.0, 103.3], [290.3, 100.6]], "after": [[-4.55, -8.7], [92.7, -8.7], [177.0, -8.7], [289.55, -8.7], [-5.3, 100.6], [92.7, 103.3], [177.0, 103.3], [290.3, 100.6]], "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 5.0, "after": 4.09, "kind": "changed", "delta": -0.91}, {"key": "rear_foot", "label": "rear_foot", "unit": "", "before": null, "after": "brass_rod", "kind": "added"}, {"key": "rod.y", "label": "rod.y", "unit": "", "before": null, "after": -8.700000000000003, "kind": "added"}, {"key": "rod.d", "label": "rod.d", "unit": "", "before": null, "after": 12.0, "kind": "added"}, {"key": "rod.x0", "label": "rod.x0", "unit": "", "before": null, "after": -12.76, "kind": "added"}, {"key": "rod.x1", "label": "rod.x1", "unit": "", "before": null, "after": 297.76, "kind": "added"}, {"key": "rod.length", "label": "rod.length", "unit": "", "before": null, "after": 310.5, "kind": "added"}, {"key": "rod.end_mode", "label": "rod.end_mode", "unit": "", "before": null, "after": "side", "kind": "added"}, {"key": "rod.holes_x", "label": "rod.holes_x", "unit": "", "before": null, "after": [-4.55, 92.7, 177.0, 289.55], "kind": "added"}, {"key": "rod.holes_from_left_end", "label": "rod.holes_from_left_end", "unit": "", "before": null, "after": [8.21, 105.46, 189.76, 302.31], "kind": "added"}, {"key": "rod.plan_overhang_at_rear_corner", "label": "rod.plan_overhang_at_rear_corner", "unit": "", "before": null, "after": 6.5, "kind": "added"}, {"key": "rod_bolt", "label": "rod_bolt", "unit": "", "before": null, "after": "M3x20", "kind": "added"}, {"key": "rod_thread_engagement", "label": "rod_thread_engagement", "unit": "", "before": null, "after": 5.4, "kind": "added"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.3, "y": -6.0, "h": 13.66, "pocket_top": 1.0}, {"x": 92.7, "y": -8.7, "h": 13.9, "pocket_top": 1.0}, {"x": 177.0, "y": -8.7, "h": 13.9, "pocket_top": 1.0}, {"x": 290.3, "y": -6.0, "h": 13.66, "pocket_top": 1.0}, {"x": -5.3, "y": 100.6, "h": 4.34, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.1, "pocket_top": 1.0}, {"x": 177.0, "y": 103.3, "h": 4.1, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.34, "pocket_top": 1.0}], "after": [{"x": -5.3, "y": 100.6, "h": 4.19, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 177.0, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.19, "pocket_top": 1.0}], "kind": "changed"}, {"key": "front_height_no_keycap", "label": "front_height_no_keycap", "unit": "", "before": 18.7, "after": 18.6, "kind": "changed", "delta": -0.1}], "model": null}, {"version": "v09", "prev": "v06", "date": "2026-10-15", "stage": "モック", "summary": "足を左右ずつまとめた形（手前バー×2＋奥の丸棒受け×2）。中央2本のネジを左右対称にして、左右の部品を同じ形に。", "changes": ["v07：丸棒とボトムプレートの間にPLAの受け台（割れ防止）", "v08：前後一体の足（取り消し）", "足を左右ずつまとめる（手前バー×2＋奥の丸棒受け×2）", "中央2本のネジを左右対称（X=92.7／192.3）"], "questions": [], "notes": null, "images": [{"src": "img/v09/img01.webp", "caption": "外観", "group": "外観"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v06", "after": "v09", "kind": "changed"}, {"key": "holes_pcb", "label": "holes_pcb", "unit": "", "before": [[-4.55, -8.7], [92.7, -8.7], [177.0, -8.7], [289.55, -8.7], [-5.3, 100.6], [92.7, 103.3], [177.0, 103.3], [290.3, 100.6]], "after": [[-4.55, -8.7], [92.7, -8.7], [192.3, -8.7], [289.55, -8.7], [-5.3, 100.6], [92.7, 103.3], [192.3, 103.3], [290.3, 100.6]], "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 4.09, "after": 4.6, "kind": "changed", "delta": 0.51}, {"key": "rod.holes_x", "label": "rod.holes_x", "unit": "", "before": [-4.55, 92.7, 177.0, 289.55], "after": [-4.55, 92.7, 192.3, 289.55], "kind": "changed"}, {"key": "rod.holes_from_left_end", "label": "rod.holes_from_left_end", "unit": "", "before": [8.21, 105.46, 189.76, 302.31], "after": [8.21, 105.46, 205.06, 302.31], "kind": "changed"}, {"key": "rod_thread_engagement", "label": "rod_thread_engagement", "unit": "", "before": 5.4, "after": 4.4, "kind": "changed", "delta": -1.0}, {"key": "saddle", "label": "saddle", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "rear_hole_d", "label": "rear_hole_d", "unit": "", "before": null, "after": 4.0, "kind": "added"}, {"key": "pairs", "label": "pairs", "unit": "", "before": null, "after": [{"side": "left", "x0": -11.3, "x1": 98.7, "front_holes": [[-5.3, 100.6, 4.22], [92.7, 103.3, 4.0]], "rear_holes": [[-4.55, -8.700000000000003], [92.7, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}, {"side": "right", "x0": 186.3, "x1": 296.3, "front_holes": [[192.3, 103.3, 4.0], [290.3, 100.6, 4.22]], "rear_holes": [[192.3, -8.700000000000003], [289.55, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}], "kind": "added"}, {"key": "foot_style", "label": "foot_style", "unit": "", "before": null, "after": "pairs", "kind": "added"}, {"key": "ribs", "label": "ribs", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.3, "y": 100.6, "h": 4.19, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 177.0, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.19, "pocket_top": 1.0}], "after": [{"x": -5.3, "y": 100.6, "h": 4.22, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.22, "pocket_top": 1.0}], "kind": "changed"}], "model": null}, {"version": "v11", "prev": "v09", "date": "2026-10-15", "stage": "モック", "summary": "丸棒を旋盤の溝×4＋ゴムテープで固定する案。加工は旋盤とボール盤だけ、渡せる加工図つき。", "changes": ["v10：丸棒の上面を平面加工（フライス）する案", "丸棒に全周の溝×4（幅10.5・深さ0.8）、ゴムテープ（幅10・厚さ1）を巻く。締めると丸棒がほぼプレートに接する", "受け台をなくした"], "questions": [], "notes": null, "images": [{"src": "img/v11/img01.webp", "caption": "外観", "group": "外観"}, {"src": "img/v11/img02.webp", "caption": "丸棒の固定（断面）", "group": "断面"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v09", "after": "v11", "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 4.6, "after": 4.14, "kind": "changed", "delta": -0.46}, {"key": "rod_thread_engagement", "label": "rod_thread_engagement", "unit": "", "before": 4.4, "after": 4.6, "kind": "changed", "delta": 0.2}, {"key": "rod_tape.tape_w", "label": "rod_tape.tape_w", "unit": "", "before": null, "after": 10.0, "kind": "added"}, {"key": "rod_tape.groove_w", "label": "rod_tape.groove_w", "unit": "", "before": null, "after": 10.5, "kind": "added"}, {"key": "rod_tape.groove_depth", "label": "rod_tape.groove_depth", "unit": "", "before": null, "after": 0.8, "kind": "added"}, {"key": "rod_tape.groove_dia", "label": "rod_tape.groove_dia", "unit": "", "before": null, "after": 10.4, "kind": "added"}, {"key": "rod_tape.tape_t", "label": "rod_tape.tape_t", "unit": "", "before": null, "after": 1.0, "kind": "added"}, {"key": "rod_tape.squeeze_top", "label": "rod_tape.squeeze_top", "unit": "", "before": null, "after": 0.19999999999999996, "kind": "added"}, {"key": "rod_tape.gap_rod_to_plate", "label": "rod_tape.gap_rod_to_plate", "unit": "", "before": null, "after": 0.0, "kind": "added"}, {"key": "rod_flat_w", "label": "rod_flat_w", "unit": "", "before": null, "after": 0.0, "kind": "added"}, {"key": "rod_flat_depth", "label": "rod_flat_depth", "unit": "", "before": null, "after": 0.0, "kind": "added"}, {"key": "rod_center_z", "label": "rod_center_z", "unit": "", "before": null, "after": -6.0, "kind": "added"}, {"key": "rod_tap_depth", "label": "rod_tap_depth", "unit": "", "before": null, "after": 6.0, "kind": "added"}, {"key": "rod_hole_depth", "label": "rod_hole_depth", "unit": "", "before": null, "after": 7.5, "kind": "added"}, {"key": "pairs", "label": "pairs", "unit": "", "before": [{"side": "left", "x0": -11.3, "x1": 98.7, "front_holes": [[-5.3, 100.6, 4.22], [92.7, 103.3, 4.0]], "rear_holes": [[-4.55, -8.700000000000003], [92.7, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}, {"side": "right", "x0": 186.3, "x1": 296.3, "front_holes": [[192.3, 103.3, 4.0], [290.3, 100.6, 4.22]], "rear_holes": [[192.3, -8.700000000000003], [289.55, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}], "after": [{"side": "left", "x0": -11.3, "x1": 98.7, "front_holes": [[-5.3, 100.6, 4.2], [92.7, 103.3, 4.0]], "rear_holes": [[-4.55, -8.700000000000003], [92.7, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}, {"side": "right", "x0": 186.3, "x1": 296.3, "front_holes": [[192.3, 103.3, 4.0], [290.3, 100.6, 4.2]], "rear_holes": [[192.3, -8.700000000000003], [289.55, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}], "kind": "changed"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.3, "y": 100.6, "h": 4.22, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.22, "pocket_top": 1.0}], "after": [{"x": -5.3, "y": 100.6, "h": 4.2, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.2, "pocket_top": 1.0}], "kind": "changed"}], "model": null}, {"version": "v13", "prev": "v11", "date": "2026-10-15", "stage": "モック", "summary": "丸棒の加工がネックなので、奥の足も一旦PLAのバーに。穴位置と傾きは丸棒φ8版と同じで、あとで差し替えられる。", "changes": ["v12：角R8・丸棒φ8（めねじは貫通）", "奥の足もPLAのバー×2（高さ8.1）。ボルトは8本ともM3×18＋ナット", "傾き約2.2°"], "questions": [], "notes": null, "images": [{"src": "img/v13/img01.webp", "caption": "外観", "group": "外観"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v11", "after": "v13", "kind": "changed"}, {"key": "corner_r", "label": "corner_r", "unit": "", "before": 12.0, "after": 8.0, "kind": "changed", "delta": -4.0}, {"key": "corner_extent", "label": "corner_extent", "unit": "", "before": 18.05, "after": 12.04, "kind": "changed", "delta": -6.01}, {"key": "holes_pcb", "label": "holes_pcb", "unit": "", "before": [[-4.55, -8.7], [92.7, -8.7], [192.3, -8.7], [289.55, -8.7], [-5.3, 100.6], [92.7, 103.3], [192.3, 103.3], [290.3, 100.6]], "after": [[-5.85, -8.7], [92.7, -8.7], [192.3, -8.7], [290.85, -8.7], [-5.9, 101.2], [92.7, 103.3], [192.3, 103.3], [290.9, 101.2]], "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 4.14, "after": 2.15, "kind": "changed", "delta": -1.99}, {"key": "rear_foot", "label": "rear_foot", "unit": "", "before": "brass_rod", "after": "pla_bars", "kind": "changed"}, {"key": "rod", "label": "rod", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "rod_bolt", "label": "rod_bolt", "unit": "", "before": "M3x20", "after": null, "kind": "changed"}, {"key": "rear_bolt", "label": "rear_bolt", "unit": "", "before": null, "after": "M3x18+nut", "kind": "added"}, {"key": "rear_bar_heights", "label": "rear_bar_heights", "unit": "", "before": null, "after": [8.1, 8.1, 8.1, 8.1], "kind": "added"}, {"key": "rod_thread_engagement", "label": "rod_thread_engagement", "unit": "", "before": 4.6, "after": null, "kind": "changed"}, {"key": "rod_hole_through", "label": "rod_hole_through", "unit": "", "before": null, "after": true, "kind": "added"}, {"key": "rod_hole_len", "label": "rod_hole_len", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "rod_tape", "label": "rod_tape", "unit": "", "before": null, "after": null, "kind": "added"}, {"key": "rod_center_z", "label": "rod_center_z", "unit": "", "before": -6.0, "after": -4.0, "kind": "changed", "delta": 2.0}, {"key": "pairs", "label": "pairs", "unit": "", "before": [{"side": "left", "x0": -11.3, "x1": 98.7, "front_holes": [[-5.3, 100.6, 4.2], [92.7, 103.3, 4.0]], "rear_holes": [[-4.55, -8.700000000000003], [92.7, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}, {"side": "right", "x0": 186.3, "x1": 296.3, "front_holes": [[192.3, 103.3, 4.0], [290.3, 100.6, 4.2]], "rear_holes": [[192.3, -8.700000000000003], [289.55, -8.700000000000003]], "front_len": 110.0, "rear_len": 110.0}], "after": [{"side": "left", "x0": -11.9, "x1": 98.7, "front_holes": [[-5.9, 101.2, 3.98], [92.7, 103.3, 3.9]], "rear_holes": [[-5.85, -8.700000000000003], [92.7, -8.700000000000003]], "rear_bar_holes": [[-5.85, -8.700000000000003, 8.1], [92.7, -8.700000000000003, 8.1]], "front_len": 110.6, "rear_len": 110.5}, {"side": "right", "x0": 186.3, "x1": 296.9, "front_holes": [[192.3, 103.3, 3.9], [290.9, 101.2, 3.98]], "rear_holes": [[192.3, -8.700000000000003], [290.85, -8.700000000000003]], "rear_bar_holes": [[192.3, -8.700000000000003, 8.1], [290.85, -8.700000000000003, 8.1]], "front_len": 110.6, "rear_len": 110.6}], "kind": "changed"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.3, "y": 100.6, "h": 4.2, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 4.0, "pocket_top": 1.0}, {"x": 290.3, "y": 100.6, "h": 4.2, "pocket_top": 1.0}], "after": [{"x": -5.9, "y": 101.2, "h": 3.98, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 3.9, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 3.9, "pocket_top": 1.0}, {"x": 290.9, "y": 101.2, "h": 3.98, "pocket_top": 1.0}], "kind": "changed"}, {"key": "front_height_no_keycap", "label": "front_height_no_keycap", "unit": "", "before": 18.6, "after": 18.5, "kind": "changed", "delta": -0.1}, {"key": "rod.d", "label": "rod.d", "unit": "", "before": 12.0, "after": null, "kind": "removed"}, {"key": "rod.end_mode", "label": "rod.end_mode", "unit": "", "before": "side", "after": null, "kind": "removed"}, {"key": "rod.holes_from_left_end", "label": "rod.holes_from_left_end", "unit": "", "before": [8.21, 105.46, 205.06, 302.31], "after": null, "kind": "removed"}, {"key": "rod.holes_x", "label": "rod.holes_x", "unit": "", "before": [-4.55, 92.7, 192.3, 289.55], "after": null, "kind": "removed"}, {"key": "rod.length", "label": "rod.length", "unit": "", "before": 310.5, "after": null, "kind": "removed"}, {"key": "rod.plan_overhang_at_rear_corner", "label": "rod.plan_overhang_at_rear_corner", "unit": "", "before": 6.5, "after": null, "kind": "removed"}, {"key": "rod.x0", "label": "rod.x0", "unit": "", "before": -12.76, "after": null, "kind": "removed"}, {"key": "rod.x1", "label": "rod.x1", "unit": "", "before": 297.76, "after": null, "kind": "removed"}, {"key": "rod.y", "label": "rod.y", "unit": "", "before": -8.700000000000003, "after": null, "kind": "removed"}, {"key": "rod_tape.gap_rod_to_plate", "label": "rod_tape.gap_rod_to_plate", "unit": "", "before": 0.0, "after": null, "kind": "removed"}, {"key": "rod_tape.groove_depth", "label": "rod_tape.groove_depth", "unit": "", "before": 0.8, "after": null, "kind": "removed"}, {"key": "rod_tape.groove_dia", "label": "rod_tape.groove_dia", "unit": "", "before": 10.4, "after": null, "kind": "removed"}, {"key": "rod_tape.groove_w", "label": "rod_tape.groove_w", "unit": "", "before": 10.5, "after": null, "kind": "removed"}, {"key": "rod_tape.squeeze_top", "label": "rod_tape.squeeze_top", "unit": "", "before": 0.19999999999999996, "after": null, "kind": "removed"}, {"key": "rod_tape.tape_t", "label": "rod_tape.tape_t", "unit": "", "before": 1.0, "after": null, "kind": "removed"}, {"key": "rod_tape.tape_w", "label": "rod_tape.tape_w", "unit": "", "before": 10.0, "after": null, "kind": "removed"}], "model": null}, {"version": "v14", "prev": "v13", "date": "2026-10-15", "stage": "モック", "summary": "傾きをなくし（0°）、足を同じ形のPLAのバー×4に。部品の種類が減って、手前の高さ18.3mm。", "changes": ["傾き0°（手首の反りを減らすため）", "手前の角の穴を奥と前後対称に移し、足4本を同じ形に（foot_bar_x4）", "Fusion用の図面セット（A3）・DXF・CSVを追加"], "questions": [], "notes": null, "images": [{"src": "img/v14/img01.webp", "caption": "外観", "group": "外観"}, {"src": "img/v14/img02.webp", "caption": "断面", "group": "断面"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v13", "after": "v14", "kind": "changed"}, {"key": "holes_pcb", "label": "holes_pcb", "unit": "", "before": [[-5.85, -8.7], [92.7, -8.7], [192.3, -8.7], [290.85, -8.7], [-5.9, 101.2], [92.7, 103.3], [192.3, 103.3], [290.9, 101.2]], "after": [[-5.85, -8.7], [92.7, -8.7], [192.3, -8.7], [290.85, -8.7], [-5.85, 103.3], [92.7, 103.3], [192.3, 103.3], [290.85, 103.3]], "kind": "changed"}, {"key": "tilt_deg", "label": "tilt_deg", "unit": "", "before": 2.15, "after": 0.0, "kind": "changed", "delta": -2.15}, {"key": "rear_bar_heights", "label": "rear_bar_heights", "unit": "", "before": [8.1, 8.1, 8.1, 8.1], "after": [3.7, 3.7, 3.7, 3.7], "kind": "changed"}, {"key": "pairs", "label": "pairs", "unit": "", "before": [{"side": "left", "x0": -11.9, "x1": 98.7, "front_holes": [[-5.9, 101.2, 3.98], [92.7, 103.3, 3.9]], "rear_holes": [[-5.85, -8.700000000000003], [92.7, -8.700000000000003]], "rear_bar_holes": [[-5.85, -8.700000000000003, 8.1], [92.7, -8.700000000000003, 8.1]], "front_len": 110.6, "rear_len": 110.5}, {"side": "right", "x0": 186.3, "x1": 296.9, "front_holes": [[192.3, 103.3, 3.9], [290.9, 101.2, 3.98]], "rear_holes": [[192.3, -8.700000000000003], [290.85, -8.700000000000003]], "rear_bar_holes": [[192.3, -8.700000000000003, 8.1], [290.85, -8.700000000000003, 8.1]], "front_len": 110.6, "rear_len": 110.6}], "after": [{"side": "left", "x0": -11.85, "x1": 98.7, "front_holes": [[-5.85, 103.3, 3.7], [92.7, 103.3, 3.7]], "rear_holes": [[-5.85, -8.700000000000003], [92.7, -8.700000000000003]], "rear_bar_holes": [[-5.85, -8.700000000000003, 3.7], [92.7, -8.700000000000003, 3.7]], "front_len": 110.6, "rear_len": 110.6, "bar_len": 110.6}, {"side": "right", "x0": 186.3, "x1": 296.85, "front_holes": [[192.3, 103.3, 3.7], [290.85, 103.3, 3.7]], "rear_holes": [[192.3, -8.700000000000003], [290.85, -8.700000000000003]], "rear_bar_holes": [[192.3, -8.700000000000003, 3.7], [290.85, -8.700000000000003, 3.7]], "front_len": 110.6, "rear_len": 110.6, "bar_len": 110.6}], "kind": "changed"}, {"key": "feet", "label": "feet", "unit": "", "before": [{"x": -5.9, "y": 101.2, "h": 3.98, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 3.9, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 3.9, "pocket_top": 1.0}, {"x": 290.9, "y": 101.2, "h": 3.98, "pocket_top": 1.0}], "after": [{"x": -5.85, "y": 103.3, "h": 3.7, "pocket_top": 1.0}, {"x": 92.7, "y": 103.3, "h": 3.7, "pocket_top": 1.0}, {"x": 192.3, "y": 103.3, "h": 3.7, "pocket_top": 1.0}, {"x": 290.85, "y": 103.3, "h": 3.7, "pocket_top": 1.0}], "kind": "changed"}, {"key": "front_height_no_keycap", "label": "front_height_no_keycap", "unit": "", "before": 18.5, "after": 18.3, "kind": "changed", "delta": -0.2}], "model": null}, {"version": "v15", "prev": "v14", "date": "2026-10-15", "stage": "モック", "summary": "枠の左右の継ぎ目を、ピンからほぞ＋縦向きのM3×6ボタンヘッドに。剛性のため。", "changes": ["継ぎ目：ほぞ（左半分の下側の舌 9×4.5×16）＋縦のM3×6（前後の壁に1組ずつ）", "最初の横向きボルト案は取り消し（他のボルトと同じ縦向きに）", "Fusion 360で寸法ベースに組み立てるスクリプトとSTEPを追加"], "questions": [], "notes": null, "images": [{"src": "img/v15/img01.webp", "caption": "外観", "group": "外観"}, {"src": "img/v15/img02.webp", "caption": "継ぎ目", "group": "継ぎ目"}], "compare": [], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v14", "after": "v15", "kind": "changed"}, {"key": "joint.kind", "label": "joint.kind", "unit": "", "before": null, "after": "tongue_vbolt", "kind": "added"}, {"key": "joint.tongue", "label": "joint.tongue", "unit": "", "before": null, "after": [9.0, 4.5, 16.0], "kind": "added"}, {"key": "joint.clear", "label": "joint.clear", "unit": "", "before": null, "after": 0.2, "kind": "added"}, {"key": "joint.bolt", "label": "joint.bolt", "unit": "", "before": null, "after": "M3x6 button", "kind": "added"}, {"key": "joint.bolt_x_from_split", "label": "joint.bolt_x_from_split", "unit": "", "before": null, "after": 8.0, "kind": "added"}, {"key": "joint.counterbore", "label": "joint.counterbore", "unit": "", "before": null, "after": [6.2, 1.9], "kind": "added"}, {"key": "joint.nut_depth", "label": "joint.nut_depth", "unit": "", "before": null, "after": 2.6, "kind": "added"}, {"key": "joint.wall_centers_y", "label": "joint.wall_centers_y", "unit": "", "before": null, "after": [-8.55, 103.15], "kind": "added"}, {"key": "joint.check.roof", "label": "joint.check.roof", "unit": "", "before": null, "after": 3.4, "kind": "added"}, {"key": "joint.check.seat", "label": "joint.check.seat", "unit": "", "before": null, "after": 6.2, "kind": "added"}, {"key": "joint.check.tip", "label": "joint.check.tip", "unit": "", "before": null, "after": 0.2, "kind": "added"}], "model": null}, {"version": "v16", "prev": "v15", "date": "2026-10-22", "stage": "モック", "summary": "ソリッド感を出すため、枠を下へスカート状に延ばしてボトムプレートを内側に収めた版。横から見えるのは枠と上のアクリル2枚だけ。高さは18.3mmのまま。", "changes": ["枠の下にスカート（厚さ2・高さ2.9）。ボトムプレートは内側にはめ込み、約310×121に（外部レビュー「塊か積層か」→ 塊を選択）", "ボトムプレートのネジ穴をU字の切り欠きに（位置はスカートで決まり、足と共締めのため）", "枠は上面を下にして印刷する前提に。継ぎ目のほぞを上側へ移し、ナットは右半分の下面（ボトムプレートで隠れる）", "図面8枚・DXF・STEP・Fusionスクリプトを更新"], "questions": ["補強板も枠の掘り込みに入れて、側面に見えるアクリルをトッププレート1.5mmだけにするか", "箱型（底一体のPLAトレイ）案と比べるか", "傾き：0°のままか、レビューの指摘どおり3〜5°にするか（手前の高さはキーキャップ込みで約27mm）", "天面のボルト：頭の低いもの／ケースと同じ色にするか", "手前の壁の中央に出る継ぎ目の線：浅いV溝で見せるか、そのままか", "色の組み合わせ（3トーンまで）"], "notes": "本番の前に試し片で測る値：レーザーのカーフ（今は0）、スイッチ穴14.0のはまり、ほぞのすき間0.2、スカートのすき間0.2、ナット溝の二面幅6.1。DZ60の実測（USBの位置）とボトムプレートの実際の厚さ（スカート2.9に対して）も必要。", "images": [{"src": "img/v16/img01.webp", "caption": "外観（キーキャップ付き）", "group": "外観"}, {"src": "img/v16/img02.webp", "caption": "ケースだけ（斜め上・斜め後ろ・右横）", "group": "外観"}, {"src": "img/v16/img03.webp", "caption": "継ぎ目（ほぞを上側へ）", "group": "継ぎ目"}, {"src": "img/v16/img04.webp", "caption": "断面（手前のネジの列）：スカートとボトムプレート", "group": "断面"}, {"src": "img/v16/img05.webp", "caption": "平面図（各部品の輪郭の重ね合わせ）", "group": "平面"}], "compare": [{"before": "img/v16/cmp01a.webp", "after": "img/v16/cmp01b.webp", "caption": "外観 v15 → v16"}, {"src": "img/v16/cmp02.webp", "caption": "横から：ボトムプレートの層が消えた"}], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v15", "after": "v16", "kind": "changed"}, {"key": "skirt.t", "label": "skirt.t", "unit": "", "before": null, "after": 2.0, "kind": "added"}, {"key": "skirt.clear", "label": "skirt.clear", "unit": "", "before": null, "after": 0.2, "kind": "added"}, {"key": "skirt.h", "label": "skirt.h", "unit": "", "before": null, "after": 2.9, "kind": "added"}, {"key": "skirt.bottom_plate_size", "label": "skirt.bottom_plate_size", "unit": "", "before": null, "after": [310.0, 121.0], "kind": "added"}, {"key": "skirt.notch", "label": "skirt.notch", "unit": "", "before": null, "after": true, "kind": "added"}, {"key": "joint.tongue", "label": "joint.tongue", "unit": "", "before": [9.0, 4.5, 16.0], "after": [9.0, 3.8, 16.0], "kind": "changed"}, {"key": "joint.check.under", "label": "joint.check.under", "unit": "", "before": null, "after": 4.1, "kind": "added"}, {"key": "joint.check.roof", "label": "joint.check.roof", "unit": "", "before": 3.4, "after": null, "kind": "removed"}], "model": "img/v16/model.glb.txt"}, {"version": "v17", "prev": "v16", "date": "2026-10-27", "stage": "モック", "summary": "補強板を枠の上面の掘り込みに入れた版。横から見えるアクリルはトッププレート1.5mmだけになり、高さは18.3mmのまま。その代わり、枠をどちら向きに刷っても壁の内側にぐるりとサポートが要る。", "changes": ["補強板を枠の上面の掘り込み（深さ2.0、外側の縁2.0、すき間0.2）に入れた（v16の問い「補強板も枠の掘り込みに入れるか」→ はい）", "補強板の外形が310×121に（ボトムプレートと同じ大きさ）。枠は高さ10.1（縁込み）", "USBの窓の上にも縁が残り、窓が四角く閉じた"], "notes": "本番の前に試し片で測る値：レーザーのカーフ（今は0）、スイッチ穴14.0のはまり、ほぞのすき間0.2、スカートのすき間0.2、補強板の掘り込みのすき間0.2（新）、ナット溝の二面幅6.1。DZ60の実測（USBの位置）とボトムプレートの実際の厚さも必要。図面・Fusionスクリプトはv16のまま（印刷の向きが決まってから更新）。\n\nモックが見つけた注意：\n・枠（左）（上面を下にして印刷）の下向きの面にサポートが要りそう：ベッドから2.0mm（X+38・Y-74付近）約3322mm²、ベッドから2.0mm（X+89・Y+8付近）約1480mm²、ベッドから10.1mm（X+18・Y+14付近）約26mm² ほか2か所（張り出し45°より浅い）\n・枠（右）（上面を下にして印刷）の下向きの面にサポートが要りそう：ベッドから2.0mm（X+243・Y-47付近）約4421mm²、ベッドから6.0mm（X+151・Y-103付近）約143mm²、ベッドから6.0mm（X+151・Y+9付近）約143mm²（張り出し45°より浅い）\n・足（そのまま印刷）の下向きの面にサポートが要りそう：ベッドから2.7mm（X+93・Y-103付近）約23mm²、ベッドから2.7mm（X-6・Y-103付近）約23mm²（張り出し45°より浅い）", "questions": [{"q": "枠の印刷の向きはどうする？（v17の掘り込みで、どちら向きでも壁の内側に幅11.7mmのサポートがぐるりと要る）", "type": "choice", "why": "いまの向き（上面を下）は天面の縁の質感がよいが、掘り込みの床にサポートが入る", "options": [{"id": "a", "label": "A：上面を下のまま。掘り込みの床にサポート", "note": "サポート跡は補強板で隠れる。高さ2mmの隙間のサポートは剥がしにくい", "img": "img/v17/q01a.webp"}, {"id": "b", "label": "B：下面を下にして刷る", "note": "掘り込みはきれい。スカートの内側の床にサポート（ボトムプレートで隠れる）。天面の縁は積層の上面になる"}, {"id": "c", "label": "C：v16に戻す（補強板は枠の上に重ねる）", "note": "サポートはほぼ不要。側面にアクリルが2枚見える"}]}, {"q": "箱型（底一体のPLAトレイ）案と比べてみる？", "type": "yesno", "options": [{"id": "yes", "label": "はい"}, {"id": "no", "label": "いいえ"}]}, {"q": "傾きは？（手前の高さはキーキャップ込みで約27mm）", "type": "choice", "options": [{"id": "a", "label": "0°のまま", "note": ""}, {"id": "b", "label": "3°", "note": ""}, {"id": "c", "label": "5°", "note": ""}]}, {"q": "天面のボルトの頭は？", "type": "choice", "options": [{"id": "a", "label": "いまのまま（ボタンヘッド・黒）", "note": ""}, {"id": "b", "label": "頭の低いもの", "note": ""}, {"id": "c", "label": "ケースと同じ色", "note": ""}]}, {"q": "手前の壁の中央に出る継ぎ目の線に、浅いV溝を入れて見せる？", "type": "yesno", "options": [{"id": "yes", "label": "はい"}, {"id": "no", "label": "いいえ"}]}, {"q": "色の組み合わせ（3トーンまで）", "type": "text"}], "images": [{"src": "img/v17/img01.webp", "caption": "外観（キーキャップ付き）", "group": "外観"}, {"src": "img/v17/img02.webp", "caption": "ケースだけ（斜め上・斜め後ろ・右横）", "group": "外観"}, {"src": "img/v17/img03.webp", "caption": "断面（手前のネジの列）：補強板が枠の掘り込みに入る", "group": "断面"}, {"src": "img/v17/img04.webp", "caption": "印刷の向きとサポートが要る所", "group": "断面"}, {"src": "img/v17/img05.webp", "caption": "平面図", "group": "平面"}], "compare": [{"before": "img/v17/cmp01a.webp", "after": "img/v17/cmp01b.webp", "caption": "外観 v16 → v17"}, {"before": "img/v17/cmp02a.webp", "after": "img/v17/cmp02b.webp", "caption": "断面 v16 → v17"}], "params_diff": [{"key": "version", "label": "version", "unit": "", "before": "v16", "after": "v17", "kind": "changed"}, {"key": "stiff_recess.lip", "label": "stiff_recess.lip", "unit": "", "before": null, "after": 2.0, "kind": "added"}, {"key": "stiff_recess.clear", "label": "stiff_recess.clear", "unit": "", "before": null, "after": 0.2, "kind": "added"}, {"key": "stiff_recess.depth", "label": "stiff_recess.depth", "unit": "", "before": null, "after": 2.0, "kind": "added"}, {"key": "stiff_recess.stiffener_size", "label": "stiff_recess.stiffener_size", "unit": "", "before": null, "after": [310.0, 121.0], "kind": "added"}, {"key": "frame_total_h", "label": "frame_total_h", "unit": "", "before": null, "after": 10.1, "kind": "added"}], "model": "img/v17/model.glb.txt", "parts": [{"name": "トッププレート", "key": "top"}, {"name": "補強板", "key": "stiffener"}, {"name": "枠（左）", "key": "frame_left"}, {"name": "枠（右）", "key": "frame_right"}, {"name": "ボトムプレート", "key": "bottom"}, {"name": "PCB", "key": "pcb"}, {"name": "足1", "key": "foot_1"}, {"name": "足2", "key": "foot_2"}, {"name": "足3", "key": "foot_3"}, {"name": "足4", "key": "foot_4"}], "step": [{"src": "img/v17/step/01.step.txt", "name": "組み立て", "file": "assembly_v17.step"}, {"src": "img/v17/step/02.step.txt", "name": "トッププレート", "file": "top_plate_v17.step"}, {"src": "img/v17/step/03.step.txt", "name": "補強板", "file": "stiffener_v17.step"}, {"src": "img/v17/step/04.step.txt", "name": "ボトムプレート", "file": "bottom_plate_v17.step"}, {"src": "img/v17/step/05.step.txt", "name": "枠（左）", "file": "frame_left_v17.step"}, {"src": "img/v17/step/06.step.txt", "name": "枠（右）", "file": "frame_right_v17.step"}, {"src": "img/v17/step/07.step.txt", "name": "足（4個同じ）", "file": "foot_v17.step"}, {"src": "img/v17/step/08.step.txt", "name": "PCB（参考）", "file": "pcb_reference_v17.step"}]}], "lang": "ja"};
+// 画面の文言（ja／en）。言語は board.json の lang（build_page.py が決める）。切り替えボタンは置かない（Claude との会話で変える）
+const I18N = {
+  ja: {
+    locale: "ja-JP",
+    board: "確認ボード", versions: "版", feedback: "フィードバック",
+    fbIntro: "この版を見て気づいたことを書いてください。次の版の変更点として反映します。",
+    fbTarget: "どこについて", fbKind: "種類", fbText: "内容",
+    fbPlaceholder: "例：手前の高さがもう少し低いほうがいい／USBの穴の位置が気になる",
+    send: "送る", fbLoading: "フィードバックを読み込んでいます…",
+    kind: {fix:"直したい", good:"良い", ask:"質問"},
+    status: {open:"未対応", applied:"反映済み", answered:"回答済み", declined:"見送り"},
+    yesno: {yes: "はい", no: "いいえ"},
+    prevLabel: "前の版", prevVer: "前の版", prevShort: "前", sep: "：",
+    hero: "外観", spin: "回して見る",
+    changes: "この版で変えたこと",
+    questions: "決めてほしいこと",
+    qHint: "ボタンで選ぶと、そのまま答えとして残ります（あとから選び直せます）。理由や別の案はフィードバック欄へ。",
+    qNoDb: "この画面では答えを保存できません。claude.ai でページを開くと選べます。",
+    qReadOnly: "この権限では選べません。集計だけ表示しています。",
+    compare: "前の版との比較", comparePos: "比較の位置",
+    figures: "図", figure: "図",
+    dims: "寸法の変化", thItem: "項目", thBefore: "前", thAfter: "今", thDelta: "差", added: "追加", removed: "削除",
+    exportH: "書き出す", format: "形式",
+    stlNote: "メッシュ。スライサー・確認用", stepNote: "ソリッド。Fusion などで編集",
+    saveZip: "ZIPで保存",
+    expNote: "単位は mm、Z が上。部品ごとのファイルを ZIP にまとめて保存します。", noStep: "この版には STEP がありません。",
+    notes: "メモ",
+    allParts: "全部品を1つにまとめたもの",
+    expChecking: "保存できるか確かめています…",
+    expNoDownloads: "このページでは保存が使えないので書き出せません（公開のときに保存が有効になっていないか、許可されていません）",
+    expNoClaude: "この画面では保存できません。claude.ai でページを開いてください",
+    expPick: "書き出す部品を選んでください",
+    expNoZip: "ZIP の部品を読み込めませんでした。ページを開き直してください",
+    expBuilding: "作っています…", expDelivered: "渡しました", expSaved: "保存しました",
+    expDeclined: "保存をやめました",
+    expRate: "確認の画面が開いています。閉じてからもう一度押してください",
+    expTooLarge: "大きすぎて保存できません。部品を減らしてください",
+    expFailed: code => "保存できませんでした" + (code ? `（${code}）` : ""),
+    loading3d: "読み込み中…", spinHint: "ドラッグで回転・ピンチで拡大", fail3d: "3Dを読み込めませんでした",
+    people: n => `${n}人`,
+    chosenBy: items => "選んだ人：" + items.map(([who, label]) => `${who}（${label}）`).join("、"),
+    you: "あなた", someone: "だれか",
+    writeInFeedback: "フィードバック欄に書いてください", noneChosen: "まだ誰も選んでいません",
+    decided: "決定：", clearChoice: "選択を取り消す", write: "書く", writeReason: "理由・別の案を書く",
+    saving: "保存しています…", cleared: "取り消しました", saved: "保存しました",
+    noPermChoose: "この権限では選べません", saveRetry: "保存できませんでした。少し待ってからもう一度選んでください",
+    all: "全体", cmpPrefix: "比較：", qPrefix: "決めてほしいこと：", question: "決めてほしいこと",
+    noFeedback: v => `${v} へのフィードバックはまだありません。`,
+    olderOpen: n => `前の版からの未対応 ${n}件`,
+    thisPC: "このPC",
+    localNote: "このPCで開いた確認ページです。書いたことは review/feedback_local.json に残ります。書き終わったら Claude に「フィードバックを読んで」と頼んでください。",
+    noDb: "この画面ではフィードバックを読み書きできません。コメント機能で書き込んでください。",
+    viewOnly: "閲覧のみの権限です。書き込むには編集できる権限が必要です。",
+    fbLoadFailed: code => `フィードバックを読み込めませんでした（${code}）。ページを開き直してください。`,
+    needText: "内容を書いてください", sending: "送っています…", sent: "送りました",
+    noPermWrite: "この権限では書き込めません", sendRetry: "送れませんでした。少し待ってからもう一度送ってください",
+  },
+  en: {
+    locale: "en-US",
+    board: "Review board", versions: "Versions", feedback: "Feedback",
+    fbIntro: "Write what you notice about this version. It goes into the changes for the next version.",
+    fbTarget: "About", fbKind: "Type", fbText: "Comment",
+    fbPlaceholder: "e.g. The front could be a bit lower / Not sure about the USB hole position",
+    send: "Send", fbLoading: "Loading feedback…",
+    kind: {fix:"Fix", good:"Good", ask:"Question"},
+    status: {open:"Open", applied:"Applied", answered:"Answered", declined:"Declined"},
+    yesno: {yes: "Yes", no: "No"},
+    prevLabel: "Previous", prevVer: "Previous version", prevShort: "Before", sep: ": ",
+    hero: "Main view", spin: "View in 3D",
+    changes: "Changed in this version",
+    questions: "Questions to decide",
+    qHint: "Pick a button and it is saved as your answer. You can change it later. Put reasons or other ideas in the feedback panel.",
+    qNoDb: "Answers cannot be saved on this screen. Open the page on claude.ai to choose.",
+    qReadOnly: "Your access does not allow choosing. Showing the tally only.",
+    compare: "Compared with the previous version", comparePos: "Comparison position",
+    figures: "Figures", figure: "Figure",
+    dims: "Dimension changes", thItem: "Item", thBefore: "Before", thAfter: "Now", thDelta: "Diff", added: "added", removed: "removed",
+    exportH: "Export", format: "Format",
+    stlNote: "Mesh. For slicers and checking", stepNote: "Solid. Edit in Fusion and similar",
+    saveZip: "Save as ZIP",
+    expNote: "Units are mm, Z up. Each part is a separate file, saved together in one ZIP.", noStep: " This version has no STEP.",
+    notes: "Notes",
+    allParts: "All parts in one file",
+    expChecking: "Checking whether saving works…",
+    expNoDownloads: "Export is off because saving is not available on this page (saving was not enabled when it was published, or it is not allowed).",
+    expNoClaude: "Saving does not work on this screen. Open the page on claude.ai.",
+    expPick: "Choose the parts to export",
+    expNoZip: "Could not load the ZIP library. Reload the page.",
+    expBuilding: "Building…", expDelivered: "Handed over", expSaved: "Saved",
+    expDeclined: "Save canceled",
+    expRate: "A confirmation is already open. Close it, then press again.",
+    expTooLarge: "Too large to save. Select fewer parts.",
+    expFailed: code => "Could not save" + (code ? ` (${code})` : ""),
+    loading3d: "Loading…", spinHint: "Drag to rotate, pinch to zoom", fail3d: "Could not load the 3D model",
+    people: n => n === 1 ? "1 person" : `${n} people`,
+    chosenBy: items => "Chosen by: " + items.map(([who, label]) => `${who} (${label})`).join(", "),
+    you: "you", someone: "someone",
+    writeInFeedback: "Write your answer in the feedback panel", noneChosen: "No one has chosen yet",
+    decided: "Decided: ", clearChoice: "Clear my choice", write: "Write", writeReason: "Add a reason or another idea",
+    saving: "Saving…", cleared: "Cleared", saved: "Saved",
+    noPermChoose: "Your access does not allow choosing", saveRetry: "Could not save. Wait a moment and choose again.",
+    all: "Whole design", cmpPrefix: "Comparison: ", qPrefix: "Question: ", question: "Question",
+    noFeedback: v => `No feedback on ${v} yet.`,
+    olderOpen: n => `Still open from earlier versions: ${n}`,
+    thisPC: "This PC",
+    localNote: "This review page is open on this PC. What you write is saved in review/feedback_local.json. When you are done, ask Claude to \"read the feedback\".",
+    noDb: "Feedback cannot be read or written on this screen. Use comments instead.",
+    viewOnly: "View-only access. You need edit access to write.",
+    fbLoadFailed: code => `Could not load feedback (${code}). Reload the page.`,
+    needText: "Write something first", sending: "Sending…", sent: "Sent",
+    noPermWrite: "Your access does not allow writing", sendRetry: "Could not send. Wait a moment and send again.",
+  },
+};
+const LANG = BOARD.lang === "en" ? "en" : "ja";
+const T = I18N[LANG];
+const KIND = T.kind;
+const STATUS = T.status;
+document.documentElement.lang = LANG;
+// 静的な部分（ヘッダー・フィードバック欄）の文言を入れる。data-i18n="kind.fix" のように . でたどる
+const tr = key => key.split(".").reduce((o, k) => o?.[k], T) ?? "";
+document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = tr(el.dataset.i18n));
+document.querySelectorAll("[data-i18n-aria]").forEach(el => el.setAttribute("aria-label", tr(el.dataset.i18nAria)));
+document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = tr(el.dataset.i18nPh));
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const vers = BOARD.versions;
@@ -160,6 +325,17 @@ let cur = vers[vers.length - 1];
 let feedback = [];         // db から
 let names = {};            // 投稿者の表示名
 let canWrite = false;
+let answers = [];          // db の answers（1人1問1件）
+let decisions = {};        // db の decisions（Claude が書く決定）。キー "<版>~q<番号>"
+let myId = null;
+let answerDb = null;       // 書き込める db（読み取りだけのときは null）
+let dbState = "loading";   // loading → rw（選べる）／ro（集計だけ）／none（db が使えない画面）
+const qOf = q => typeof q === "string" ? {q, type: "text"} : q;   // 0.2 までの版は文字列
+// 選択肢の表示名。はい／いいえ は画面の言語で出す（言語を変える前に作った版でも揃う）
+const optLabel = (q, o) => (q.type === "yesno" && T.yesno[o.id]) || o.label;
+const labelOf = (q, id) => { const o = (q.options || []).find(o => o.id === id); return (o && optLabel(q, o)) || id; };
+const safeSeg = s => String(s).replace(/[^A-Za-z0-9_\-.~:@+]/g, "_");
+const ansId = (ver, i, uid) => `${safeSeg(ver)}~q${i}~${safeSeg(uid)}`;
 
 function pickFromHash(){
   const h = decodeURIComponent(location.hash.slice(1));
@@ -174,7 +350,7 @@ function renderHeader(){
     cur.stage ? `<span class="chip stage">${esc(cur.stage)}</span>` : "",
     `<span class="num">${esc(cur.version)}</span>`,
     cur.date ? `<span class="num">${esc(cur.date)}</span>` : "",
-    cur.prev ? `<span>前の版 <span class="num">${esc(cur.prev)}</span></span>` : ""
+    cur.prev ? `<span>${esc(T.prevLabel)} <span class="num">${esc(cur.prev)}</span></span>` : ""
   ].join("");
   $("#vers").innerHTML = vers.map(v => `<button type="button" data-v="${esc(v.version)}" aria-current="${v === cur}">${esc(v.version)}</button>`).join("");
   $("#vers").querySelectorAll("button").forEach(b => b.onclick = () => { cur = vers.find(v => v.version === b.dataset.v); history.replaceState(null, "", "#" + cur.version); renderAll(); });
@@ -183,10 +359,10 @@ function renderHeader(){
 function heroHTML(){
   const img = cur.images[0];
   if (!img) return "";
-  return `<section aria-label="外観"><div class="hero" id="hero">
+  return `<section aria-label="${esc(T.hero)}"><div class="hero" id="hero">
     <img src="${esc(img.src)}" alt="${esc(img.caption)}" data-cap="${esc(img.caption)}">
     <div class="bar"><span>${esc(img.caption)}</span>
-    ${cur.model ? `<button class="btn ghost" type="button" id="spin">回して見る</button>` : ""}</div></div></section>`;
+    ${cur.model ? `<button class="btn ghost" type="button" id="spin">${esc(T.spin)}</button>` : ""}</div></div></section>`;
 }
 
 function mainHTML(){
@@ -194,19 +370,20 @@ function mainHTML(){
   out.push(heroHTML());
   const lists = [];
   if (cur.summary) out.push(`<p class="summary">${esc(cur.summary)}</p>`);
-  if (cur.changes?.length) lists.push(`<div class="box"><h3>この版で変えたこと</h3><ul>${cur.changes.map(c => `<li>${esc(c)}</li>`).join("")}</ul></div>`);
-  if (cur.questions?.length) lists.push(`<div class="box"><h3>決めてほしいこと</h3><ul>${cur.questions.map((q, i) =>
-      `<li><div class="q"><span>${esc(q)}</span><button type="button" class="linkbtn" data-q="${i}">書く</button></div></li>`).join("")}</ul></div>`);
+  if (cur.changes?.length) lists.push(`<div class="box"><h3>${esc(T.changes)}</h3><ul>${cur.changes.map(c => `<li>${esc(c)}</li>`).join("")}</ul></div>`);
   if (lists.length) out.push(`<section class="cols">${lists.join("")}</section>`);
+  if (cur.questions?.length) out.push(`<section aria-label="${esc(T.questions)}"><h2>${esc(T.questions)}</h2>
+    <p class="note" id="qnote" style="margin:0">${esc(T.qHint)}</p>
+    <div class="qs" id="qs"></div></section>`);
 
   if (cur.compare?.length){
-    out.push(`<section aria-label="前の版との比較"><h2>前の版との比較</h2><div class="gallery">${cur.compare.map((c, i) => c.before ? `
+    out.push(`<section aria-label="${esc(T.compare)}"><h2>${esc(T.compare)}</h2><div class="gallery">${cur.compare.map((c, i) => c.before ? `
       <figure><div class="slider" style="--pos:50%" data-i="${i}">
-        <img src="${esc(c.before)}" alt="${esc(cur.prev || "前の版")}：${esc(c.caption)}">
-        <div class="after"><img src="${esc(c.after)}" alt="${esc(cur.version)}：${esc(c.caption)}"></div>
+        <img src="${esc(c.before)}" alt="${esc(cur.prev || T.prevVer)}${esc(T.sep)}${esc(c.caption)}">
+        <div class="after"><img src="${esc(c.after)}" alt="${esc(cur.version)}${esc(T.sep)}${esc(c.caption)}"></div>
         <div class="handle"></div>
-        <span class="tag" style="left:8px">${esc(cur.prev || "前")}</span><span class="tag" style="right:8px">${esc(cur.version)}</span>
-        <input type="range" min="0" max="100" value="50" id="cmp-${esc(cur.version)}-${i}" aria-label="比較の位置">
+        <span class="tag" style="left:8px">${esc(cur.prev || T.prevShort)}</span><span class="tag" style="right:8px">${esc(cur.version)}</span>
+        <input type="range" min="0" max="100" value="50" id="cmp-${esc(cur.version)}-${i}" aria-label="${esc(T.comparePos)}">
       </div><figcaption><span>${esc(c.caption)}</span></figcaption></figure>` : `
       <figure><img src="${esc(c.src)}" alt="${esc(c.caption)}" data-cap="${esc(c.caption)}"><figcaption><span>${esc(c.caption)}</span></figcaption></figure>`).join("")}</div></section>`);
   }
@@ -214,21 +391,33 @@ function mainHTML(){
   const rest = cur.images.slice(1);
   if (rest.length){
     const groups = {};
-    rest.forEach(im => (groups[im.group || "図"] ??= []).push(im));
-    out.push(`<section aria-label="図"><h2>図</h2>${Object.entries(groups).map(([g, ims]) => `
+    rest.forEach(im => (groups[im.group || T.figures] ??= []).push(im));
+    out.push(`<section aria-label="${esc(T.figures)}"><h2>${esc(T.figures)}</h2>${Object.entries(groups).map(([g, ims]) => `
       <div class="group-title">${esc(g)}</div><div class="gallery">${ims.map(im => `
         <figure><img src="${esc(im.src)}" alt="${esc(im.caption)}" data-cap="${esc(im.caption)}" loading="lazy">
         <figcaption><span>${esc(im.caption)}</span></figcaption></figure>`).join("")}</div>`).join("")}</section>`);
   }
 
   if (cur.params_diff?.length){
-    out.push(`<section aria-label="寸法の変化"><h2>寸法の変化 <span class="num" style="color:var(--muted);font-weight:400;font-size:13px">${esc(cur.prev || "")} → ${esc(cur.version)}</span></h2>
-      <div class="tablewrap"><table><thead><tr><th>項目</th><th style="text-align:right">前</th><th style="text-align:right">今</th><th style="text-align:right">差</th></tr></thead><tbody>
+    out.push(`<section aria-label="${esc(T.dims)}"><h2>${esc(T.dims)} <span class="num" style="color:var(--muted);font-weight:400;font-size:13px">${esc(cur.prev || "")} → ${esc(cur.version)}</span></h2>
+      <div class="tablewrap"><table><thead><tr><th>${esc(T.thItem)}</th><th style="text-align:right">${esc(T.thBefore)}</th><th style="text-align:right">${esc(T.thAfter)}</th><th style="text-align:right">${esc(T.thDelta)}</th></tr></thead><tbody>
       ${cur.params_diff.map(r => `<tr><td>${esc(r.label)}</td><td class="n">${fmt(r.before, r.unit)}</td><td class="n">${fmt(r.after, r.unit)}</td>
-        <td class="n ${r.delta > 0 ? "up" : r.delta < 0 ? "down" : ""}">${r.delta !== undefined ? (r.delta > 0 ? "+" : "") + esc(r.delta) : (r.kind === "added" ? "追加" : r.kind === "removed" ? "削除" : "")}</td></tr>`).join("")}
+        <td class="n ${r.delta > 0 ? "up" : r.delta < 0 ? "down" : ""}">${r.delta !== undefined ? (r.delta > 0 ? "+" : "") + esc(r.delta) : (r.kind === "added" ? esc(T.added) : r.kind === "removed" ? esc(T.removed) : "")}</td></tr>`).join("")}
       </tbody></table></div></section>`);
   }
-  if (cur.notes) out.push(`<section><div class="box"><h3>メモ</h3><p style="margin:0;white-space:pre-wrap">${esc(cur.notes)}</p></div></section>`);
+  if (cur.model || cur.step?.length){
+    const hasStl = !!cur.model, hasStep = !!cur.step?.length;
+    out.push(`<section aria-label="${esc(T.exportH)}"><h2>${esc(T.exportH)}</h2><div class="box exp">
+      <div class="fmt" role="radiogroup" aria-label="${esc(T.format)}">
+        <label><input type="radio" name="fmt" id="fmt-stl" value="stl" ${hasStl ? "checked" : "disabled"}> STL <small>${esc(T.stlNote)}</small></label>
+        <label><input type="radio" name="fmt" id="fmt-step" value="step" ${!hasStl && hasStep ? "checked" : ""} ${hasStep ? "" : "disabled"}> STEP <small>${esc(T.stepNote)}</small></label>
+      </div>
+      <div class="checks" id="explist"></div>
+      <div class="go"><button class="btn" type="button" id="expgo">${esc(T.saveZip)}</button><span class="status" id="expstatus" role="status"></span></div>
+      <p class="note" style="margin:0">${esc(T.expNote)}${hasStep ? "" : esc(T.noStep)}</p>
+    </div></section>`);
+  }
+  if (cur.notes) out.push(`<section><div class="box"><h3>${esc(T.notes)}</h3><p style="margin:0;white-space:pre-wrap">${esc(cur.notes)}</p></div></section>`);
   return out.join("");
 }
 
@@ -240,15 +429,113 @@ function wireMain(){
     const r = sl.querySelector("input");
     r.oninput = () => sl.style.setProperty("--pos", r.value + "%");
   });
-  document.querySelectorAll("[data-q]").forEach(b => b.onclick = () => {
-    const t = $("#fbtarget"); t.value = "q:" + b.dataset.q; $("#fbtext").focus();
-  });
   const spin = $("#spin");
   if (spin) spin.onclick = () => openViewer(spin);
+  if ($("#expgo")){
+    document.querySelectorAll('input[name="fmt"]').forEach(r => r.onchange = renderExpList);
+    renderExpList();
+    $("#expgo").onclick = exportZip;
+    showExpState();
+  }
+}
+
+// ---- 書き出し（STL は 3Dモデルからその場で作る。STEP は載せてあるファイル）
+const glbCache = {};
+function loadGLB(v){
+  if (!glbCache[v.model]) glbCache[v.model] = (async () => {
+    const {GLTFLoader} = await import("three/addons/loaders/GLTFLoader.js");
+    // 3Dモデルは base64 のテキストで載せている（アーティファクトが .glb を配信しないため）
+    const b64 = (await (await fetch(v.model)).text()).trim();
+    const bin = Uint8Array.from(atob(b64), ch => ch.charCodeAt(0));
+    return new GLTFLoader().parseAsync(bin.buffer, "");
+  })();
+  return glbCache[v.model];
+}
+function expFormat(){ return document.querySelector('input[name="fmt"]:checked')?.value || "stl"; }
+function expItems(){
+  if (expFormat() === "step") return (cur.step || []).map((st, i) => ({id: "s" + i, name: st.name, file: st.file}));
+  const parts = cur.parts?.length ? cur.parts : [];
+  const items = parts.map((p, i) => ({id: "p" + i, name: p.name || p.key, file: `${String(i + 1).padStart(2, "0")}_${p.key || "part"}.stl`}));
+  items.push({id: "all", name: T.allParts, file: `all_${cur.version}.stl`});
+  return items;
+}
+function renderExpList(){
+  $("#explist").innerHTML = expItems().map(it => `<label><input type="checkbox" id="exp-${esc(cur.version)}-${esc(it.id)}" data-id="${esc(it.id)}" checked>
+    <span>${esc(it.name)} <span class="file">${esc(it.file)}</span></span></label>`).join("");
+}
+// 保存（downloads）が使えるかは開いたときに1回だけ確かめる。使えない画面ではボタンを押せない表示にして理由を出す
+let downloadsApi;            // undefined：確かめ中／null：使えない
+(async () => {
+  try { downloadsApi = window.claude ? await window.claude.use("downloads") : null; } catch (e) { downloadsApi = null; }
+  // 普通のブラウザ（PC で serve_review.py から開いたときなど）では、ふつうのダウンロードで保存する
+  if (!downloadsApi && !window.claude) downloadsApi = {save: async ({filename, data}) => {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(data); a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+    return {status: "saved"};
+  }};
+  showExpState();
+})();
+function showExpState(){
+  const st = $("#expstatus"), go = $("#expgo");
+  if (!go) return;
+  if (downloadsApi === undefined){ go.disabled = true; st.textContent = T.expChecking; return; }
+  go.disabled = !downloadsApi;
+  st.textContent = downloadsApi ? "" : window.claude ? T.expNoDownloads : T.expNoClaude;
+}
+async function exportZip(){
+  const st = $("#expstatus"), go = $("#expgo");
+  if (!downloadsApi){ showExpState(); return; }
+  const ids = new Set([...document.querySelectorAll("#explist input:checked")].map(c => c.dataset.id));
+  const items = expItems().filter(it => ids.has(it.id));
+  if (!items.length){ st.textContent = T.expPick; return; }
+  if (typeof JSZip === "undefined"){ st.textContent = T.expNoZip; return; }
+  go.disabled = true; st.textContent = T.expBuilding;
+  try {
+    const zip = new JSZip(), fmt = expFormat();
+    if (fmt === "step"){
+      for (const it of items){
+        const stp = cur.step[Number(it.id.slice(1))];
+        const b64 = (await (await fetch(stp.src)).text()).trim();
+        zip.file(it.file, Uint8Array.from(atob(b64), ch => ch.charCodeAt(0)));
+      }
+    } else {
+      const THREE = await import("three");
+      const {STLExporter} = await import("three/addons/exporters/STLExporter.js");
+      const gl = await loadGLB(cur);
+      gl.scene.updateMatrixWorld(true);
+      const back = new THREE.Matrix4().makeRotationX(Math.PI / 2);   // 表示用の Y上 → 元の Z上
+      const byIndex = {};
+      gl.scene.traverse(o => {
+        if (!o.isMesh) return;
+        let n = o, m = null;
+        while (n && !(m = /^p(\d+)_/.exec(n.name || ""))) n = n.parent;
+        const g = o.geometry.clone().applyMatrix4(o.matrixWorld).applyMatrix4(back);
+        (byIndex[m ? m[1] : "x"] ??= []).push(new THREE.Mesh(g));
+      });
+      const exp = new STLExporter();
+      const groupOf = list => { const g = new THREE.Group(); list.forEach(x => g.add(x.clone())); return g; };
+      for (const it of items){
+        const list = it.id === "all" ? Object.values(byIndex).flat() : (byIndex[it.id.slice(1)] || []);
+        if (!list.length) continue;
+        zip.file(it.file, exp.parse(groupOf(list), {binary: true}).buffer);
+      }
+    }
+    const blob = await zip.generateAsync({type: "blob", compression: "DEFLATE"});
+    const name = `${BOARD.project}_${cur.version}_${fmt.toUpperCase()}.zip`;
+    const res = await downloadsApi.save({filename: name, data: blob});
+    st.textContent = res.status === "delivered" ? T.expDelivered : T.expSaved;
+  } catch (e) {
+    const code = e && e.code;
+    st.textContent = code === "declined" ? T.expDeclined
+      : code === "rate_limited" ? T.expRate
+      : code === "too_large" ? T.expTooLarge
+      : T.expFailed(code);
+    if (!code) console.error(e);
+  } finally { go.disabled = false; }
 }
 
 async function openViewer(btn){
-  btn.disabled = true; btn.textContent = "読み込み中…";
+  btn.disabled = true; btn.textContent = T.loading3d;
   try {
     const THREE = await import("three");
     const {GLTFLoader} = await import("three/addons/loaders/GLTFLoader.js");
@@ -264,43 +551,126 @@ async function openViewer(btn){
     const d = new THREE.DirectionalLight(0xffffff, 1.8); s.add(d);
     const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 1e5);
     const ctl = new OrbitControls(cam, canvas); ctl.enableDamping = true;
-    // 3Dモデルは base64 のテキストで載せている（アーティファクトが .glb を配信しないため）
-    const b64 = (await (await fetch(cur.model)).text()).trim();
-    const bin = Uint8Array.from(atob(b64), ch => ch.charCodeAt(0));
-    const gl = await new GLTFLoader().parseAsync(bin.buffer, "");
+    const gl0 = await loadGLB(cur);
+    const gl = {scene: gl0.scene.clone(true)};
     gl.scene.traverse(o => { if (o.isMesh && o.material.transparent) o.material.depthWrite = false; });
     s.add(gl.scene);
     const box = new THREE.Box3().setFromObject(gl.scene), c = box.getCenter(new THREE.Vector3()), R = box.getSize(new THREE.Vector3()).length();
-    cam.position.set(c.x - 0.45 * R, c.y + 0.55 * R, c.z + 0.85 * R); ctl.target.copy(c); cam.near = R / 200; cam.far = R * 20; cam.updateProjectionMatrix();
+    // 全体（対角 R の球）が縦の画角 30° に入る距離から見る
+    const dist = 0.5 * R / Math.sin(THREE.MathUtils.degToRad(15)) * 1.05;
+    cam.position.copy(c).addScaledVector(new THREE.Vector3(-0.45, 0.55, 0.85).normalize(), dist); ctl.target.copy(c); cam.near = R / 200; cam.far = R * 20; cam.updateProjectionMatrix();
     d.position.set(c.x - R, c.y + 2 * R, c.z + R);
     const size = () => { const w = canvas.clientWidth, h = canvas.clientHeight; r.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); };
     new ResizeObserver(size).observe(canvas); size();
     (function loop(){ ctl.update(); r.render(s, cam); requestAnimationFrame(loop); })();
-    btn.textContent = "ドラッグで回転・ピンチで拡大";
+    btn.textContent = T.spinHint;
   } catch (e) {
-    btn.textContent = "3Dを読み込めませんでした"; console.error(e);
+    btn.textContent = T.fail3d; console.error(e);
   }
 }
 
+// ---- 決めてほしいこと
+function renderQuestions(){
+  const box = $("#qs");
+  if (!box) return;
+  const ver = cur.version;
+  box.innerHTML = cur.questions.map((raw, i) => {
+    const q = qOf(raw), dec = decisions[`${ver}~q${i}`];
+    const mine = answers.find(a => a.version === ver && a.q === i && a.author === myId && myId);
+    const list = answers.filter(a => a.version === ver && a.q === i);
+    const total = list.length;
+    const dis = !answerDb || dec ? "disabled" : "";
+    const count = id => list.filter(a => a.choice === id).length;
+    const decLabel = dec ? labelOf(q, dec.choice) : "";
+    let body = "";
+    if (q.type === "yesno"){
+      body = `<div class="seg" role="radiogroup" aria-label="${esc(q.q)}">${q.options.map(o => `
+        <label><input class="vis" type="radio" name="ans-${esc(ver)}-${i}" id="ans-${esc(ver)}-${i}-${esc(o.id)}" value="${esc(o.id)}" data-qi="${i}"
+          ${mine?.choice === o.id ? "checked" : ""} ${dis}>${esc(optLabel(q, o))}<span class="cnt">${count(o.id)}</span></label>`).join("")}</div>`;
+    } else if (q.type === "choice"){
+      body = `<div class="opts" role="radiogroup" aria-label="${esc(q.q)}">${q.options.map(o => {
+        const n = count(o.id), pct = total ? Math.round(100 * n / total) : 0;
+        return `<label class="opt ${dec?.choice === o.id ? "win" : ""}">
+          ${o.img ? `<img src="${esc(o.img)}" alt="${esc(o.label)}" loading="lazy">` : ""}
+          <span class="top"><input type="radio" name="ans-${esc(ver)}-${i}" id="ans-${esc(ver)}-${i}-${esc(o.id)}" value="${esc(o.id)}" data-qi="${i}"
+            ${mine?.choice === o.id ? "checked" : ""} ${dis}><span class="lbl">${esc(o.label)}</span></span>
+          ${o.note ? `<span class="on">${esc(o.note)}</span>` : ""}
+          <span class="tally"><span class="bar"><i style="width:${pct}%"></i></span><span>${esc(T.people(n))}</span></span></label>`;
+      }).join("")}</div>`;
+    }
+    const who = list.length && q.type !== "text"
+      ? T.chosenBy(list.map(a => [esc(a.author === myId ? T.you : names[a.author] || T.someone), esc(labelOf(q, a.choice))]))
+      : (q.type === "text" ? T.writeInFeedback : T.noneChosen);
+    return `<div class="qcard ${dec ? "decided" : ""}">
+      <div class="qhead"><span class="qn">Q${i + 1}</span><span class="qt">${esc(q.q)}</span>
+        ${dec ? `<span class="chip dec">${esc(T.decided)}${esc(decLabel)}${dec.version ? " " + esc(dec.version) : ""}</span>` : ""}</div>
+      ${q.why ? `<p class="qwhy">${esc(q.why)}</p>` : ""}
+      ${body}
+      ${dec?.note ? `<div class="reply" style="font-size:13px;border-left:2px solid var(--accent);padding-left:8px">${esc(dec.note)}</div>` : ""}
+      <div class="qfoot"><span class="who">${who}</span>
+        ${mine && !dec && answerDb ? `<button type="button" class="linkbtn" data-clear="${i}">${esc(T.clearChoice)}</button>` : ""}
+        <button type="button" class="linkbtn" data-q="${i}">${esc(q.type === "text" ? T.write : T.writeReason)}</button>
+        <span class="status" id="qst-${i}" role="status"></span></div></div>`;
+  }).join("");
+  box.querySelectorAll("input[data-qi]").forEach(r => r.onchange = () => saveAnswer(Number(r.dataset.qi), r.value));
+  box.querySelectorAll("[data-clear]").forEach(b => b.onclick = () => saveAnswer(Number(b.dataset.clear), null));
+  box.querySelectorAll("[data-q]").forEach(b => b.onclick = () => {
+    const t = $("#fbtarget"); t.value = "q:" + b.dataset.q;
+    const k = document.getElementById("kind-ask"); if (k && qOf(cur.questions[b.dataset.q]).type === "text") k.checked = true;
+    $("#fbtext").focus();
+  });
+  const st = answerDb ? "rw" : dbState === "rw" ? "ro" : dbState;
+  if ($("#qnote")) $("#qnote").textContent = !cur.questions.some(q => qOf(q).type !== "text") || st === "rw" || st === "loading"
+    ? T.qHint
+    : st === "none" ? T.qNoDb
+    : T.qReadOnly;
+}
+
+// 1つの問いへの書き込みは1度に1回。続けて押されたら最後の選択だけを書く
+const ansQueue = {};
+async function saveAnswer(i, choice){
+  if (!answerDb || !myId) return;
+  const ver = cur.version, id = ansId(ver, i, myId), q = qOf(cur.questions[i]);
+  const st = () => document.getElementById("qst-" + i);
+  const job = ansQueue[id] ??= {busy: false, next: undefined};
+  job.next = choice;
+  if (job.busy) return;
+  job.busy = true;
+  try {
+    while (job.next !== undefined){
+      const c = job.next; job.next = undefined;
+      if (st()) st().textContent = T.saving;
+      const ref = answerDb.collection("answers").doc(id);
+      if (c === null) await ref.delete();
+      else await ref.set({version: ver, q: i, question: q.q, choice: c,
+        label: labelOf(q, c), author: myId, updatedAt: new Date().toISOString()});
+      if (st()) st().textContent = c === null ? T.cleared : T.saved;
+    }
+  } catch (err) {
+    if (st()) st().textContent = err.code === "invalid_argument" ? T.noPermChoose : T.saveRetry;
+    if (err.code === "invalid_argument"){ answerDb = null; renderQuestions(); }
+  } finally { job.busy = false; }
+}
+
 function targets(){
-  const t = [["all", "全体"]];
+  const t = [["all", T.all]];
   cur.images.forEach((im, i) => t.push(["img:" + i, im.caption]));
-  (cur.compare || []).forEach((c, i) => t.push(["cmp:" + i, "比較：" + c.caption]));
-  (cur.questions || []).forEach((q, i) => t.push(["q:" + i, "決めてほしいこと：" + q]));
+  (cur.compare || []).forEach((c, i) => t.push(["cmp:" + i, T.cmpPrefix + c.caption]));
+  (cur.questions || []).forEach((q, i) => t.push(["q:" + i, T.qPrefix + qOf(q).q]));
   return t;
 }
 function targetLabel(f){
   const v = vers.find(x => x.version === f.version) || cur;
   const [k, i] = String(f.target || "all").split(":");
-  if (k === "img") return v.images[i]?.caption || "図";
-  if (k === "cmp") return "比較：" + (v.compare?.[i]?.caption || "");
-  if (k === "q") return v.questions?.[i] || "決めてほしいこと";
-  return "全体";
+  if (k === "img") return v.images[i]?.caption || T.figure;
+  if (k === "cmp") return T.cmpPrefix + (v.compare?.[i]?.caption || "");
+  if (k === "q") return v.questions?.[i] ? qOf(v.questions[i]).q : T.question;
+  return T.all;
 }
 
 function fbItem(f){
   const who = names[f.author] || "";
-  const when = f.createdAt ? new Date(f.createdAt).toLocaleString("ja-JP", {month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"}) : "";
+  const when = f.createdAt ? new Date(f.createdAt).toLocaleString(T.locale, {month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"}) : "";
   return `<div class="fb"><div class="row">
       <span class="chip k-${esc(f.kind)}">${esc(KIND[f.kind] || f.kind)}</span>
       <span class="chip s-${esc(f.status || "open")}">${esc(STATUS[f.status || "open"])}${f.resolvedIn ? " " + esc(f.resolvedIn) : ""}</span>
@@ -317,8 +687,8 @@ function renderFeedback(){
   const mine = feedback.filter(f => f.version === cur.version).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
   const older = feedback.filter(f => f.version !== cur.version && (f.status || "open") === "open" && f.version < cur.version);
   let html = "";
-  html += mine.length ? mine.map(fbItem).join("") : `<p class="empty">${esc(cur.version)} へのフィードバックはまだありません。</p>`;
-  if (older.length) html += `<h3 class="group-title" style="margin-top:12px">前の版からの未対応 ${older.length}件</h3>` + older.map(fbItem).join("");
+  html += mine.length ? mine.map(fbItem).join("") : `<p class="empty">${T.noFeedback(esc(cur.version))}</p>`;
+  if (older.length) html += `<h3 class="group-title" style="margin-top:12px">${esc(T.olderOpen(older.length))}</h3>` + older.map(fbItem).join("");
   $("#fblist").innerHTML = html;
 }
 
@@ -327,27 +697,83 @@ function renderAll(){
   renderHeader();
   $("#main").innerHTML = mainHTML();
   wireMain();
+  renderQuestions();
   renderFeedback();
 }
 
 window.addEventListener("hashchange", renderAll);
 renderAll();
 
+// ---- ローカルモード：PC で serve_review.py から開いたとき（Artifact の db が無い）。
+// フィードバック・答え・決定を、ページを配っているサーバー（review/feedback_local.json）に保存する。db と同じ使い方ができる形にする
+function isLocalHost(){ return ["127.0.0.1", "localhost", "[::1]"].includes(location.hostname); }
+async function localStore(){
+  if (!isLocalHost()) return null;
+  let store;
+  try { const r = await fetch("feedback", {cache: "no-store"}); if (!r.ok) return null; store = await r.json(); } catch (e) { return null; }
+  const subs = {};
+  const snap = name => ({docs: Object.entries(store[name] || {}).map(([id, v]) => ({id, data: () => v}))});
+  const emit = () => { for (const n in subs) subs[n].forEach(cb => cb(snap(n))); };
+  const post = async body => {
+    const r = await fetch("feedback", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+    if (!r.ok) throw {code: "local_" + r.status};
+    store = await r.json(); emit();
+  };
+  // Claude がファイルに書いた返信・決定は、ページに戻ったときに読み直す
+  document.addEventListener("visibilitychange", async () => {
+    if (document.visibilityState !== "visible") return;
+    try { const r = await fetch("feedback", {cache: "no-store"}); if (r.ok){ store = await r.json(); emit(); } } catch (e) {}
+  });
+  const db = {collection: name => ({
+    onSnapshot(cb){ (subs[name] ??= []).push(cb); cb(snap(name)); return () => {}; },
+    add: doc => post({collection: name, doc}),
+    doc: id => ({set: doc => post({collection: name, id, doc}), delete: () => post({collection: name, id, delete: true})}),
+  })};
+  const user = {can: async () => true, id: async () => "local",
+    profiles: async ids => Object.fromEntries(ids.map(i => [i, {name: i === "local" ? T.thisPC : ""}]))};
+  return {db, user};
+}
+
 // ---- フィードバックの保存（db）。使えない画面では読み取りだけにする
 (async () => {
   const c = window.claude;
-  const db = c ? await c.use("db") : null;
-  const user = c ? await c.use("user") : null;
+  let db = c ? await c.use("db") : null;
+  let user = c ? await c.use("user") : null;
   if (!db){
-    $("#fbnote").textContent = "この画面ではフィードバックを読み書きできません。コメント機能で書き込んでください。";
+    const local = await localStore();
+    if (local){
+      ({db, user} = local);
+      $("#fbnote").textContent = T.localNote;
+    }
+  }
+  if (!db){
+    dbState = "none"; renderQuestions();
+    $("#fbnote").textContent = T.noDb;
     $("#fblist").innerHTML = "";
     return;
   }
   const may = user ? await user.can("data.write") : null;
   canWrite = may !== false;
-  const myId = user ? await user.id() : null;
+  myId = user ? await user.id() : null;
+  answerDb = canWrite && myId ? db : null;
+  dbState = answerDb ? "rw" : "ro";
+  renderQuestions();
+  const resolveNames = async ids => {
+    ids = ids.filter(id => id && !(id in names));
+    if (!user || !ids.length) return;
+    try { const ps = await user.profiles(ids); ids.forEach(id => names[id] = ps[id]?.name || ""); } catch (e) {}
+  };
+  db.collection("answers").onSnapshot(async snap => {
+    answers = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    await resolveNames([...new Set(answers.map(a => a.author))]);
+    renderQuestions();
+  }, () => {});
+  db.collection("decisions").onSnapshot(snap => {
+    decisions = {}; snap.docs.forEach(d => decisions[d.id] = d.data());
+    renderQuestions();
+  }, () => {});
   $("#fbform").hidden = !canWrite;
-  if (!canWrite) $("#fbnote").textContent = "閲覧のみの権限です。書き込むには編集できる権限が必要です。";
+  if (!canWrite) $("#fbnote").textContent = T.viewOnly;
   db.collection("feedback").onSnapshot(async snap => {
     feedback = snap.docs.map(d => ({id: d.id, ...d.data()}));
     const ids = [...new Set(feedback.map(f => f.author).filter(Boolean))];
@@ -355,22 +781,22 @@ renderAll();
       try { const ps = await user.profiles(ids); ids.forEach(id => names[id] = ps[id]?.name || ""); } catch (e) {}
     }
     renderFeedback();
-  }, err => { $("#fblist").innerHTML = `<p class="empty">フィードバックを読み込めませんでした（${esc(err.code)}）。ページを開き直してください。</p>`; });
+  }, err => { $("#fblist").innerHTML = `<p class="empty">${T.fbLoadFailed(esc(err.code))}</p>`; });
 
   $("#fbform").onsubmit = async e => {
     e.preventDefault();
     const text = $("#fbtext").value.trim();
-    if (!text){ $("#fbstatus").textContent = "内容を書いてください"; return; }
-    $("#fbsend").disabled = true; $("#fbstatus").textContent = "送っています…";
+    if (!text){ $("#fbstatus").textContent = T.needText; return; }
+    $("#fbsend").disabled = true; $("#fbstatus").textContent = T.sending;
     try {
       await db.collection("feedback").add({
         version: cur.version, target: $("#fbtarget").value,
         kind: document.querySelector('input[name="kind"]:checked').value,
         text, author: myId, createdAt: new Date().toISOString(), status: "open"
       });
-      $("#fbtext").value = ""; $("#fbstatus").textContent = "送りました";
+      $("#fbtext").value = ""; $("#fbstatus").textContent = T.sent;
     } catch (err) {
-      $("#fbstatus").textContent = err.code === "invalid_argument" ? "この権限では書き込めません" : "送れませんでした。少し待ってからもう一度送ってください";
+      $("#fbstatus").textContent = err.code === "invalid_argument" ? T.noPermWrite : T.sendRetry;
       if (err.code === "invalid_argument"){ canWrite = false; $("#fbform").hidden = true; }
     } finally { $("#fbsend").disabled = false; }
   };

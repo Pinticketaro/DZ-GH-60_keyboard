@@ -1,0 +1,53 @@
+[
+ {
+  "key": "version",
+  "label": "version",
+  "unit": "",
+  "before": "v16",
+  "after": "v17",
+  "kind": "changed"
+ },
+ {
+  "key": "stiff_recess.lip",
+  "label": "stiff_recess.lip",
+  "unit": "",
+  "before": null,
+  "after": 2.0,
+  "kind": "added"
+ },
+ {
+  "key": "stiff_recess.clear",
+  "label": "stiff_recess.clear",
+  "unit": "",
+  "before": null,
+  "after": 0.2,
+  "kind": "added"
+ },
+ {
+  "key": "stiff_recess.depth",
+  "label": "stiff_recess.depth",
+  "unit": "",
+  "before": null,
+  "after": 2.0,
+  "kind": "added"
+ },
+ {
+  "key": "stiff_recess.stiffener_size",
+  "label": "stiff_recess.stiffener_size",
+  "unit": "",
+  "before": null,
+  "after": [
+   310.0,
+   121.0
+  ],
+  "kind": "added"
+ },
+ {
+  "key": "frame_total_h",
+  "label": "frame_total_h",
+  "unit": "",
+  "before": null,
+  "after": 10.1,
+  "kind": "added"
+ }
+]
