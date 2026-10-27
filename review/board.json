@@ -3048,8 +3048,390 @@
      "kind": "removed"
     }
    ],
-   "dims": [],
-   "refs": [],
+   "dims": [
+    {
+     "key": "outer_w",
+     "label": "外形の幅（X）",
+     "value": 315.0,
+     "unit": "mm",
+     "basis": "旧デザイン（swillkb で作ったケース）の外形を踏襲",
+     "ref": "決定事項.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "outer_d",
+     "label": "外形の奥行き（Y）",
+     "value": 126.0,
+     "unit": "mm",
+     "basis": "同上",
+     "ref": "決定事項.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "corner_r",
+     "label": "外形の角の丸み（Apple風）",
+     "value": 8.0,
+     "unit": "mm",
+     "basis": "v12 で R8・スムージング0.6 に（v11 までは R12）。角とネジ穴の距離から",
+     "ref": "決定事項.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "wall",
+     "label": "枠の壁の幅",
+     "value": 14.0,
+     "unit": "mm",
+     "basis": "旧デザイン。枠の内側 287×98 で PCB とのすき間 約1.0",
+     "ref": "基準寸法.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "pcb_w",
+     "label": "PCBの幅",
+     "value": 285.0,
+     "unit": "mm",
+     "basis": "GH60 オープンソースPCB の外形。DZ60 は GH60 互換（要実測）",
+     "ref": "基準寸法.md",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "pcb_d",
+     "label": "PCBの奥行き",
+     "value": 94.6,
+     "unit": "mm",
+     "basis": "同上",
+     "ref": "基準寸法.md",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "pcb_t",
+     "label": "PCBの厚さ",
+     "value": 1.6,
+     "unit": "mm",
+     "basis": "一般的なFR4の1.6。DZ60 の実測で置き換える",
+     "ref": "dz60_実測.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "key_pitch",
+     "label": "キーの間隔（1U）",
+     "value": 19.05,
+     "unit": "mm",
+     "basis": "MX 系キーボードの標準",
+     "ref": "基準寸法.md",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "plate_top_to_pcb",
+     "label": "プレート上面〜PCB上面",
+     "value": 5.0,
+     "unit": "mm",
+     "basis": "MX スイッチの規格寸法",
+     "ref": "基準寸法.md",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "top_t",
+     "label": "トッププレートの厚さ（アクリル）",
+     "value": 1.5,
+     "unit": "mm",
+     "basis": "MX の爪が掛かるのは1.6mm以下",
+     "ref": "基準寸法.md",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "switch_cut",
+     "label": "スイッチ穴（カーフ補正前）",
+     "value": 14.0,
+     "unit": "mm",
+     "basis": "MX 標準。穴形状は旧 swillkb の出力（65キーと全数一致を確認）",
+     "ref": "swillkb_switch_layer.svg",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "stiff_t",
+     "label": "補強板の厚さ（アクリル）",
+     "value": 2.0,
+     "unit": "mm",
+     "basis": "2026-10-15 決定（3mm1枚案は爪が掛からず不可）。2mm/3mm はテストカットで決める",
+     "ref": "決定事項.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "stiff_offset",
+     "label": "補強板の穴の逃げ（片側）",
+     "value": 0.8,
+     "unit": "mm",
+     "basis": "スイッチの爪が開く空間。テストカットで確かめる",
+     "ref": "基準寸法.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "gap_stiff_pcb",
+     "label": "補強板の下面〜PCB上面",
+     "value": 1.5,
+     "unit": "mm",
+     "basis": "plate_top_to_pcb − top_t − stiff_t",
+     "ref": "",
+     "status": "計算",
+     "fab": false
+    },
+    {
+     "key": "under_pcb",
+     "label": "PCB下面〜底の上面（台座の高さ）",
+     "value": 5.0,
+     "unit": "mm",
+     "basis": "PCB裏の部品・USB-C より高く。DZ60 の実測で決める",
+     "ref": "dz60_実測.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "frame_h",
+     "label": "枠の高さ（掘り込みの床まで、底を除く）",
+     "value": 8.1,
+     "unit": "mm",
+     "basis": "gap_stiff_pcb ＋ pcb_t ＋ under_pcb",
+     "ref": "",
+     "status": "計算",
+     "fab": false
+    },
+    {
+     "key": "floor_t",
+     "label": "トレーの底の厚さ（PLA）",
+     "value": 3.0,
+     "unit": "mm",
+     "basis": "v17 のボトムプレート3.0と同じにして全体の高さを変えない",
+     "ref": "決定事項.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "stiff_lip",
+     "label": "補強板の掘り込みの外側の縁",
+     "value": 2.0,
+     "unit": "mm",
+     "basis": "v17：側面に見えるアクリルをトッププレートだけにする。スカートと同じ2mm",
+     "ref": "決定事項.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "total_h",
+     "label": "全体の高さ（足・キーキャップ別）",
+     "value": 14.6,
+     "unit": "mm",
+     "basis": "各層の合計",
+     "ref": "",
+     "status": "計算",
+     "fab": false
+    },
+    {
+     "key": "usb_x",
+     "label": "USB切り欠きの中心（PCB左端から）",
+     "value": 18.2,
+     "unit": "mm",
+     "basis": "GH60 標準の位置。DZ60 の実測で置き換える",
+     "ref": "dz60_実測.md",
+     "status": "仮",
+     "fab": false
+    },
+    {
+     "key": "usb_w",
+     "label": "USB切り欠きの幅",
+     "value": 13.0,
+     "unit": "mm",
+     "basis": "ケーブルの太い部分（USB-C のオーバーモールド 約12.35）＋余裕。手持ちのいちばん太いケーブルで試す",
+     "ref": "",
+     "status": "経験則",
+     "fab": false
+    },
+    {
+     "key": "split_x",
+     "label": "枠の分割位置（X）",
+     "value": 142.5,
+     "unit": "mm",
+     "basis": "中央。半分がプリンタの造形範囲に載る",
+     "ref": "",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "bed",
+     "label": "プリンタの造形範囲（Ender-3 Pro）",
+     "value": 220,
+     "unit": "mm",
+     "basis": "メーカー仕様 220×220×250",
+     "ref": "",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "hole_d",
+     "label": "M3ボルト穴",
+     "value": 3.4,
+     "unit": "mm",
+     "basis": "JIS B 1001 2級（1級3.2／2級3.4／3級3.6）",
+     "ref": "",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "bolt_l",
+     "label": "M3ボルトの長さ（8本）",
+     "value": 18.0,
+     "unit": "mm",
+     "basis": "全層＋足のナットまで。ナットの上に残る厚さ 1.0",
+     "ref": "",
+     "status": "計算",
+     "fab": false
+    },
+    {
+     "key": "nut_af",
+     "label": "M3ナットの二面幅",
+     "value": 5.5,
+     "unit": "mm",
+     "basis": "ISO 4032／JIS B 1181",
+     "ref": "",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "nut_t",
+     "label": "M3ナットの厚さ",
+     "value": 2.4,
+     "unit": "mm",
+     "basis": "同上（最大2.4）",
+     "ref": "",
+     "status": "規格",
+     "fab": false
+    },
+    {
+     "key": "tilt",
+     "label": "傾き",
+     "value": 0.0,
+     "unit": "°",
+     "basis": "v14 で 0°（平ら）。3〜5° にするかは未決",
+     "ref": "決定事項.md",
+     "status": "決定",
+     "fab": false
+    },
+    {
+     "key": "tongue_t",
+     "label": "継ぎ目のほぞ（舌）の厚さ",
+     "value": 5.5,
+     "unit": "mm",
+     "basis": "トレーは底を下に刷るので下側に。ナット溝3.4の上に2.1残る",
+     "ref": "",
+     "status": "計算",
+     "fab": false
+    },
+    {
+     "key": "joint_bolt",
+     "label": "継ぎ目のボルト M3（ボタンヘッド）の長さ",
+     "value": 8.0,
+     "unit": "mm",
+     "basis": "頭のざぐりからナットまで。ナットに約2.2mm掛かる",
+     "ref": "",
+     "status": "計算",
+     "fab": false
+    },
+    {
+     "key": "kerf",
+     "label": "レーザーのカーフ（切断溝の全幅）",
+     "value": 0.0,
+     "unit": "mm",
+     "basis": "まだ補正していない（0）。3mmアクリル・CO2 の公開値は0.125〜0.18。試し片で測る",
+     "ref": "",
+     "status": "初期値",
+     "fab": true
+    },
+    {
+     "key": "clr_tongue",
+     "label": "ほぞ穴のすき間（片側）",
+     "value": 0.2,
+     "unit": "mm",
+     "basis": "FDM の一般クリアランス0.2。±0.1 の3段の試し片で決める",
+     "ref": "",
+     "status": "初期値",
+     "fab": true
+    },
+    {
+     "key": "clr_stiff",
+     "label": "補強板の掘り込みのすき間（片側）",
+     "value": 0.2,
+     "unit": "mm",
+     "basis": "同上。アクリルの外形のばらつきも見る",
+     "ref": "",
+     "status": "初期値",
+     "fab": true
+    },
+    {
+     "key": "nut_pocket",
+     "label": "ナット溝の二面幅",
+     "value": 6.1,
+     "unit": "mm",
+     "basis": "ナット5.5＋0.6（少しきつめ）。印刷して調整",
+     "ref": "",
+     "status": "初期値",
+     "fab": true
+    },
+    {
+     "key": "overhang_deg",
+     "label": "サポートなしで刷れる張り出し角",
+     "value": 45,
+     "unit": "°",
+     "basis": "FDM の一般的な目安（45°ルール）",
+     "ref": "",
+     "status": "経験則",
+     "fab": true
+    }
+   ],
+   "refs": [
+    {
+     "src": "refs/dz60_実測.md",
+     "name": "dz60_実測.md",
+     "caption": "DZ60の実測の記録（未記入）",
+     "img": false
+    },
+    {
+     "src": "refs/swillkb_switch_layer.svg",
+     "name": "swillkb_switch_layer.svg",
+     "caption": "スイッチ穴の形（旧swillkb）",
+     "img": true
+    },
+    {
+     "src": "refs/基準寸法.md",
+     "name": "基準寸法.md",
+     "caption": "GH60互換の基準寸法",
+     "img": false
+    },
+    {
+     "src": "refs/決定事項.md",
+     "name": "決定事項.md",
+     "caption": "決定事項",
+     "img": false
+    },
+    {
+     "src": "refs/資料.md",
+     "name": "資料.md",
+     "caption": "資料の一覧（何を何の根拠にしたか）",
+     "img": false
+    }
+   ],
    "model": "img/v18b/model.glb.txt",
    "parts": [
     {
