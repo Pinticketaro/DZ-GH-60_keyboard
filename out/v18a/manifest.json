@@ -112,5 +112,27 @@
    "name": "PCB（参考）",
    "file": "pcb_reference_v18a.step"
   }
+ ],
+ "refs": [
+  {
+   "src": "refs/資料.md",
+   "caption": "資料の一覧（何を何の根拠にしたか）"
+  },
+  {
+   "src": "refs/基準寸法.md",
+   "caption": "GH60互換の基準寸法"
+  },
+  {
+   "src": "refs/dz60_実測.md",
+   "caption": "DZ60の実測の記録（未記入）"
+  },
+  {
+   "src": "refs/決定事項.md",
+   "caption": "決定事項"
+  },
+  {
+   "src": "refs/swillkb_switch_layer.svg",
+   "caption": "スイッチ穴の形（旧swillkb）"
+  }
  ]
 }
