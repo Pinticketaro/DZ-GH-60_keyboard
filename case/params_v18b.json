@@ -1,5 +1,9 @@
 {
-  "version": "v18",
+  "meta": {
+    "parent": "v17",
+    "lang": "ja"
+  },
+  "version": "v18b",
   "pcb": [
     285.0,
     94.6

@@ -25,9 +25,10 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v18"
+VER = "v18b"
+PARENT = "v17"                      # 分けた元の版（確認ボードの版の流れ）
 
-# v18（ブランチ claude/tray-v18）：トレー型。枠とボトムプレートを1つのPLAのトレー（上だけ開いた箱）にする。
+# v18b（v17 から分けた案・ブランチ claude/tray-v18）：トレー型。枠とボトムプレートを1つのPLAのトレー（上だけ開いた箱）にする。
 # トレーは底を下にして印刷（補強板の掘り込みは上向き、スカートは無し）→ サポートの要る面がほぼ無い
 CASE = "tray"                       # "tray"＝トレー型（v18）／"sandwich"＝枠＋アクリルのボトムプレート（v17まで）
 FLOOR_T = 3.0                       # トレーの底の厚さ（v17のボトムプレートと同じ。全体の高さを変えない）
@@ -765,7 +766,7 @@ def main():
                             f"前後一体の足×4（幅{RIB_W}、厚さ{RIB_T}、手前はナット受け・奥は丸棒受け）"))
     svg(os.path.join(ROOT, f"case/feet_{VER}.svg"), feet_layers, "足（ナット受け）と真鍮丸棒 平面図", note)
 
-    params = dict(version=VER, pcb=[PCB_W, PCB_H], outer=[OUTER_W, OUTER_H], outer_origin=[OX, OY],
+    params = dict(meta=dict(parent=PARENT, lang="ja"), version=VER, pcb=[PCB_W, PCB_H], outer=[OUTER_W, OUTER_H], outer_origin=[OX, OY],
                   wall=WALL, frame_inner=[OUTER_W - 2 * WALL, OUTER_H - 2 * WALL],
                   corner_r=CORNER_R, corner_smoothing=CORNER_SMOOTH,
                   corner_extent=round(sq.corner_extent(CORNER_R, CORNER_SMOOTH), 2),

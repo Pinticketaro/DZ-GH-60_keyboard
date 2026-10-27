@@ -1,10 +1,26 @@
 [
  {
+  "key": "meta.parent",
+  "label": "meta.parent",
+  "unit": "",
+  "before": null,
+  "after": "v17",
+  "kind": "added"
+ },
+ {
+  "key": "meta.lang",
+  "label": "meta.lang",
+  "unit": "",
+  "before": null,
+  "after": "ja",
+  "kind": "added"
+ },
+ {
   "key": "version",
   "label": "version",
   "unit": "",
   "before": "v17",
-  "after": "v18",
+  "after": "v18b",
   "kind": "changed"
  },
  {
