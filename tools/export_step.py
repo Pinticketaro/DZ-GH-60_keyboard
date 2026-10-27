@@ -97,7 +97,9 @@ def build():
                                z["st1"], g.TOP_T)
     parts["stiffener"] = plate(wire_from_pts([fd.T(p) for p in g.stiff_outer_pts()], seg_long=0.6) if g.STIFF_RECESS else wire_from_pts(D["outer"]), [circle_wire(c, d) for c, d in D["holes"]] +
                                [wire_from_pts(p, seg_long=0.05) for p in D["stiff"]], z["fr1"], g.STIFF_T)
-    if g.SKIRT:
+    if g.CASE == "tray":
+        pass                        # v18 トレー型：底はトレーと一体
+    elif g.SKIRT:
         bp = g.bottom_poly()
         parts["bottom_plate"] = plate(wire_from_pts([fd.T(p) for p in list(bp.exterior.coords)[:-1]], seg_long=0.6), [], z["bot0"], g.BOTTOM_T)
     else:
@@ -109,6 +111,8 @@ def build():
     frame = plate(fo, [fi] + [circle_wire(c, d) for c, d in D["holes"]], z["bot1"], g.FRAME_H)
     ux = g.USB_X - fd.OX0
     frame = frame.cut(box(ux - g.USB_W / 2, ux + g.USB_W / 2, g.OUTER_H - g.WALL - 1, g.OUTER_H + 1, z["bot1"] - 1, z["fr1"] + 1))
+    if g.CASE == "tray":     # 底（枠の外形いっぱい、ネジ穴だけ）
+        frame = frame.fuse(plate(fo, [circle_wire(c, d) for c, d in D["holes"]], z["bot0"], g.FLOOR_T)).clean()
     if g.STIFF_RECESS:   # v17：補強板の高さまで縁を立て、内側を補強板の形に掘る
         pk = wire_from_pts([fd.T(p) for p in list(g.stiff_pocket_poly().exterior.coords)[:-1]], seg_long=0.6)
         frame = frame.fuse(plate(fo, [pk], z["fr1"], g.STIFF_T)).clean()
@@ -122,7 +126,20 @@ def build():
     left = frame.intersect(box(-big, xs, -big, big, -big, big))
     right = frame.intersect(box(xs, big, -big, big, -big, big))
     zb, top = z["bot1"], z["fr1"]
-    if g.JOINT == "tongue_vbolt":
+    if g.JOINT == "tongue_vbolt" and g.CASE == "tray":
+        c = g.TONGUE_CLEAR
+        H = g.tray_h()
+        for ycp in g.joint_wall_y():
+            yc = fd.T((0, ycp))[1]
+            bxp = (xs + g.JB_X, yc)
+            tongue = box(xs - 0.5, xs + g.TONGUE_L, yc - g.TONGUE_W / 2, yc + g.TONGUE_W / 2, 0, g.TONGUE_T)
+            mortise = box(xs - 0.01, xs + g.TONGUE_L + c, yc - g.TONGUE_W / 2 - c, yc + g.TONGUE_W / 2 + c, -1, g.TONGUE_T + c)
+            hole = cyl(bxp, g.HOLE_D, -1, H + 1)
+            cb = cyl(bxp, g.JB_CB_D, H - g.JB_CB_DEPTH, H + 1)
+            nut = hex_prism(bxp, g.NUT_POCKET_AF, -1, g.JB_NUT_DEPTH)
+            left = left.fuse(tongue).clean().cut(hole).cut(nut)
+            right = right.cut(mortise).cut(hole).cut(cb)
+    elif g.JOINT == "tongue_vbolt":
         c = g.TONGUE_CLEAR
         for ycp in g.joint_wall_y():
             yc = fd.T((0, ycp))[1]

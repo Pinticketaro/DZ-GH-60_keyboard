@@ -68,7 +68,9 @@ def build_parts():
     parts = {}
     parts["top"] = slab(g.outer_pts(), g.switch_cutouts() + hole_polys, z["st1"], g.TOP_T)
     parts["stiffener"] = slab(g.stiff_outer_pts(), g.stiffener_openings() + hole_polys, z["fr1"], g.STIFF_T)
-    if g.SKIRT:
+    if g.CASE == "tray":
+        parts["bottom"] = None      # v18 トレー型：底はトレー（frame_left/right）と一体
+    elif g.SKIRT:
         bp = g.bottom_poly()
         parts["bottom"] = slab(list(bp.exterior.coords)[:-1], [list(r.coords)[:-1] for r in bp.interiors], z["bot0"], g.BOTTOM_T)
     else:
@@ -79,6 +81,8 @@ def build_parts():
     usb = m3.Manifold.cube([g.USB_W, g.WALL + 2, g.FRAME_H + 2]).translate(
         [g.USB_X - g.USB_W / 2, -(g.OY + g.WALL + 1), z["bot1"] - 1])
     frame = frame - usb
+    if g.CASE == "tray":     # 底：枠の外形いっぱいの板（ネジ穴だけ）。USBの窓の下枠にもなる
+        frame = frame + slab(g.frame_outer_pts(), hole_polys, z["bot0"], g.FLOOR_T + 0.01)
     if g.STIFF_RECESS:   # v17：補強板の高さまで縁を立て、内側を補強板の形に掘る（掘り込みの床＝v16までの枠の上面）
         lip = slab(g.frame_outer_pts(), [list(g.stiff_pocket_poly().exterior.coords)[:-1]], z["fr1"] - 0.01, g.STIFF_T + 0.01)
         frame = frame + lip     # USBの上も縁を残す（USBの窓が四角く閉じる）
@@ -91,7 +95,24 @@ def build_parts():
     left = frame ^ m3.Manifold.cube([big, big, big]).translate([g.SPLIT_X - big, -big / 2, -big / 2])
     right = frame ^ m3.Manifold.cube([big, big, big]).translate([g.SPLIT_X, -big / 2, -big / 2])
     sx, zb = g.SPLIT_X, z["bot1"]
-    if g.JOINT == "tongue_vbolt":
+    if g.JOINT == "tongue_vbolt" and g.CASE == "tray":
+        # トレー：底を下にして刷るので、ほぞは左半分の下側（ベッドの上）。頭は右半分の上面（掘り込みの床）のざぐり、ナットは舌の下面
+        H = g.tray_h()
+        def bx(x0, x1, yc, w, z0, z1):
+            return m3.Manifold.cube([x1 - x0, w, z1 - z0]).translate([x0, -yc - w / 2, z0])
+        rr = g.NUT_POCKET_AF / math.sqrt(3)
+        hexa = m3.CrossSection([[(rr * math.cos(math.radians(60 * k)), rr * math.sin(math.radians(60 * k))) for k in range(6)]])
+        for yc in g.joint_wall_y():
+            c = g.TONGUE_CLEAR
+            bxp = sx + g.JB_X
+            tongue = bx(sx - 0.5, sx + g.TONGUE_L, yc, g.TONGUE_W, 0, g.TONGUE_T)
+            mortise = bx(sx - 0.01, sx + g.TONGUE_L + c, yc, g.TONGUE_W + 2 * c, -1, g.TONGUE_T + c)
+            hole = m3.Manifold.cylinder(H + 2, g.HOLE_D / 2, g.HOLE_D / 2, 32).translate([bxp, -yc, -1])
+            cb = m3.Manifold.cylinder(g.JB_CB_DEPTH + 1, g.JB_CB_D / 2, g.JB_CB_D / 2, 40).translate([bxp, -yc, H - g.JB_CB_DEPTH])
+            nut = m3.Manifold.extrude(hexa, g.JB_NUT_DEPTH + 1).translate([bxp, -yc, -1])
+            right = right - mortise - hole - cb
+            left = (left + tongue) - hole - nut
+    elif g.JOINT == "tongue_vbolt":
         top = zb + g.FRAME_H
         def bx(x0, x1, yc, w, z0, z1):     # X・Z範囲と、Yの中心・幅（PCB座標のY）で箱
             return m3.Manifold.cube([x1 - x0, w, z1 - z0]).translate([x0, -yc - w / 2, z0])
@@ -317,7 +338,9 @@ def export(parts, z):
     for f in feet[1:]:
         allfeet = allfeet + f
     to_trimesh(allfeet).export(os.path.join(OUT, f"feet_{g.VER}.stl"))
-    asm = parts["top"] + parts["stiffener"] + parts["frame_left"] + parts["frame_right"] + parts["bottom"] + parts["pcb"]
+    asm = parts["top"] + parts["stiffener"] + parts["frame_left"] + parts["frame_right"] + parts["pcb"]
+    if parts["bottom"] is not None:
+        asm = asm + parts["bottom"]
     for k, sd in enumerate(parts.get("saddle") or []):
         asm = asm + sd
         # 印刷向き：平らな面（ボトムプレート側）を下に
@@ -365,7 +388,7 @@ def render(parts, z, path, frame_color="#e9e4da", acrylic="#bcd6e4"):
         return t, np.c_[rgb, np.full(len(rgb), alpha)]
 
     caps = keycaps(z["top1"])
-    layers = [(parts["bottom"], acrylic, 0.95), (parts["frame_left"], frame_color, 1), (parts["frame_right"], frame_color, 1),
+    layers = ([(parts["bottom"], acrylic, 0.95)] if parts["bottom"] is not None else []) + [(parts["frame_left"], frame_color, 1), (parts["frame_right"], frame_color, 1),
               (parts["stiffener"], acrylic, 0.95), (parts["top"], acrylic, 0.95)] + \
              [(f, "#333333", 1) for f in parts["feet"]] + [(c, "#d8d8d4", 1) for c in caps]
     fig = plt.figure(figsize=(16, 9))

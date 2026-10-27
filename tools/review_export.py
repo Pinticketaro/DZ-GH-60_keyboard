@@ -10,7 +10,7 @@ import build3d as b3
 import gen_case as g
 
 # 3Dプリントする部品と印刷の向き（-z＝上面を下にして刷る）。monozukuri の雛形 common.py の overhangs と同じ考え方
-PRINT_UP = {"frame_left": "-z", "frame_right": "-z", "foot": "z"}
+PRINT_UP = {"frame_left": "-z" if g.SKIRT else "z", "frame_right": "-z" if g.SKIRT else "z", "foot": "z"}   # トレー（v18）は底を下に
 
 
 def overhangs(mesh, deg=45.0, up="z", min_area=1.0):
@@ -46,7 +46,7 @@ def overhang_note(name, mesh, up):
         return None
     where = "、".join(f"ベッドから{r['h']:.1f}mm（X{r['x']:+.0f}・Y{r['y']:+.0f}付近）約{r['area']:.0f}mm²" for r in regs[:3])
     more = f" ほか{len(regs) - 3}か所" if len(regs) > 3 else ""
-    orient = "上面を下にして印刷" if up == "-z" else "そのまま印刷"
+    orient = "上面を下にして印刷" if up == "-z" else "底を下にして印刷"
     return f"{name}（{orient}）の下向きの面にサポートが要りそう：{where}{more}（張り出し45°より浅い）"
 
 PARTS = [("top", "トッププレート", "#e6eef2", 0.7, 0.55), ("stiffener", "補強板", "#e6eef2", 0.7, 0.55),
@@ -60,6 +60,10 @@ def main():
     os.makedirs(os.path.join(out, "model"), exist_ok=True)
     scene = {"title": f"DZ60ケース {g.VER}", "lang": "ja", "up": "z", "notes": [], "views": ["iso", "back", "side"], "parts": []}
     for key, name, col, op, rough in PARTS:
+        if parts.get(key) is None:
+            continue
+        if g.CASE == "tray" and key.startswith("frame_"):
+            name = name.replace("枠", "トレー")
         fn = f"model/{key}.stl"
         tm = b3.to_trimesh(parts[key])
         tm.export(os.path.join(out, fn))

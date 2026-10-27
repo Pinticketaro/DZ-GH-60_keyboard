@@ -25,7 +25,12 @@ sys.path.insert(0, os.path.dirname(__file__))
 import squircle as sq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VER = "v17"
+VER = "v18"
+
+# v18（ブランチ claude/tray-v18）：トレー型。枠とボトムプレートを1つのPLAのトレー（上だけ開いた箱）にする。
+# トレーは底を下にして印刷（補強板の掘り込みは上向き、スカートは無し）→ サポートの要る面がほぼ無い
+CASE = "tray"                       # "tray"＝トレー型（v18）／"sandwich"＝枠＋アクリルのボトムプレート（v17まで）
+FLOOR_T = 3.0                       # トレーの底の厚さ（v17のボトムプレートと同じ。全体の高さを変えない）
 
 # ---- パラメータ（ここだけ直せば全図面が追従する） ---------------------------
 PCB_W, PCB_H = 285.0, 94.6          # GH60基準（要実測）
@@ -47,11 +52,15 @@ SPLIT_X = PCB_W / 2                 # 枠の分割位置（中央）
 # ボルトは他の8本と同じ縦向き。頭はほぞの上面のざぐり（補強板で隠れる）、ナットは右半分の下面（段差の面）に埋め込む（ボトムプレートで隠れる）
 JOINT = "tongue_vbolt"              # "tongue_vbolt"＝ほぞ＋縦ボルト／"pin"＝φ1.75フィラメントの位置決めピン（v14まで）
 TONGUE_W, TONGUE_T, TONGUE_L = 9.0, 3.8, 16.0   # ほぞ（舌）：幅（Y）・厚さ（Z、枠の上面から下へ）・長さ（継ぎ目から右へ）
+if CASE == "tray":                  # トレーは底を下にして刷るので、ほぞは下側（ベッドの上）に戻す。底の分だけ壁が高いので舌も厚く
+    TONGUE_T = 5.5                  # 舌の厚さ（トレーの下面から上へ）
 TONGUE_CLEAR = 0.2                  # ほぞ穴のすき間（幅は片側、高さと長さも同じだけ）
 JB_L = 6.0                          # 継ぎ目のボルト M3×6 ボタンヘッド（他の8本と同じ種類）
 JB_X = 8.0                          # 継ぎ目からボルトの中心まで（右半分の側）
 JB_CB_D, JB_CB_DEPTH = 6.2, 1.9     # 頭のざぐり（ボタンヘッドφ5.7×1.65）
-JB_NUT_DEPTH = 2.6                  # ナット溝（二面幅 NUT_POCKET_AF、右半分の枠の下面＝段差の面から）
+JB_NUT_DEPTH = 2.6 if CASE != "tray" else 3.4   # ナット溝の深さ（二面幅 NUT_POCKET_AF）。サンドイッチ：右半分の枠の下面から。トレー：ナットは左の舌の下面（トレーの底面）から。ボルトの先が底面から出ない深さ
+if CASE == "tray":
+    JB_L = 8.0                      # トレー：M3×8（頭は右半分の上＝補強板の掘り込みの床、ナットは舌の下面）
 USB_X = 142.5 - 124.3               # USB中心X：GH60標準（swillkb −124.3）。要実測
 USB_W = 13.0                        # USB切り欠き幅（ケーブルの太い部分が通る幅。旧10mm）
 # ---- 高さ方向（PCBはネジ止めしない）
@@ -67,7 +76,7 @@ PCB_T = 1.6                         # 要実測
 UNDER_PCB = 5.0                     # PCB下面〜ボトムプレート上面（台座の高さ＝裏面部品・USB-Cより高く）。要実測
 BOTTOM_T = 3.0                      # ボトムプレート（アクリル）厚さ（仮）
 # v16：枠を下へスカート状に延ばし、ボトムプレートをその内側にはめ込む（横からボトムプレートが見えない＝塊に見せる）
-SKIRT = True
+SKIRT = CASE != "tray"
 SKIRT_T = 2.0                       # スカートの厚さ（枠の外面から）
 SKIRT_CLEAR = 0.2                   # スカートの内面とボトムプレートの縁のすき間
 SKIRT_H = BOTTOM_T - 0.1            # スカートの高さ。ボトムプレートより0.1低く、足がボトムプレートを確実に押さえる
@@ -164,10 +173,26 @@ def joint_wall_y():
     return [round(rear, 3), round(front, 3)]
 
 
+def tray_h():
+    """トレーの壁の高さ（下面〜補強板の掘り込みの床）。"""
+    return FLOOR_T + FRAME_H
+
+
 def check_joint():
     """継ぎ目の寸法の確認：ほぞ穴の下の肉とナット、ほぞのざぐりの下の肉、ボルトの先がナットの下面と合うか。"""
     if JOINT != "tongue_vbolt":
         return
+    if CASE == "tray":     # 舌は下側（左半分）、ナットは舌の下面、頭は右半分の上面のざぐり
+        H = tray_h()
+        above = H - (TONGUE_T + TONGUE_CLEAR)              # 右半分：ほぞ穴の上に残る厚さ
+        seat = H - JB_CB_DEPTH
+        tip = seat - JB_L
+        nut_bottom = JB_NUT_DEPTH - NUT_T
+        assert above - JB_CB_DEPTH >= 1.5, "ざぐりとほぞ穴の間の肉が薄い"
+        assert TONGUE_T - JB_NUT_DEPTH >= 1.5, "舌のナット溝の上の肉が薄い"
+        assert 0.0 <= tip <= JB_NUT_DEPTH - 0.6, f"ボルトの先が底面から出る／ナットにかからない（{tip:.2f}）"
+        return dict(above=round(above, 2), seat=round(seat, 2), tip=round(tip, 2),
+                    engagement=round(JB_NUT_DEPTH - max(tip, nut_bottom), 2))
     under = FRAME_H - (TONGUE_T + TONGUE_CLEAR)        # 右半分：ほぞ穴の下に残る厚さ
     seat = FRAME_H - JB_CB_DEPTH                        # 頭の座面（枠の下面から）
     tip = seat - JB_L
@@ -639,7 +664,9 @@ def main():
         f"補強板（アクリル{STIFF_T}mm・トッププレートの下に重ねて共締め）", note)
     web = stiffener_min_web(st_open)
 
-    if SKIRT:
+    if CASE == "tray":
+        pass                        # トレー型：ボトムプレートは無い（底はトレーと一体）
+    elif SKIRT:
         bp = bottom_poly()
         bp_d = sq.to_svg_path(kerf_out(list(bp.exterior.coords)[:-1]))
         svg(os.path.join(ROOT, f"case/bottom_{VER}_kerf{KERF:g}.svg"),
@@ -660,7 +687,8 @@ def main():
          ("holes", "#000000", [circle_path(c, hole_d(c), False) for c in holes()], "M3穴（後ろはφ4.0）"),
          ("split", "#0000ff", [split_d], f"分割線 X={SPLIT_X}"),
          ("usb", "#0000ff", [usb_d], f"USB切り欠き 幅{USB_W}（位置は要実測）")],
-        f"枠（厚さ{FRAME_H}mm・PLA・左右2分割）", note)
+        (f"トレー（高さ{round(FLOOR_T + FRAME_H + (STIFF_T if STIFF_RECESS else 0), 2)}mm・底{FLOOR_T}mm・PLA・左右2分割）" if CASE == "tray"
+         else f"枠（厚さ{FRAME_H}mm・PLA・左右2分割）"), note)
 
     # フォームの型紙（紙に100%で印刷して切る。PORON＝ポリウレタンはレーザーで切らない）
     from shapely.geometry import box as _box
@@ -759,7 +787,8 @@ def main():
                               notch=BP_NOTCH) if SKIRT else None),
                   stiff_recess=(dict(lip=STIFF_LIP, clear=STIFF_CLEAR, depth=STIFF_T, stiffener_size=[round(b[2] - b[0], 2), round(b[3] - b[1], 2)])
                                 if STIFF_RECESS and (b := Polygon(stiff_outer_pts()).bounds) else None),
-                  frame_total_h=round(FRAME_H + (STIFF_T if STIFF_RECESS else 0), 2),
+                  case=CASE, floor_t=(FLOOR_T if CASE == "tray" else None),
+                  frame_total_h=round(FRAME_H + (FLOOR_T if CASE == "tray" else 0) + (STIFF_T if STIFF_RECESS else 0), 2),
                   joint=(dict(kind=JOINT, tongue=[TONGUE_W, TONGUE_T, TONGUE_L], clear=TONGUE_CLEAR, bolt=f"M3x{JB_L:g} button",
                               bolt_x_from_split=JB_X, counterbore=[JB_CB_D, JB_CB_DEPTH], nut_depth=JB_NUT_DEPTH,
                               wall_centers_y=joint_wall_y(), check=check_joint()) if JOINT == "tongue_vbolt" else dict(kind=JOINT)),
