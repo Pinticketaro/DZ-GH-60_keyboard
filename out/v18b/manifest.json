@@ -1,0 +1,136 @@
+{
+ "version": "v18b",
+ "prev": "v17",
+ "date": "2026-10-27",
+ "stage": "モック",
+ "summary": "v17 から分けた案 B：トレー型（ブランチ claude/tray-v18）。枠とボトムプレートを1つのPLAのトレー（上だけ開いた箱）にし、底を下にして刷るので v17 の壁の内側のサポートが消えた。見た目と高さ18.3mmは v17・v18a と同じ。",
+ "changes": [
+  "枠＋アクリルのボトムプレート → 底3.0mm一体のPLAトレー（左右2分割）に（v17 の問い「印刷の向き」への別の答え。v16 の問い「箱型案と比べるか」）",
+  "印刷の向き：上面を下 → 底を下に。サポートが要るのはUSBの窓の上（幅13の橋渡し）とほぞ穴・ナット溝の天井だけ",
+  "継ぎ目のほぞを下側へ戻した（舌の厚さ3.8→5.5）。ボルトはM3×6→M3×8、頭は右半分の上面（補強板の下）、ナットは舌の下面（トレーの底面）",
+  "スカートとボトムプレートのU字の切り欠きは無くなった"
+ ],
+ "questions": [
+  {
+   "q": "v18a（サンドイッチ型）と v18b（トレー型）、どちらで進める？",
+   "options": [
+    {
+     "label": "v18a：サンドイッチ型（上面を下・掘り込みにサポート）",
+     "note": "ボトムプレートはアクリル（透ける・レーザーで速い）。壁の内側に幅11.7×高さ2mmのサポートが1周",
+     "img": "out/v18a/print_support.png"
+    },
+    {
+     "label": "v18b：トレー型（底を下）",
+     "note": "サポートはほぼ不要。PLAが片側約130g（100%換算）、印刷時間が長い。底は不透明",
+     "img": "out/v18b/preview.png"
+    }
+   ]
+  },
+  {
+   "q": "トレーの底の中央の継ぎ目（突き合わせ）：前後の壁のほぞ2組だけで足りる？ 底にもほぞを足す？",
+   "options": [
+    "壁の2組だけ（いまのまま）",
+    "底の中央にも小さいほぞを1つ足す",
+    "足（ナット受け）を継ぎ目をまたぐ位置にずらして押さえる"
+   ]
+  },
+  {
+   "q": "底の厚さ3.0mmを薄くして（2.0mm）全体を1mm低くする？",
+   "type": "yesno"
+  },
+  {
+   "q": "傾きは？（手前の高さはキーキャップ込みで約27mm）",
+   "options": [
+    "0°のまま",
+    "3°",
+    "5°"
+   ]
+  },
+  "色の組み合わせ（3トーンまで）"
+ ],
+ "notes": "本番の前に試し片で測る値：レーザーのカーフ（今は0）、スイッチ穴14.0のはまり、ほぞのすき間0.2、補強板の掘り込みのすき間0.2、ナット溝の二面幅6.1（深さ3.4）。DZ60の実測（USBの位置）も必要。トレーの半分は約173×125で、Ender-3 Pro（220×220）に載る。図面・Fusionスクリプトは未更新。",
+ "images": [
+  {
+   "src": "docs/img/preview_v18b.png",
+   "caption": "外観（キーキャップ付き）",
+   "group": "外観"
+  },
+  {
+   "src": "out/v18b/preview.png",
+   "caption": "ケースだけ（斜め上・斜め後ろ・右横）",
+   "group": "外観"
+  },
+  {
+   "src": "out/v18b/section.png",
+   "caption": "断面（手前のネジの列）：底がトレーと一体",
+   "group": "断面"
+  },
+  {
+   "src": "out/v18b/section_joint.png",
+   "caption": "継ぎ目の断面（X=150.5）：下側のほぞ・上のざぐり・下のナット溝",
+   "group": "断面"
+  },
+  {
+   "src": "out/v18b/plan.png",
+   "caption": "平面図",
+   "group": "平面"
+  }
+ ],
+ "compare": [
+  {
+   "before": "out/v18a/preview.png",
+   "after": "out/v18b/preview.png",
+   "caption": "案 A（v18a）と案 B（v18b）"
+  },
+  {
+   "before": "out/v18a/section.png",
+   "after": "out/v18b/section.png",
+   "caption": "断面：案 A と案 B"
+  },
+  {
+   "before": "docs/img/preview_v17.png",
+   "after": "docs/img/preview_v18b.png",
+   "caption": "外観 v17 → v18b"
+  }
+ ],
+ "params_diff": "out/v18b/params_diff.json",
+ "model": "out/v18b/model.glb",
+ "parts": "out/v18b/scene.json",
+ "step": [
+  {
+   "src": "case/step/assembly_v18b.step",
+   "name": "組み立て",
+   "file": "assembly_v18b.step"
+  },
+  {
+   "src": "case/step/top_plate_v18b.step",
+   "name": "トッププレート",
+   "file": "top_plate_v18b.step"
+  },
+  {
+   "src": "case/step/stiffener_v18b.step",
+   "name": "補強板",
+   "file": "stiffener_v18b.step"
+  },
+  {
+   "src": "case/step/frame_left_v18b.step",
+   "name": "トレー（左）",
+   "file": "frame_left_v18b.step"
+  },
+  {
+   "src": "case/step/frame_right_v18b.step",
+   "name": "トレー（右）",
+   "file": "frame_right_v18b.step"
+  },
+  {
+   "src": "case/step/foot_v18b.step",
+   "name": "足（4個同じ）",
+   "file": "foot_v18b.step"
+  },
+  {
+   "src": "case/step/pcb_reference_v18b.step",
+   "name": "PCB（参考）",
+   "file": "pcb_reference_v18b.step"
+  }
+ ]
+}

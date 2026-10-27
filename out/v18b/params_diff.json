@@ -1,0 +1,177 @@
+[
+ {
+  "key": "meta.parent",
+  "label": "meta.parent",
+  "unit": "",
+  "before": null,
+  "after": "v17",
+  "kind": "added"
+ },
+ {
+  "key": "meta.lang",
+  "label": "meta.lang",
+  "unit": "",
+  "before": null,
+  "after": "ja",
+  "kind": "added"
+ },
+ {
+  "key": "version",
+  "label": "version",
+  "unit": "",
+  "before": "v17",
+  "after": "v18b",
+  "kind": "changed"
+ },
+ {
+  "key": "skirt",
+  "label": "skirt",
+  "unit": "",
+  "before": null,
+  "after": null,
+  "kind": "added"
+ },
+ {
+  "key": "case",
+  "label": "case",
+  "unit": "",
+  "before": null,
+  "after": "tray",
+  "kind": "added"
+ },
+ {
+  "key": "floor_t",
+  "label": "floor_t",
+  "unit": "",
+  "before": null,
+  "after": 3.0,
+  "kind": "added"
+ },
+ {
+  "key": "frame_total_h",
+  "label": "frame_total_h",
+  "unit": "",
+  "before": 10.1,
+  "after": 13.1,
+  "kind": "changed",
+  "delta": 3.0
+ },
+ {
+  "key": "joint.tongue",
+  "label": "joint.tongue",
+  "unit": "",
+  "before": [
+   9.0,
+   3.8,
+   16.0
+  ],
+  "after": [
+   9.0,
+   5.5,
+   16.0
+  ],
+  "kind": "changed"
+ },
+ {
+  "key": "joint.bolt",
+  "label": "joint.bolt",
+  "unit": "",
+  "before": "M3x6 button",
+  "after": "M3x8 button",
+  "kind": "changed"
+ },
+ {
+  "key": "joint.nut_depth",
+  "label": "joint.nut_depth",
+  "unit": "",
+  "before": 2.6,
+  "after": 3.4,
+  "kind": "changed",
+  "delta": 0.8
+ },
+ {
+  "key": "joint.check.above",
+  "label": "joint.check.above",
+  "unit": "",
+  "before": null,
+  "after": 5.4,
+  "kind": "added"
+ },
+ {
+  "key": "joint.check.seat",
+  "label": "joint.check.seat",
+  "unit": "",
+  "before": 6.2,
+  "after": 9.2,
+  "kind": "changed",
+  "delta": 3.0
+ },
+ {
+  "key": "joint.check.tip",
+  "label": "joint.check.tip",
+  "unit": "",
+  "before": 0.2,
+  "after": 1.2,
+  "kind": "changed",
+  "delta": 1.0
+ },
+ {
+  "key": "joint.check.engagement",
+  "label": "joint.check.engagement",
+  "unit": "",
+  "before": null,
+  "after": 2.2,
+  "kind": "added"
+ },
+ {
+  "key": "joint.check.under",
+  "label": "joint.check.under",
+  "unit": "",
+  "before": 4.1,
+  "after": null,
+  "kind": "removed"
+ },
+ {
+  "key": "skirt.bottom_plate_size",
+  "label": "skirt.bottom_plate_size",
+  "unit": "",
+  "before": [
+   310.0,
+   121.0
+  ],
+  "after": null,
+  "kind": "removed"
+ },
+ {
+  "key": "skirt.clear",
+  "label": "skirt.clear",
+  "unit": "",
+  "before": 0.2,
+  "after": null,
+  "kind": "removed"
+ },
+ {
+  "key": "skirt.h",
+  "label": "skirt.h",
+  "unit": "",
+  "before": 2.9,
+  "after": null,
+  "kind": "removed"
+ },
+ {
+  "key": "skirt.notch",
+  "label": "skirt.notch",
+  "unit": "",
+  "before": true,
+  "after": null,
+  "kind": "removed"
+ },
+ {
+  "key": "skirt.t",
+  "label": "skirt.t",
+  "unit": "",
+  "before": 2.0,
+  "after": null,
+  "kind": "removed"
+ }
+]

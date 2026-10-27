@@ -2524,6 +2524,608 @@
      "file": "pcb_reference_v17.step"
     }
    ]
+  },
+  {
+   "version": "v18a",
+   "prev": "v17",
+   "date": "2026-10-27",
+   "stage": "モック",
+   "summary": "v17 から分けた案 A：サンドイッチ型のまま、枠は上面を下にして刷り、補強板の掘り込みの床をサポートで受ける。形は v17 と同じで、サポートの範囲（赤）を部品として足した。",
+   "changes": [
+    "印刷の向きを決めた：上面を下のまま（v17 の問い「枠の印刷の向き」→ A）",
+    "印刷時のサポートの範囲を参考の部品として足した（幅11.7×高さ2mm・1周、約19cm³。剥がした跡は補強板で隠れる）",
+    "形・寸法は v17 と同じ"
+   ],
+   "notes": "案 B（v18b・トレー型）と比べるには、上の「別の案」か「版の流れを見る」から。どちらで進めるかは v18b の「決めてほしいこと」で選ぶ。\n\nモックが見つけた注意：\n・枠（左）（上面を下にして印刷）の下向きの面にサポートが要りそう：ベッドから2.0mm（X+38・Y-74付近）約3322mm²、ベッドから2.0mm（X+89・Y+8付近）約1480mm²、ベッドから10.1mm（X+18・Y+14付近）約26mm² ほか2か所（張り出し45°より浅い）\n・枠（右）（上面を下にして印刷）の下向きの面にサポートが要りそう：ベッドから2.0mm（X+243・Y-47付近）約4421mm²、ベッドから6.0mm（X+151・Y-103付近）約143mm²、ベッドから6.0mm（X+151・Y+9付近）約143mm²（張り出し45°より浅い）\n・足（そのまま印刷）の下向きの面にサポートが要りそう：ベッドから2.7mm（X+93・Y-103付近）約23mm²、ベッドから2.7mm（X-6・Y-103付近）約23mm²（張り出し45°より浅い）\n・枠を上面を下にして刷るとき、補強板の掘り込みの床（壁の内側、幅11.7×高さ2mm、1周）にサポートが要る。体積は約19cm³（サポートの密度で減る）。剥がした跡は補強板で隠れる",
+   "questions": [
+    {
+     "q": "掘り込みのサポートの種類は？",
+     "type": "choice",
+     "options": [
+      {
+       "id": "a",
+       "label": "ツリーサポート（おすすめ）",
+       "note": "接点が少なく、2mmの隙間でも剥がしやすい"
+      },
+      {
+       "id": "b",
+       "label": "ふつうのサポート（格子）",
+       "note": "床の面はきれいだが、高さ2mmの隙間から剥がしにくい"
+      }
+     ]
+    },
+    {
+     "q": "サポートを減らすため、掘り込みの深さを補強板の厚さ2.0mmより浅く（1.0mm）して、補強板の側面を少し見せる？",
+     "type": "yesno",
+     "options": [
+      {
+       "id": "yes",
+       "label": "はい"
+      },
+      {
+       "id": "no",
+       "label": "いいえ"
+      }
+     ]
+    }
+   ],
+   "images": [
+    {
+     "src": "img/v18a/img01.webp",
+     "caption": "外観（キーキャップ付き）",
+     "group": "外観"
+    },
+    {
+     "src": "img/v18a/img02.webp",
+     "caption": "枠を上面を下にして刷る向き（赤＝サポート）",
+     "group": "印刷"
+    },
+    {
+     "src": "img/v18a/img03.webp",
+     "caption": "壁の断面とサポート",
+     "group": "印刷"
+    },
+    {
+     "src": "img/v18a/img04.webp",
+     "caption": "ケースだけ（斜め上・斜め後ろ・右横）",
+     "group": "外観"
+    },
+    {
+     "src": "img/v18a/img05.webp",
+     "caption": "断面（手前のネジの列）",
+     "group": "断面"
+    },
+    {
+     "src": "img/v18a/img06.webp",
+     "caption": "平面図",
+     "group": "平面"
+    }
+   ],
+   "compare": [
+    {
+     "before": "img/v18a/cmp01a.webp",
+     "after": "img/v18a/cmp01b.webp",
+     "caption": "外観 v17 → v18a（同じ形）"
+    }
+   ],
+   "params_diff": [
+    {
+     "key": "meta.parent",
+     "label": "meta.parent",
+     "unit": "",
+     "before": null,
+     "after": "v17",
+     "kind": "added"
+    },
+    {
+     "key": "meta.lang",
+     "label": "meta.lang",
+     "unit": "",
+     "before": null,
+     "after": "ja",
+     "kind": "added"
+    },
+    {
+     "key": "meta.print_frame",
+     "label": "meta.print_frame",
+     "unit": "",
+     "before": null,
+     "after": "top_down_with_support",
+     "kind": "added"
+    },
+    {
+     "key": "version",
+     "label": "version",
+     "unit": "",
+     "before": "v17",
+     "after": "v18a",
+     "kind": "changed"
+    }
+   ],
+   "dims": [],
+   "refs": [],
+   "model": "img/v18a/model.glb.txt",
+   "parts": [
+    {
+     "name": "トッププレート",
+     "key": "top"
+    },
+    {
+     "name": "補強板",
+     "key": "stiffener"
+    },
+    {
+     "name": "枠（左）",
+     "key": "frame_left"
+    },
+    {
+     "name": "枠（右）",
+     "key": "frame_right"
+    },
+    {
+     "name": "ボトムプレート",
+     "key": "bottom"
+    },
+    {
+     "name": "PCB",
+     "key": "pcb"
+    },
+    {
+     "name": "足1",
+     "key": "foot_1"
+    },
+    {
+     "name": "足2",
+     "key": "foot_2"
+    },
+    {
+     "name": "足3",
+     "key": "foot_3"
+    },
+    {
+     "name": "足4",
+     "key": "foot_4"
+    },
+    {
+     "name": "印刷時のサポート（参考）",
+     "key": "support"
+    }
+   ],
+   "step": [
+    {
+     "src": "img/v18a/step/01.step.txt",
+     "name": "組み立て",
+     "file": "assembly_v18a.step"
+    },
+    {
+     "src": "img/v18a/step/02.step.txt",
+     "name": "トッププレート",
+     "file": "top_plate_v18a.step"
+    },
+    {
+     "src": "img/v18a/step/03.step.txt",
+     "name": "補強板",
+     "file": "stiffener_v18a.step"
+    },
+    {
+     "src": "img/v18a/step/04.step.txt",
+     "name": "ボトムプレート",
+     "file": "bottom_plate_v18a.step"
+    },
+    {
+     "src": "img/v18a/step/05.step.txt",
+     "name": "枠（左）",
+     "file": "frame_left_v18a.step"
+    },
+    {
+     "src": "img/v18a/step/06.step.txt",
+     "name": "枠（右）",
+     "file": "frame_right_v18a.step"
+    },
+    {
+     "src": "img/v18a/step/07.step.txt",
+     "name": "足（4個同じ）",
+     "file": "foot_v18a.step"
+    },
+    {
+     "src": "img/v18a/step/08.step.txt",
+     "name": "PCB（参考）",
+     "file": "pcb_reference_v18a.step"
+    }
+   ]
+  },
+  {
+   "version": "v18b",
+   "prev": "v17",
+   "date": "2026-10-27",
+   "stage": "モック",
+   "summary": "v17 から分けた案 B：トレー型（ブランチ claude/tray-v18）。枠とボトムプレートを1つのPLAのトレー（上だけ開いた箱）にし、底を下にして刷るので v17 の壁の内側のサポートが消えた。見た目と高さ18.3mmは v17・v18a と同じ。",
+   "changes": [
+    "枠＋アクリルのボトムプレート → 底3.0mm一体のPLAトレー（左右2分割）に（v17 の問い「印刷の向き」への別の答え。v16 の問い「箱型案と比べるか」）",
+    "印刷の向き：上面を下 → 底を下に。サポートが要るのはUSBの窓の上（幅13の橋渡し）とほぞ穴・ナット溝の天井だけ",
+    "継ぎ目のほぞを下側へ戻した（舌の厚さ3.8→5.5）。ボルトはM3×6→M3×8、頭は右半分の上面（補強板の下）、ナットは舌の下面（トレーの底面）",
+    "スカートとボトムプレートのU字の切り欠きは無くなった"
+   ],
+   "notes": "本番の前に試し片で測る値：レーザーのカーフ（今は0）、スイッチ穴14.0のはまり、ほぞのすき間0.2、補強板の掘り込みのすき間0.2、ナット溝の二面幅6.1（深さ3.4）。DZ60の実測（USBの位置）も必要。トレーの半分は約173×125で、Ender-3 Pro（220×220）に載る。図面・Fusionスクリプトは未更新。\n\nモックが見つけた注意：\n・トレー（左）（底を下にして印刷）の下向きの面にサポートが要りそう：ベッドから11.1mm（X+18・Y+14付近）約26mm²、ベッドから3.4mm（X+150・Y+9付近）約23mm²、ベッドから3.4mm（X+150・Y-103付近）約23mm²（張り出し45°より浅い）\n・トレー（右）（底を下にして印刷）の下向きの面にサポートが要りそう：ベッドから5.7mm（X+151・Y-103付近）約143mm²、ベッドから5.7mm（X+151・Y+9付近）約143mm²（張り出し45°より浅い）\n・足（底を下にして印刷）の下向きの面にサポートが要りそう：ベッドから2.7mm（X+93・Y-103付近）約23mm²、ベッドから2.7mm（X-6・Y-103付近）約23mm²（張り出し45°より浅い）",
+   "questions": [
+    {
+     "q": "v18a（サンドイッチ型）と v18b（トレー型）、どちらで進める？",
+     "type": "choice",
+     "options": [
+      {
+       "id": "a",
+       "label": "v18a：サンドイッチ型（上面を下・掘り込みにサポート）",
+       "note": "ボトムプレートはアクリル（透ける・レーザーで速い）。壁の内側に幅11.7×高さ2mmのサポートが1周",
+       "img": "img/v18b/q01a.webp"
+      },
+      {
+       "id": "b",
+       "label": "v18b：トレー型（底を下）",
+       "note": "サポートはほぼ不要。PLAが片側約130g（100%換算）、印刷時間が長い。底は不透明",
+       "img": "img/v18b/q01b.webp"
+      }
+     ]
+    },
+    {
+     "q": "トレーの底の中央の継ぎ目（突き合わせ）：前後の壁のほぞ2組だけで足りる？ 底にもほぞを足す？",
+     "type": "choice",
+     "options": [
+      {
+       "id": "a",
+       "label": "壁の2組だけ（いまのまま）",
+       "note": ""
+      },
+      {
+       "id": "b",
+       "label": "底の中央にも小さいほぞを1つ足す",
+       "note": ""
+      },
+      {
+       "id": "c",
+       "label": "足（ナット受け）を継ぎ目をまたぐ位置にずらして押さえる",
+       "note": ""
+      }
+     ]
+    },
+    {
+     "q": "底の厚さ3.0mmを薄くして（2.0mm）全体を1mm低くする？",
+     "type": "yesno",
+     "options": [
+      {
+       "id": "yes",
+       "label": "はい"
+      },
+      {
+       "id": "no",
+       "label": "いいえ"
+      }
+     ]
+    },
+    {
+     "q": "傾きは？（手前の高さはキーキャップ込みで約27mm）",
+     "type": "choice",
+     "options": [
+      {
+       "id": "a",
+       "label": "0°のまま",
+       "note": ""
+      },
+      {
+       "id": "b",
+       "label": "3°",
+       "note": ""
+      },
+      {
+       "id": "c",
+       "label": "5°",
+       "note": ""
+      }
+     ]
+    },
+    {
+     "q": "色の組み合わせ（3トーンまで）",
+     "type": "text"
+    }
+   ],
+   "images": [
+    {
+     "src": "img/v18b/img01.webp",
+     "caption": "外観（キーキャップ付き）",
+     "group": "外観"
+    },
+    {
+     "src": "img/v18b/img02.webp",
+     "caption": "ケースだけ（斜め上・斜め後ろ・右横）",
+     "group": "外観"
+    },
+    {
+     "src": "img/v18b/img03.webp",
+     "caption": "断面（手前のネジの列）：底がトレーと一体",
+     "group": "断面"
+    },
+    {
+     "src": "img/v18b/img04.webp",
+     "caption": "継ぎ目の断面（X=150.5）：下側のほぞ・上のざぐり・下のナット溝",
+     "group": "断面"
+    },
+    {
+     "src": "img/v18b/img05.webp",
+     "caption": "平面図",
+     "group": "平面"
+    }
+   ],
+   "compare": [
+    {
+     "before": "img/v18b/cmp01a.webp",
+     "after": "img/v18b/cmp01b.webp",
+     "caption": "案 A（v18a）と案 B（v18b）"
+    },
+    {
+     "before": "img/v18b/cmp02a.webp",
+     "after": "img/v18b/cmp02b.webp",
+     "caption": "断面：案 A と案 B"
+    },
+    {
+     "before": "img/v18b/cmp03a.webp",
+     "after": "img/v18b/cmp03b.webp",
+     "caption": "外観 v17 → v18b"
+    }
+   ],
+   "params_diff": [
+    {
+     "key": "meta.parent",
+     "label": "meta.parent",
+     "unit": "",
+     "before": null,
+     "after": "v17",
+     "kind": "added"
+    },
+    {
+     "key": "meta.lang",
+     "label": "meta.lang",
+     "unit": "",
+     "before": null,
+     "after": "ja",
+     "kind": "added"
+    },
+    {
+     "key": "version",
+     "label": "version",
+     "unit": "",
+     "before": "v17",
+     "after": "v18b",
+     "kind": "changed"
+    },
+    {
+     "key": "skirt",
+     "label": "skirt",
+     "unit": "",
+     "before": null,
+     "after": null,
+     "kind": "added"
+    },
+    {
+     "key": "case",
+     "label": "case",
+     "unit": "",
+     "before": null,
+     "after": "tray",
+     "kind": "added"
+    },
+    {
+     "key": "floor_t",
+     "label": "floor_t",
+     "unit": "",
+     "before": null,
+     "after": 3.0,
+     "kind": "added"
+    },
+    {
+     "key": "frame_total_h",
+     "label": "frame_total_h",
+     "unit": "",
+     "before": 10.1,
+     "after": 13.1,
+     "kind": "changed",
+     "delta": 3.0
+    },
+    {
+     "key": "joint.tongue",
+     "label": "joint.tongue",
+     "unit": "",
+     "before": [
+      9.0,
+      3.8,
+      16.0
+     ],
+     "after": [
+      9.0,
+      5.5,
+      16.0
+     ],
+     "kind": "changed"
+    },
+    {
+     "key": "joint.bolt",
+     "label": "joint.bolt",
+     "unit": "",
+     "before": "M3x6 button",
+     "after": "M3x8 button",
+     "kind": "changed"
+    },
+    {
+     "key": "joint.nut_depth",
+     "label": "joint.nut_depth",
+     "unit": "",
+     "before": 2.6,
+     "after": 3.4,
+     "kind": "changed",
+     "delta": 0.8
+    },
+    {
+     "key": "joint.check.above",
+     "label": "joint.check.above",
+     "unit": "",
+     "before": null,
+     "after": 5.4,
+     "kind": "added"
+    },
+    {
+     "key": "joint.check.seat",
+     "label": "joint.check.seat",
+     "unit": "",
+     "before": 6.2,
+     "after": 9.2,
+     "kind": "changed",
+     "delta": 3.0
+    },
+    {
+     "key": "joint.check.tip",
+     "label": "joint.check.tip",
+     "unit": "",
+     "before": 0.2,
+     "after": 1.2,
+     "kind": "changed",
+     "delta": 1.0
+    },
+    {
+     "key": "joint.check.engagement",
+     "label": "joint.check.engagement",
+     "unit": "",
+     "before": null,
+     "after": 2.2,
+     "kind": "added"
+    },
+    {
+     "key": "joint.check.under",
+     "label": "joint.check.under",
+     "unit": "",
+     "before": 4.1,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "skirt.bottom_plate_size",
+     "label": "skirt.bottom_plate_size",
+     "unit": "",
+     "before": [
+      310.0,
+      121.0
+     ],
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "skirt.clear",
+     "label": "skirt.clear",
+     "unit": "",
+     "before": 0.2,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "skirt.h",
+     "label": "skirt.h",
+     "unit": "",
+     "before": 2.9,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "skirt.notch",
+     "label": "skirt.notch",
+     "unit": "",
+     "before": true,
+     "after": null,
+     "kind": "removed"
+    },
+    {
+     "key": "skirt.t",
+     "label": "skirt.t",
+     "unit": "",
+     "before": 2.0,
+     "after": null,
+     "kind": "removed"
+    }
+   ],
+   "dims": [],
+   "refs": [],
+   "model": "img/v18b/model.glb.txt",
+   "parts": [
+    {
+     "name": "トッププレート",
+     "key": "top"
+    },
+    {
+     "name": "補強板",
+     "key": "stiffener"
+    },
+    {
+     "name": "トレー（左）",
+     "key": "frame_left"
+    },
+    {
+     "name": "トレー（右）",
+     "key": "frame_right"
+    },
+    {
+     "name": "PCB",
+     "key": "pcb"
+    },
+    {
+     "name": "足1",
+     "key": "foot_1"
+    },
+    {
+     "name": "足2",
+     "key": "foot_2"
+    },
+    {
+     "name": "足3",
+     "key": "foot_3"
+    },
+    {
+     "name": "足4",
+     "key": "foot_4"
+    }
+   ],
+   "step": [
+    {
+     "src": "img/v18b/step/01.step.txt",
+     "name": "組み立て",
+     "file": "assembly_v18b.step"
+    },
+    {
+     "src": "img/v18b/step/02.step.txt",
+     "name": "トッププレート",
+     "file": "top_plate_v18b.step"
+    },
+    {
+     "src": "img/v18b/step/03.step.txt",
+     "name": "補強板",
+     "file": "stiffener_v18b.step"
+    },
+    {
+     "src": "img/v18b/step/04.step.txt",
+     "name": "トレー（左）",
+     "file": "frame_left_v18b.step"
+    },
+    {
+     "src": "img/v18b/step/05.step.txt",
+     "name": "トレー（右）",
+     "file": "frame_right_v18b.step"
+    },
+    {
+     "src": "img/v18b/step/06.step.txt",
+     "name": "足（4個同じ）",
+     "file": "foot_v18b.step"
+    },
+    {
+     "src": "img/v18b/step/07.step.txt",
+     "name": "PCB（参考）",
+     "file": "pcb_reference_v18b.step"
+    }
+   ]
   }
  ],
  "lang": "ja"
