@@ -11,3 +11,6 @@ __pycache__/
 # three.js（外観プレビュー用。npm install three@0.160.0 で tools/.three に入れる）
 tools/.three/
 tools/.three/
+
+# ツールを更新したときのバックアップ（scaffold.py --update-tools）
+tools/.backup-*/

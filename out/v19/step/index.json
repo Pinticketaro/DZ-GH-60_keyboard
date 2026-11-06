@@ -1,0 +1,37 @@
+[
+ {
+  "src": "case/step/assembly_v19.step",
+  "name": "組み立て",
+  "file": "assembly_v19.step"
+ },
+ {
+  "src": "case/step/top_plate_v19.step",
+  "name": "トッププレート",
+  "file": "top_plate_v19.step"
+ },
+ {
+  "src": "case/step/stiffener_v19.step",
+  "name": "補強板",
+  "file": "stiffener_v19.step"
+ },
+ {
+  "src": "case/step/frame_left_v19.step",
+  "name": "トレー（左）",
+  "file": "frame_left_v19.step"
+ },
+ {
+  "src": "case/step/frame_right_v19.step",
+  "name": "トレー（右）",
+  "file": "frame_right_v19.step"
+ },
+ {
+  "src": "case/step/foot_v19.step",
+  "name": "足（4個同じ）",
+  "file": "foot_v19.step"
+ },
+ {
+  "src": "case/step/pcb_reference_v19.step",
+  "name": "PCB（参考）",
+  "file": "pcb_reference_v19.step"
+ }
+]

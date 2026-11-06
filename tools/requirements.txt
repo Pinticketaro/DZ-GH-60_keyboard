@@ -1,8 +1,12 @@
+numpy
+scipy           # convex hulls in trimesh (cadquery used to bring it in)
 shapely>=2.0
 matplotlib>=3.7
 manifold3d>=3.0
 trimesh>=4.0
+networkx        # sections and plan views (used by trimesh section)
 pillow>=10.0
-playwright>=1.40   # 外観プレビュー（render_preview.py）のみ
-ezdxf
-cadquery
+playwright>=1.40
+cascadio        # for reading STEP
+cadquery        # for writing the mock as STEP too (STL only without it)
+ezdxf           # 図面の DXF（fusion_drawings.py。このプロジェクトで足した）

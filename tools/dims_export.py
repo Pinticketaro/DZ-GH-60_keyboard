@@ -16,6 +16,8 @@ KIJUN, JISSOKU, KETTEI = "基準寸法.md", "dz60_実測.md", "決定事項.md"
 
 
 def it(value, label, basis, status, ref="", unit="mm"):
+    if status == "仮" and not basis.startswith("仮"):
+        basis = "仮（要実測・未確定）：" + basis      # monozukuri 0.8 は basis の先頭の「仮」で仮の寸法を見分ける
     return {"value": round(value, 3) if isinstance(value, float) else value, "unit": unit, "label": label,
             "basis": basis, "status": status, "ref": ref}
 
@@ -39,7 +41,7 @@ def build():
     P["under_pcb"] = it(g.UNDER_PCB, "PCB下面〜底の上面（台座の高さ）", "PCB裏の部品・USB-C より高く。DZ60 の実測で決める", "仮", JISSOKU)
     P["frame_h"] = it(g.FRAME_H, "枠の高さ（掘り込みの床まで、底を除く）", "gap_stiff_pcb ＋ pcb_t ＋ under_pcb", "計算")
     if TRAY:
-        P["floor_t"] = it(g.FLOOR_T, "トレーの底の厚さ（PLA）", "v17 のボトムプレート3.0と同じにして全体の高さを変えない", "仮", KETTEI)
+        P["floor_t"] = it(g.FLOOR_T, "トレーの底の厚さ（PLA）", "v19 で3.0→2.0（確認ボードの答え：全体を1mm低く）。たわみは試作で確かめる", "決定", KETTEI)
     else:
         P["bottom_t"] = it(g.BOTTOM_T, "ボトムプレートの厚さ（アクリル）", "手持ちの3mm（仮）。シートごとに実測", "仮", KETTEI)
         P["skirt_t"] = it(g.SKIRT_T, "スカートの厚さ", "v16：横からボトムプレートを見せないため", "決定", KETTEI)
@@ -87,7 +89,7 @@ def build():
     for v in list(P.values()) + list(F.values()):
         if not v["ref"]:
             v.pop("ref")
-    return {"meta": {"version": g.VER, "parent": getattr(g, "PARENT", None), "lang": "ja",
+    return {"meta": {"version": g.VER, "parent": getattr(g, "PARENT", None), "lang": "ja", "process": "both",
                      "note": "tools/dims_export.py が gen_case.py の値から書き出す。手で直さない（根拠は dims_export.py に書く）"},
             "params": P, "fab": F}
 
